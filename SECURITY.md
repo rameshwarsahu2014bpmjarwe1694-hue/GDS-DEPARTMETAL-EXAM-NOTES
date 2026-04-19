@@ -2,20 +2,33 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+अभी हम केवल नीचे दिए गए वर्जन के लिए सिक्योरिटी अपडेट्स दे रहे हैं:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| Version | Supported |
+| ------- | --------- |
+| 1.0.x   | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+अगर आपको इस प्रोजेक्ट / ऐप में कोई सुरक्षा संबंधी समस्या मिलती है, तो कृपया GitHub Issues का उपयोग न करें।  
+इसके बजाय, कृपया अपनी रिपोर्ट इस ईमेल पर भेजें:
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+**GDSdepartmentalstudysupport@gmail.com**
+
+रिपोर्ट भेजते समय कृपया ये जानकारी दें:
+
+- समस्या का छोटा विवरण  
+- समस्या कहाँ मिली (page / feature / section)  
+- उसे दोबारा कैसे देखा जा सकता है (steps)  
+- यदि संभव हो तो screenshot / screen recording  
+
+हम आपकी रिपोर्ट की समीक्षा करेंगे और सामान्यतः **2-3 कार्य दिवस** में उत्तर देने की कोशिश करेंगे।
+
+## Responsible Disclosure
+
+कृपया समस्या को सार्वजनिक रूप से शेयर करने से पहले हमें सुधार का अवसर दें।  
+हम जिम्मेदार सुरक्षा रिपोर्टिंग की सराहना करते हैं।
+
+## Thank You
+
+हमारे प्रोजेक्ट को सुरक्षित बनाने में सहयोग देने के लिए धन्यवाद।
