@@ -1,184 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Quiz</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
+}
+
+body{
+background:#f2f2f2;
+padding:20px;
+}
+
+.topbar{
+background:#000;
+color:#fff;
+text-align:center;
+padding:14px;
+font-size:20px;
+font-weight:bold;
+margin-bottom:20px;
+border-radius:8px;
+}
+
+.container{
+max-width:600px;
+margin:auto;
+background:#fff;
+padding:20px;
+border-radius:12px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h2{
+text-align:center;
+margin-bottom:15px;
+}
+
+.info{
+font-size:14px;
+color:#444;
+margin-bottom:10px;
+line-height:22px;
+}
+
+textarea{
+width:100%;
+height:320px;
+padding:12px;
+font-size:16px;
+border:1px solid #ccc;
+border-radius:8px;
+resize:none;
+margin-bottom:15px;
+}
+
+button{
+width:100%;
+padding:14px;
+font-size:16px;
+font-weight:bold;
+border:none;
+border-radius:8px;
+cursor:pointer;
+margin-top:10px;
+}
+
+.saveBtn{
+background:#000;
+color:#fff;
+}
+
+.clearBtn{
+background:#666;
+color:#fff;
+}
+
+.backBtn{
+background:#d40000;
+color:#fff;
+}
+
+#msg{
+text-align:center;
+margin-top:15px;
+font-weight:bold;
+font-size:16px;
+}
+
+.countBox{
+text-align:center;
+margin-bottom:10px;
+font-weight:bold;
+color:#000;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">📝 Add Quiz</div>
+
+<div class="container">
+
+<h2>Create Bulk MCQ Quiz</h2>
+
+<div class="info">
+Format:<br>
+Question | Option A | Option B | Option C | Option D | Correct Answer<br><br>
+
+Example:<br>
+What is capital of India?|Delhi|Mumbai|Kolkata|Chennai|A
+</div>
+
+<div class="countBox" id="count">Saved Questions: 0</div>
+
+<textarea id="bulkData" placeholder="Paste many questions here..."></textarea>
+
+<button class="saveBtn" onclick="saveBulkQuiz()">Save All Questions</button>
+
+<button class="clearBtn" onclick="clearAllQuiz()">Clear All Questions</button>
+
+<a href="admin-panel.html">
+<button class="backBtn">← Back to Admin Panel</button>
+</a>
+
+<p id="msg"></p>
+
+</div>
+
 <script>
-function bulkAddQuestions() {
+showCount();
 
-  const textarea = document.getElementById("bulkQuestions");
+function saveBulkQuiz(){
 
-  if (!textarea) {
-    alert("Bulk textarea not found");
-    return;
-  }
+let data = document.getElementById("bulkData").value.trim();
 
-  let raw = textarea.value.trim();
+if(data==""){
+document.getElementById("msg").innerHTML="Please paste questions first!";
+document.getElementById("msg").style.color="red";
+return;
+}
 
-  if (raw === "") {
-    alert("Paste questions first");
-    return;
-  }
+let lines = data.split("\n");
+let quiz = [];
 
-  let lines = raw.split(/\r?\n/);
-  let imported = [];
-  let current = null;
+lines.forEach(line => {
 
-  function clean(t) {
-    return t.replace(/\s+/g, " ").trim();
-  }
+let parts = line.split("|");
 
-  function createQuestion(q) {
-    saveQuestion();
+if(parts.length==6){
 
-    current = {
-      question: clean(q),
-      options: [],
-      answer: 0
-    };
-  }
+quiz.push({
+question: parts[0].trim(),
+a: parts[1].trim(),
+b: parts[2].trim(),
+c: parts[3].trim(),
+d: parts[4].trim(),
+answer: parts[5].trim().toUpperCase()
+});
 
-  function saveQuestion() {
-    if (!current) return;
+}
 
-    current.question = clean(current.question);
+});
 
-    // remove empty options
-    current.options = current.options.filter(x => clean(x) !== "");
+localStorage.setItem("quizQuestions", JSON.stringify(quiz));
 
-    // minimum 2 options
-    if (current.question !== "" && current.options.length >= 2) {
+document.getElementById("msg").innerHTML =
+quiz.length + " Questions Saved Successfully!";
 
-      // make 4 options compulsory
-      while (current.options.length < 4) {
-        current.options.push("Option " + (current.options.length + 1));
-      }
+document.getElementById("msg").style.color="green";
 
-      // max 4 options
-      current.options = current.options.slice(0, 4);
+document.getElementById("bulkData").value="";
 
-      // safe answer
-      if (current.answer < 0 || current.answer > 3) {
-        current.answer = 0;
-      }
+showCount();
 
-      imported.push(current);
-    }
+}
 
-    current = null;
-  }
+function clearAllQuiz(){
 
-  for (let i = 0; i < lines.length; i++) {
+if(confirm("Delete all saved quiz questions?")){
 
-    let line = clean(lines[i]);
+localStorage.removeItem("quizQuestions");
 
-    if (line === "") continue;
+document.getElementById("msg").innerHTML="All Questions Deleted!";
+document.getElementById("msg").style.color="red";
 
-    // ======================
-    // NEW QUESTION DETECT
-    // ======================
-    if (
-      /^(Q\s*\d+|Q\d+|Q\.|Question\s*\d+|\d+\.)/i.test(line)
-    ) {
+showCount();
 
-      line = line.replace(
-        /^(Q\s*\d+|Q\d+|Q\.|Question\s*\d+|\d+\.)\s*/i,
-        ""
-      );
+}
 
-      createQuestion(line);
-      continue;
-    }
+}
 
-    // first line question if no question yet
-    if (!current) {
-      createQuestion(line);
-      continue;
-    }
+function showCount(){
 
-    // ======================
-    // OPTION DETECT A-D
-    // ======================
-    if (
-      /^[A-Da-d][\)\.\:\-\s]+/.test(line) ||
-      /^\([A-Da-d]\)/.test(line)
-    ) {
+let old = JSON.parse(localStorage.getItem("quizQuestions")) || [];
 
-      line = line.replace(/^[A-Da-d][\)\.\:\-\s]+/, "");
-      line = line.replace(/^\([A-Da-d]\)\s*/, "");
+document.getElementById("count").innerHTML =
+"Saved Questions: " + old.length;
 
-      current.options.push(clean(line));
-      continue;
-    }
-
-    // ======================
-    // OPTION DETECT 1-4
-    // ======================
-    if (/^[1-4][\)\.\:\-\s]+/.test(line)) {
-
-      line = line.replace(/^[1-4][\)\.\:\-\s]+/, "");
-
-      current.options.push(clean(line));
-      continue;
-    }
-
-    // ======================
-    // ANSWER DETECT
-    // ======================
-    if (
-      /^(Answer|Ans|उत्तर|सही उत्तर|Correct)/i.test(line)
-    ) {
-
-      let ans = line.replace(
-        /^(Answer|Ans|उत्तर|सही उत्तर|Correct)\s*[:\-]?\s*/i,
-        ""
-      ).trim().toUpperCase();
-
-      if (ans === "A" || ans === "1") current.answer = 0;
-      else if (ans === "B" || ans === "2") current.answer = 1;
-      else if (ans === "C" || ans === "3") current.answer = 2;
-      else if (ans === "D" || ans === "4") current.answer = 3;
-
-      continue;
-    }
-
-    // ======================
-    // EXTRA TEXT JOIN
-    // ======================
-
-    if (current.options.length > 0) {
-      current.options[current.options.length - 1] += " " + line;
-    } else {
-      current.question += " " + line;
-    }
-
-  }
-
-  saveQuestion();
-
-  if (imported.length === 0) {
-    alert("No valid questions found");
-    return;
-  }
-
-  // ======================
-  // SAVE TO LOCAL STORAGE
-  // ======================
-
-  let oldQuestions = [];
-
-  try {
-    oldQuestions = JSON.parse(
-      localStorage.getItem("quizQuestions")
-    ) || [];
-  } catch (e) {
-    oldQuestions = [];
-  }
-
-  let finalQuestions = oldQuestions.concat(imported);
-
-  localStorage.setItem(
-    "quizQuestions",
-    JSON.stringify(finalQuestions)
-  );
-
-  alert(imported.length + " Questions Added Successfully");
-
-  textarea.value = "";
 }
 </script>
+
+</body>
+</html>
