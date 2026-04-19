@@ -28,24 +28,25 @@ window.loginUser = function () {
     });
 };
 
-// Admin Login
 window.adminLogin = function () {
-  const email = document.getElementById("adminEmail").value;
-  const password = document.getElementById("adminPassword").value;
+const email = document.getElementById("adminEmail").value.trim();
+const password = document.getElementById("adminPassword").value;
 
-  if (email !== "rameshwarsahu2014bpmjarwe1694@gmail.com") {
-    alert("Only Admin Allowed");
-    return;
-  }
+alert("Function Running");
 
-  signInWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      alert("Admin Login Successful");
-      window.location.href = "admin-panel.html";
-    })
-    .catch((error) => {
-      alert(error.message);
-    });
+if (email !== "rameshwarsahu2014bpmjarwe1694@gmail.com") {
+  alert("Only Admin Allowed");
+  return;
+}
+
+signInWithEmailAndPassword(auth, email, password)
+.then(() => {
+  alert("Admin Login Successful");
+  window.location.href = "admin-panel.html";
+})
+.catch((error) => {
+  alert(error.message);
+});
 };
 
 // Logout
