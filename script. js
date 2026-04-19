@@ -33,7 +33,7 @@ window.adminLogin = function () {
   const email = document.getElementById("adminEmail").value;
   const password = document.getElementById("adminPassword").value;
 
-  if (email !== "rameshwarbpm2014@gmail.com") {
+  if (email !== "rameshwarsahu2014bpmjarwe1694@gmail.com") {
     alert("Only Admin Allowed");
     return;
   }
