@@ -1,103 +1,126 @@
 <script>
-function bulkAddQuestions(){
+function bulkAddQuestions() {
+  let textarea = document.getElementById("bulkQuestions");
 
-let text = document.getElementById("bulkQuestions").value.trim();
+  if (!textarea) {
+    alert("bulkQuestions textarea not found");
+    return;
+  }
 
-if(!text){
-alert("Paste questions first");
-return;
-}
+  let text = textarea.value.trim();
 
-let lines = text.split(/\n+/);
-let questions = [];
+  if (text === "") {
+    alert("Paste questions first");
+    return;
+  }
 
-let current = null;
+  let lines = text.split(/\r?\n/);
+  let questions = [];
+  let current = null;
 
-function saveCurrent(){
-if(current && current.question && current.options.length >=2){
-questions.push(current);
-}
-}
+  function saveCurrent() {
+    if (
+      current &&
+      current.question &&
+      current.options.length >= 2
+    ) {
+      if (current.answer === "" || current.answer === null) {
+        current.answer = 0;
+      }
 
-lines.forEach(line=>{
+      questions.push(current);
+    }
+  }
 
-line = line.trim();
+  function newQuestion(qText) {
+    saveCurrent();
 
-if(line=="") return;
+    current = {
+      question: qText.trim(),
+      options: [],
+      answer: ""
+    };
+  }
 
-// New Question Detect
-if(
-/^(Q\.?\d*|Question\s*\d*|\d+\.)/i.test(line)
-){
-saveCurrent();
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
 
-line = line.replace(/^(Q\.?\d*|Question\s*\d*|\d+\.)\s*/i,"");
+    if (line === "") continue;
 
-current = {
-question: line,
-options: [],
-answer: ""
-};
-return;
-}
+    // Question detect
+    if (
+      /^(Q\s*\d*[\.\):-]?|Question\s*\d*[\.\):-]?|\d+[\.\)])/i.test(line)
+    ) {
+      line = line.replace(
+        /^(Q\s*\d*[\.\):-]?|Question\s*\d*[\.\):-]?|\d+[\.\)])\s*/i,
+        ""
+      );
 
-// If no question yet
-if(!current){
-current = {
-question: line,
-options: [],
-answer: ""
-};
-return;
-}
+      newQuestion(line);
+      continue;
+    }
 
-// Option Detect
-if(
-/^(A|B|C|D|a|b|c|d)[\.\)\-:\s]/.test(line)
-){
-line = line.replace(/^(A|B|C|D|a|b|c|d)[\.\)\-:\s]*/,"");
-current.options.push(line);
-return;
-}
+    // If first line without number
+    if (!current) {
+      newQuestion(line);
+      continue;
+    }
 
-// Answer Detect
-if(
-/^(Answer|Ans|उत्तर)\s*[:\-]?\s*/i.test(line)
-){
-let ans = line.replace(/^(Answer|Ans|उत्तर)\s*[:\-]?\s*/i,"").trim().toUpperCase();
+    // Option detect
+    if (
+      /^[A-Da-d][\.\):-\s]+/.test(line) ||
+      /^\([A-Da-d]\)\s*/.test(line)
+    ) {
+      line = line.replace(/^[A-Da-d][\.\):-\s]+/, "");
+      line = line.replace(/^\([A-Da-d]\)\s*/, "");
 
-if(ans=="A") current.answer=0;
-if(ans=="B") current.answer=1;
-if(ans=="C") current.answer=2;
-if(ans=="D") current.answer=3;
+      current.options.push(line.trim());
+      continue;
+    }
 
-return;
-}
+    // Answer detect
+    if (/^(Answer|Ans|उत्तर| सही उत्तर)/i.test(line)) {
+      let ans = line
+        .replace(/^(Answer|Ans|उत्तर| सही उत्तर)\s*[:\-]?\s*/i, "")
+        .trim()
+        .toUpperCase();
 
-// Agar option complete ho gaya aur extra text hai to question me add karo
-if(current.options.length==0){
-current.question += " " + line;
-}
+      if (ans === "A" || ans === "1") current.answer = 0;
+      else if (ans === "B" || ans === "2") current.answer = 1;
+      else if (ans === "C" || ans === "3") current.answer = 2;
+      else if (ans === "D" || ans === "4") current.answer = 3;
 
-});
+      continue;
+    }
 
-saveCurrent();
+    // If options started then treat as continued option
+    if (current.options.length > 0 && current.options.length < 4) {
+      current.options[current.options.length - 1] += " " + line;
+    } else {
+      // otherwise question continuation
+      current.question += " " + line;
+    }
+  }
 
-if(questions.length==0){
-alert("No valid questions found");
-return;
-}
+  saveCurrent();
 
-// Save old data
-let old = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+  if (questions.length === 0) {
+    alert("No valid questions found");
+    return;
+  }
 
-let finalData = old.concat(questions);
+  let oldData =
+    JSON.parse(localStorage.getItem("quizQuestions")) || [];
 
-localStorage.setItem("quizQuestions", JSON.stringify(finalData));
+  let finalData = oldData.concat(questions);
 
-alert(questions.length + " Questions Added Successfully");
+  localStorage.setItem(
+    "quizQuestions",
+    JSON.stringify(finalData)
+  );
 
-document.getElementById("bulkQuestions").value="";
+  alert(questions.length + " Questions Added Successfully");
 
+  textarea.value = "";
 }
 </script>
