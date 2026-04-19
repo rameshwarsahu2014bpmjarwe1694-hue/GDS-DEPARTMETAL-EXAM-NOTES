@@ -70,60 +70,44 @@
 </div>
 
 <script src="app.js"></script>
-    <!-- 1. Font Awesome (आइकन के लिए) -->
-<link rel="stylesheet" href="https://cloudflare.com">
-
-<!-- 2. Fixed WhatsApp Share Button -->
-<a href="https://whatsapp.com" 
+<!-- Direct WhatsApp Chat Share Button -->
+<a href="https://api.whatsapp.com/send?text=Check%20this%20useful%20website:%20https://rameshwarsahu2014bpmjarwe1694-hue.github.io/GDS-DEPARTMETAL-EXAM-NOTES/" 
    target="_blank" 
-   class="whatsapp-fixed">
-    <i class="fab fa-whatsapp"></i>
-    <span>Share on WhatsApp</span>
+   class="whatsapp-share">
+   <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp Share">
 </a>
 
-<!-- 3. Button Styling (CSS) -->
+<footer>
+    <p>Share This Website on WhatsApp</p>
+    <a href="https://api.whatsapp.com/send?text=Check%20this%20useful%20website:%20https://rameshwarsahu2014bpmjarwe1694-hue.github.io/GDS-DEPARTMETAL-EXAM-NOTES/" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" class="footer-whatsapp" alt="WhatsApp">
+    </a>
+</footer>
+
 <style>
-    .whatsapp-fixed {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background-color: #25D366;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 50px;
-        text-decoration: none;
-        font-weight: bold;
-        font-family: Arial, sans-serif;
-        display: flex;
-        align-items: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        z-index: 1000; /* ताकि यह सबसे ऊपर दिखे */
-        transition: transform 0.3s ease;
-    }
-
-    .whatsapp-fixed:hover {
-        transform: scale(1.05);
-        background-color: #128C7E;
-    }
-
-    .whatsapp-fixed i {
-        font-size: 24px;
-        margin-right: 10px;
-    }
-
-    /* मोबाइल पर केवल आइकन दिखाने के लिए (वैकल्पिक) */
-    @media (max-width: 480px) {
-        .whatsapp-fixed span {
-            display: none;
-        }
-        .whatsapp-fixed i {
-            margin-right: 0;
-        }
-        .whatsapp-fixed {
-            padding: 15px;
-            border-radius: 50%;
-        }
-    }
+.whatsapp-share{
+    position:fixed;
+    bottom:80px;
+    right:20px;
+    z-index:999;
+}
+.whatsapp-share img{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    box-shadow:0 4px 10px rgba(0,0,0,0.3);
+}
+footer{
+    background:#111;
+    color:#fff;
+    text-align:center;
+    padding:15px;
+    margin-top:30px;
+}
+.footer-whatsapp{
+    width:40px;
+    margin-top:10px;
+}
 </style>
 </body>
 </html>
