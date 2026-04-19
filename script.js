@@ -90,6 +90,9 @@ await signInWithEmailAndPassword(auth, email, password);
 
 const user = userCredential.user;
 
+/* background candidate add */
+try {
+
 const { doc, getDoc, setDoc } = await import(
 "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js"
 );
@@ -98,7 +101,6 @@ const ref = doc(window.db, "candidates", user.uid);
 const snap = await getDoc(ref);
 
 if (!snap.exists()) {
-
 await setDoc(ref, {
 name: user.email.split("@")[0],
 mobile: "-",
@@ -106,8 +108,20 @@ email: user.email,
 uid: user.uid,
 createdAt: new Date().toISOString()
 });
-
 }
+
+} catch(innerError) {
+console.log("Firestore sync skipped:", innerError);
+}
+
+alert("Login Successful");
+window.location.href = "dashboard.html";
+
+} catch(error) {
+alert(error.message);
+}
+
+};
 
 alert("Login Successful");
 window.location.href = "dashboard.html";
