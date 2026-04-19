@@ -3,53 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Add Quiz</title>
+<title>Add Quiz - Firebase</title>
 
 <style>
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial, sans-serif;
+font-family:Arial,sans-serif;
 }
-
 body{
 background:#f2f2f2;
-padding:20px;
+padding:15px;
 }
-
 .topbar{
 background:#000;
 color:#fff;
-text-align:center;
 padding:14px;
-font-size:20px;
+text-align:center;
+font-size:22px;
 font-weight:bold;
-margin-bottom:20px;
 border-radius:8px;
+margin-bottom:20px;
 }
-
 .container{
-max-width:600px;
+max-width:650px;
 margin:auto;
 background:#fff;
 padding:20px;
 border-radius:12px;
 box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
-
 h2{
 text-align:center;
 margin-bottom:15px;
 }
-
 .info{
 font-size:14px;
+line-height:24px;
+margin-bottom:15px;
 color:#444;
-margin-bottom:10px;
-line-height:22px;
 }
-
+.countBox{
+text-align:center;
+font-weight:bold;
+margin-bottom:12px;
+}
 textarea{
 width:100%;
 height:320px;
@@ -58,9 +57,7 @@ font-size:16px;
 border:1px solid #ccc;
 border-radius:8px;
 resize:none;
-margin-bottom:15px;
 }
-
 button{
 width:100%;
 padding:14px;
@@ -68,64 +65,51 @@ font-size:16px;
 font-weight:bold;
 border:none;
 border-radius:8px;
-cursor:pointer;
 margin-top:10px;
+cursor:pointer;
 }
-
 .saveBtn{
 background:#000;
 color:#fff;
 }
-
 .clearBtn{
 background:#666;
 color:#fff;
 }
-
 .backBtn{
 background:#d40000;
 color:#fff;
 }
-
 #msg{
 text-align:center;
 margin-top:15px;
 font-weight:bold;
-font-size:16px;
-}
-
-.countBox{
-text-align:center;
-margin-bottom:10px;
-font-weight:bold;
-color:#000;
 }
 </style>
 </head>
-
 <body>
 
-<div class="topbar">📝 Add Quiz</div>
+<div class="topbar">📝 Add Quiz Questions</div>
 
 <div class="container">
 
-<h2>Create Bulk MCQ Quiz</h2>
+<h2>Bulk Quiz Upload</h2>
 
 <div class="info">
 Format:<br>
-Question | Option A | Option B | Option C | Option D | Correct Answer<br><br>
+Question|Option A|Option B|Option C|Option D|Answer<br><br>
 
 Example:<br>
-What is capital of India?|Delhi|Mumbai|Kolkata|Chennai|A
+भारत की राजधानी क्या है?|दिल्ली|मुंबई|कोलकाता|चेन्नई|A
 </div>
 
 <div class="countBox" id="count">Saved Questions: 0</div>
 
-<textarea id="bulkData" placeholder="Paste many questions here..."></textarea>
+<textarea id="bulkData" placeholder="Paste Hindi / English / Mixed Questions Here..."></textarea>
 
 <button class="saveBtn" onclick="saveBulkQuiz()">Save All Questions</button>
 
-<button class="clearBtn" onclick="clearAllQuiz()">Clear All Questions</button>
+<button class="clearBtn" onclick="clearAllQuiz()">Delete All Questions</button>
 
 <a href="admin-panel.html">
 <button class="backBtn">← Back to Admin Panel</button>
@@ -135,27 +119,59 @@ What is capital of India?|Delhi|Mumbai|Kolkata|Chennai|A
 
 </div>
 
-<script>
-showCount();
+<script type="module">
 
-function saveBulkQuiz(){
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getDatabase,
+ref,
+set,
+get,
+remove
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+databaseURL: "https://gds-departmental-exam-studyhub-default-rtdb.asia-southeast1.firebasedatabase.app/",
+projectId: "gds-departmental-exam-studyhub",
+storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
+messagingSenderId: "759916756080",
+appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.saveBulkQuiz = async function(){
 
 let data = document.getElementById("bulkData").value.trim();
 
 if(data==""){
-document.getElementById("msg").innerHTML="Please paste questions first!";
-document.getElementById("msg").style.color="red";
+msg("Please paste questions first!","red");
 return;
 }
 
-let lines = data.split("\n");
+let lines = data.split(/\r?\n/);
+
 let quiz = [];
 
-lines.forEach(line => {
+lines.forEach(line=>{
 
-let parts = line.split("|");
+line=line.trim();
 
-if(parts.length==6){
+if(line=="") return;
+
+line=line.replace(/\s*\|\s*/g,"|");
+
+if(line.split("|").length<6){
+line=line.replace(/\s*,\s*/g,"|");
+}
+
+let parts=line.split("|");
+
+if(parts.length>=6){
 
 quiz.push({
 question: parts[0].trim(),
@@ -163,19 +179,16 @@ a: parts[1].trim(),
 b: parts[2].trim(),
 c: parts[3].trim(),
 d: parts[4].trim(),
-answer: parts[5].trim().toUpperCase()
+answer: parts[5].trim().toUpperCase().replace(/[^ABCD]/g,"")
 });
 
 }
 
 });
 
-localStorage.setItem("quizQuestions", JSON.stringify(quiz));
+await set(ref(db,"quizQuestions"),quiz);
 
-document.getElementById("msg").innerHTML =
-quiz.length + " Questions Saved Successfully!";
-
-document.getElementById("msg").style.color="green";
+msg(quiz.length+" Questions Saved Successfully!","green");
 
 document.getElementById("bulkData").value="";
 
@@ -183,14 +196,13 @@ showCount();
 
 }
 
-function clearAllQuiz(){
+window.clearAllQuiz = async function(){
 
-if(confirm("Delete all saved quiz questions?")){
+if(confirm("Delete all questions?")){
 
-localStorage.removeItem("quizQuestions");
+await remove(ref(db,"quizQuestions"));
 
-document.getElementById("msg").innerHTML="All Questions Deleted!";
-document.getElementById("msg").style.color="red";
+msg("All Questions Deleted!","red");
 
 showCount();
 
@@ -198,14 +210,35 @@ showCount();
 
 }
 
-function showCount(){
+async function showCount(){
 
-let old = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+const snap = await get(ref(db,"quizQuestions"));
+
+if(snap.exists()){
+
+let total = snap.val().length;
 
 document.getElementById("count").innerHTML =
-"Saved Questions: " + old.length;
+"Saved Questions: "+total;
+
+}else{
+
+document.getElementById("count").innerHTML =
+"Saved Questions: 0";
 
 }
+
+}
+
+function msg(text,color){
+
+document.getElementById("msg").innerHTML=text;
+document.getElementById("msg").style.color=color;
+
+}
+
+showCount();
+
 </script>
 
 </body>
