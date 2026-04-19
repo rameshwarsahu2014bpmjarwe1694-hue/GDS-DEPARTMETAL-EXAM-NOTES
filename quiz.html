@@ -1,232 +1,103 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Add Quiz</title>
-
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-body{
-background:#f2f2f2;
-padding:15px;
-}
-
-.topbar{
-background:#000;
-color:#fff;
-text-align:center;
-padding:14px;
-font-size:20px;
-font-weight:bold;
-border-radius:8px;
-margin-bottom:20px;
-}
-
-.container{
-max-width:600px;
-margin:auto;
-background:#fff;
-padding:20px;
-border-radius:12px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-
-h2{
-text-align:center;
-margin-bottom:15px;
-}
-
-.info{
-font-size:14px;
-line-height:22px;
-color:#444;
-margin-bottom:15px;
-}
-
-.countBox{
-text-align:center;
-font-weight:bold;
-margin-bottom:10px;
-}
-
-textarea{
-width:100%;
-height:320px;
-padding:12px;
-font-size:16px;
-border:1px solid #ccc;
-border-radius:8px;
-resize:none;
-margin-bottom:15px;
-}
-
-button{
-width:100%;
-padding:14px;
-font-size:16px;
-font-weight:bold;
-border:none;
-border-radius:8px;
-cursor:pointer;
-margin-top:10px;
-}
-
-.saveBtn{
-background:#000;
-color:#fff;
-}
-
-.clearBtn{
-background:#666;
-color:#fff;
-}
-
-.backBtn{
-background:#d40000;
-color:#fff;
-}
-
-#msg{
-text-align:center;
-font-weight:bold;
-margin-top:15px;
-}
-</style>
-</head>
-
-<body>
-
-<div class="topbar">📝 Add Quiz</div>
-
-<div class="container">
-
-<h2>Create Bulk MCQ Quiz</h2>
-
-<div class="info">
-Format:<br>
-Question | Option A | Option B | Option C | Option D | Correct Answer<br><br>
-
-Example:<br>
-भारत की राजधानी क्या है?|दिल्ली|मुंबई|कोलकाता|चेन्नई|A<br>
-2+2 कितना है?|3|4|5|6|B
-</div>
-
-<div class="countBox" id="count">Saved Questions: 0</div>
-
-<textarea id="bulkData" placeholder="Paste Hindi / English / Mixed Questions Here..."></textarea>
-
-<button class="saveBtn" onclick="saveBulkQuiz()">Save All Questions</button>
-
-<button class="clearBtn" onclick="clearAllQuiz()">Clear All Questions</button>
-
-<a href="admin-panel.html">
-<button class="backBtn">← Back to Admin Panel</button>
-</a>
-
-<p id="msg"></p>
-
-</div>
-
 <script>
+function bulkAddQuestions(){
 
-showCount();
+let text = document.getElementById("bulkQuestions").value.trim();
 
-function saveBulkQuiz(){
-
-let data = document.getElementById("bulkData").value.trim();
-
-if(data==""){
-document.getElementById("msg").innerHTML="Please paste questions first!";
-document.getElementById("msg").style.color="red";
+if(!text){
+alert("Paste questions first");
 return;
 }
 
-/* split lines */
-let lines = data.split(/\r?\n/);
+let lines = text.split(/\n+/);
+let questions = [];
 
-let quiz = [];
+let current = null;
 
-lines.forEach(line => {
+function saveCurrent(){
+if(current && current.question && current.options.length >=2){
+questions.push(current);
+}
+}
+
+lines.forEach(line=>{
 
 line = line.trim();
 
-/* blank line ignore */
 if(line=="") return;
 
-/* spaces around | remove */
-line = line.replace(/\s*\|\s*/g,"|");
+// New Question Detect
+if(
+/^(Q\.?\d*|Question\s*\d*|\d+\.)/i.test(line)
+){
+saveCurrent();
 
-/* comma support */
-if(line.split("|").length < 6){
-line = line.replace(/\s*,\s*/g,"|");
+line = line.replace(/^(Q\.?\d*|Question\s*\d*|\d+\.)\s*/i,"");
+
+current = {
+question: line,
+options: [],
+answer: ""
+};
+return;
 }
 
-let parts = line.split("|");
+// If no question yet
+if(!current){
+current = {
+question: line,
+options: [],
+answer: ""
+};
+return;
+}
 
-if(parts.length >= 6){
+// Option Detect
+if(
+/^(A|B|C|D|a|b|c|d)[\.\)\-:\s]/.test(line)
+){
+line = line.replace(/^(A|B|C|D|a|b|c|d)[\.\)\-:\s]*/,"");
+current.options.push(line);
+return;
+}
 
-let ans = parts[5].trim().toUpperCase();
+// Answer Detect
+if(
+/^(Answer|Ans|उत्तर)\s*[:\-]?\s*/i.test(line)
+){
+let ans = line.replace(/^(Answer|Ans|उत्तर)\s*[:\-]?\s*/i,"").trim().toUpperCase();
 
-ans = ans.replace(/[^ABCD]/g,"");
+if(ans=="A") current.answer=0;
+if(ans=="B") current.answer=1;
+if(ans=="C") current.answer=2;
+if(ans=="D") current.answer=3;
 
-quiz.push({
-question: parts[0].trim(),
-a: parts[1].trim(),
-b: parts[2].trim(),
-c: parts[3].trim(),
-d: parts[4].trim(),
-answer: ans
+return;
+}
+
+// Agar option complete ho gaya aur extra text hai to question me add karo
+if(current.options.length==0){
+current.question += " " + line;
+}
+
 });
 
+saveCurrent();
+
+if(questions.length==0){
+alert("No valid questions found");
+return;
 }
 
-});
-
-localStorage.setItem("quizQuestions", JSON.stringify(quiz));
-
-document.getElementById("msg").innerHTML =
-quiz.length + " Questions Saved Successfully!";
-
-document.getElementById("msg").style.color="green";
-
-document.getElementById("bulkData").value="";
-
-showCount();
-
-}
-
-function clearAllQuiz(){
-
-if(confirm("Delete all saved questions?")){
-
-localStorage.removeItem("quizQuestions");
-
-document.getElementById("msg").innerHTML="All Questions Deleted!";
-document.getElementById("msg").style.color="red";
-
-showCount();
-
-}
-
-}
-
-function showCount(){
-
+// Save old data
 let old = JSON.parse(localStorage.getItem("quizQuestions")) || [];
 
-document.getElementById("count").innerHTML =
-"Saved Questions: " + old.length;
+let finalData = old.concat(questions);
+
+localStorage.setItem("quizQuestions", JSON.stringify(finalData));
+
+alert(questions.length + " Questions Added Successfully");
+
+document.getElementById("bulkQuestions").value="";
 
 }
-
 </script>
-
-</body>
-</html>
