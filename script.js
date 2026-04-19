@@ -80,7 +80,9 @@ const { doc, setDoc } = await import(
 await setDoc(doc(window.db, "candidates", uid), {
 name: name,
 mobile: mobile,
-email: email
+email: email,
+uid: uid,
+createdAt: new Date().toISOString()
 });
 
 alert("Registration Successful");
