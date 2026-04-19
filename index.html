@@ -35,7 +35,38 @@
         <i class="fab fa-whatsapp" style="color: #25d366;"></i> <b>WhatsApp:</b> 8963999086
     </div>
 </div>
-    
+   <!-- Main Container -->
+<div class="container">
+
+    <!-- 1. Home View (Select Category) -->
+    <div id="view-home" class="view active">
+        <h2>Select Category</h2>
+        <div id="catGrid" class="cat-grid">
+            <!-- यहाँ JavaScript के ज़रिए कैटेगरी बटन लोड होंगे -->
+        </div>
+    </div>
+
+    <!-- 2. Quiz View -->
+    <div id="view-quiz" class="view">
+        <h2 id="quizCat">Quiz</h2>
+        <div id="qContainer"></div>
+        
+        <!-- Navigation Buttons -->
+        <div style="margin-top:20px;">
+            <button id="prevBtn">Previous</button>
+            <button id="nextBtn">Next</button>
+            <!-- Submit Button (Hidden by default) -->
+            <button id="submitBtn" style="display:none; background-color: #28a745; color: white;">Submit Quiz</button>
+            <button id="quitBtn">Quit</button>
+        </div>
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
+
     <div class="container">
         <!-- नोट्स डाउनलोड सेक्शन -->
 <div style="background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; border-left: 5px solid #b8351a;">
@@ -134,28 +165,3 @@
     </p>
 </div>
 <!-- README कंटेंट सेक्शन समाप्त -->
-        
-   
-    </a>
-</div>
-        <!-- Home View -->
-        <div id="view-home" class="view active">
-            <h2>Select Category</h2>
-            <div id="catGrid" class="cat-grid"></div>
-        </div>
-
-        <!-- Quiz View -->
-        <div id="view-quiz" class="view">
-            <h2 id="quizCat">Quiz</h2>
-            <div id="qContainer"></div>
-            <div style="margin-top:20px;">
-                <button id="prevBtn">Previous</button>
-                <button id="nextBtn">Next</button>
-                <button id="quitBtn">Quit</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="app.js"></script>
-</body>
-</html>
