@@ -63,6 +63,13 @@ color:#555;
 font-size:15px;
 }
 
+.empty{
+text-align:center;
+color:#fff;
+font-size:18px;
+margin-top:30px;
+}
+
 .back{
 display:block;
 margin-top:25px;
@@ -73,13 +80,6 @@ text-align:center;
 border-radius:10px;
 text-decoration:none;
 font-weight:bold;
-}
-
-.empty{
-text-align:center;
-color:#fff;
-font-size:18px;
-margin-top:30px;
 }
 </style>
 </head>
@@ -99,40 +99,31 @@ margin-top:30px;
 </div>
 
 <!-- Firebase -->
+<script type="module" src="firebase.js"></script>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
-getFirestore,
 collection,
 getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* APNA FIREBASE CONFIG YAHA DALO */
-const firebaseConfig = {
-apiKey: "YOUR_API_KEY",
-authDomain: "YOUR_PROJECT.firebaseapp.com",
-projectId: "YOUR_PROJECT_ID",
-storageBucket: "YOUR_PROJECT.appspot.com",
-messagingSenderId: "XXXXXX",
-appId: "XXXXXX"
-};
+setTimeout(async () => {
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = window.db;
 
 const countBox = document.getElementById("countBox");
 const candidateList = document.getElementById("candidateList");
 
-async function loadCandidates(){
-
 candidateList.innerHTML = "";
 
-const querySnapshot = await getDocs(collection(db,"candidates"));
+try{
+
+const snapshot = await getDocs(collection(db,"candidates"));
 
 let total = 0;
 
-querySnapshot.forEach((doc) => {
+snapshot.forEach((doc) => {
 
 total++;
 
@@ -156,9 +147,15 @@ candidateList.innerHTML = `
 `;
 }
 
+}catch(error){
+
+candidateList.innerHTML = `
+<div class="empty">Failed to load candidates</div>
+`;
+
 }
 
-loadCandidates();
+},800);
 
 </script>
 
