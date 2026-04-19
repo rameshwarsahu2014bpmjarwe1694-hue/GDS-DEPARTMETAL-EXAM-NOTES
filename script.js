@@ -7,22 +7,24 @@ window.onload = function () {
    ADMIN LOGIN
 ========================= */
 window.adminLogin = function () {
-  const email = document.getElementById("adminEmail")?.value.trim();
-  const password = document.getElementById("adminPassword")?.value;
 
-  if (!email || !password) {
-    alert("Enter email and password");
-    return;
-  }
+const email = document.getElementById("adminEmail")?.value.trim();
+const password = document.getElementById("adminPassword")?.value;
 
-  signInWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      alert("Admin Login Successful");
-      window.location.href = "admin-panel.html";
-    })
-    .catch((error) => {
-      alert(error.message);
-    });
+if (!email || !password) {
+alert("Enter email and password");
+return;
+}
+
+signInWithEmailAndPassword(auth, email, password)
+.then(() => {
+alert("Admin Login Successful");
+window.location.href = "admin-panel.html";
+})
+.catch((error) => {
+alert(error.message);
+});
+
 };
 
 /* =========================
@@ -40,6 +42,11 @@ alert("Fill all fields");
 return;
 }
 
+if (mobile.length < 10) {
+alert("Enter valid mobile number");
+return;
+}
+
 try {
 
 const userCredential =
@@ -51,7 +58,7 @@ const { doc, setDoc } = await import(
 "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js"
 );
 
-await setDoc(doc(db, "candidates", uid), {
+await setDoc(doc(window.db, "candidates", uid), {
 name: name,
 mobile: mobile,
 email: email,
@@ -72,34 +79,38 @@ alert(error.message);
    CANDIDATE LOGIN
 ========================= */
 window.candidateLogin = function () {
-  const email = document.getElementById("loginEmail")?.value.trim();
-  const password = document.getElementById("loginPassword")?.value;
 
-  if (!email || !password) {
-    alert("Enter email and password");
-    return;
-  }
+const email = document.getElementById("loginEmail")?.value.trim();
+const password = document.getElementById("loginPassword")?.value;
 
-  signInWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      alert("Login Successful");
-      window.location.href = "dashboard.html";
-    })
-    .catch((error) => {
-      alert(error.message);
-    });
+if (!email || !password) {
+alert("Enter email and password");
+return;
+}
+
+signInWithEmailAndPassword(auth, email, password)
+.then(() => {
+alert("Login Successful");
+window.location.href = "dashboard.html";
+})
+.catch((error) => {
+alert(error.message);
+});
+
 };
 
 /* =========================
    LOGOUT
 ========================= */
 window.logout = function () {
-  signOut(auth)
-    .then(() => {
-      alert("Logged Out");
-      window.location.href = "index.html";
-    })
-    .catch((error) => {
-      alert(error.message);
-    });
+
+signOut(auth)
+.then(() => {
+alert("Logged Out");
+window.location.href = "index.html";
+})
+.catch((error) => {
+alert(error.message);
+});
+
 };
