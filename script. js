@@ -1,58 +1,57 @@
-
 // Candidate Register
-function registerUser() {
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+window.registerUser = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-createUserWithEmailAndPassword(auth, email, password)
-.then(() => {
-alert("Registration Successful");
-window.location.href = "login.html";
-})
-.catch((error) => {
-alert(error.message);
-});
-}
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      alert("Registration Successful");
+      window.location.href = "login.html";
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
+};
 
 // Candidate Login
-function loginUser() {
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+window.loginUser = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-signInWithEmailAndPassword(auth, email, password)
-.then(() => {
-alert("Login Successful");
-window.location.href = "dashboard.html";
-})
-.catch((error) => {
-alert(error.message);
-});
-}
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      alert("Login Successful");
+      window.location.href = "dashboard.html";
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
+};
 
 // Admin Login
-function adminLogin() {
-const email = document.getElementById("adminEmail").value;
-const password = document.getElementById("adminPassword").value;
+window.adminLogin = function () {
+  const email = document.getElementById("adminEmail").value;
+  const password = document.getElementById("adminPassword").value;
 
-if(email !== "rameshwarbpm2014@gmail.com"){
-alert("Only Admin Allowed");
-return;
-}
+  if (email !== "rameshwarbpm2014@gmail.com") {
+    alert("Only Admin Allowed");
+    return;
+  }
 
-signInWithEmailAndPassword(auth, email, password)
-.then(() => {
-alert("Admin Login Successful");
-window.location.href = "admin-panel.html";
-})
-.catch((error) => {
-alert(error.message);
-});
-}
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      alert("Admin Login Successful");
+      window.location.href = "admin-panel.html";
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
+};
 
 // Logout
-function logoutUser() {
-signOut(auth).then(() => {
-alert("Logged Out");
-window.location.href = "index.html";
-});
-}
+window.logoutUser = function () {
+  signOut(auth).then(() => {
+    alert("Logged Out");
+    window.location.href = "index.html";
+  });
+};
