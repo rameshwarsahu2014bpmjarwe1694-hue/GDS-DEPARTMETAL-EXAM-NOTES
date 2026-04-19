@@ -1,1 +1,27 @@
 
+// Firebase CDN
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
+signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// YOUR FIREBASE CONFIG HERE
+const firebaseConfig = {
+apiKey: "PASTE_API_KEY",
+authDomain: "PASTE_AUTH_DOMAIN",
+projectId: "PASTE_PROJECT_ID",
+storageBucket: "PASTE_BUCKET",
+messagingSenderId: "PASTE_SENDER_ID",
+appId: "PASTE_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.auth = auth;
+window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+window.signOut = signOut;
