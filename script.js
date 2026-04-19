@@ -54,24 +54,41 @@ alert(error.message);
 /* =========================
 REGISTER
 ========================= */
-window.register = function () {
+window.register = async function () {
 
+const name = document.getElementById("name").value.trim();
+const mobile = document.getElementById("mobile").value.trim();
 const email = document.getElementById("email").value.trim();
 const password = document.getElementById("password").value;
 
-if (!email || !password) {
-alert("Enter email and password");
+if (!name || !mobile || !email || !password) {
+alert("Fill all fields");
 return;
 }
 
-window.createUserWithEmailAndPassword(window.auth, email, password)
-.then(function () {
+try {
+
+const userCredential =
+await window.createUserWithEmailAndPassword(window.auth, email, password);
+
+const uid = userCredential.user.uid;
+
+const { doc, setDoc } = await import(
+"https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js"
+);
+
+await setDoc(doc(window.db, "candidates", uid), {
+name: name,
+mobile: mobile,
+email: email
+});
+
 alert("Registration Successful");
 window.location.href = "login.html";
-})
-.catch(function (error) {
+
+} catch(error) {
 alert(error.message);
-});
+}
 
 };
 
