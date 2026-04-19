@@ -28,23 +28,44 @@ window.adminLogin = function () {
 /* =========================
    CANDIDATE REGISTER
 ========================= */
-window.register = function () {
-  const email = document.getElementById("email")?.value.trim();
-  const password = document.getElementById("password")?.value;
+window.register = async function () {
 
-  if (!email || !password) {
-    alert("Enter email and password");
-    return;
-  }
+const name = document.getElementById("name")?.value.trim();
+const mobile = document.getElementById("mobile")?.value.trim();
+const email = document.getElementById("email")?.value.trim();
+const password = document.getElementById("password")?.value;
 
-  createUserWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      alert("Registration Successful");
-      window.location.href = "candidate-login.html";
-    })
-    .catch((error) => {
-      alert(error.message);
-    });
+if (!name || !mobile || !email || !password) {
+alert("Fill all fields");
+return;
+}
+
+try {
+
+const userCredential =
+await createUserWithEmailAndPassword(auth, email, password);
+
+const uid = userCredential.user.uid;
+
+const { doc, setDoc } = await import(
+"https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js"
+);
+
+await setDoc(doc(db, "candidates", uid), {
+name: name,
+mobile: mobile,
+email: email,
+uid: uid,
+createdAt: new Date().toISOString()
+});
+
+alert("Registration Successful");
+window.location.href = "candidate-login.html";
+
+} catch(error) {
+alert(error.message);
+}
+
 };
 
 /* =========================
