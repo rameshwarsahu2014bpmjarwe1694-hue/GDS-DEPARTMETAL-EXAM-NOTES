@@ -1,89 +1,133 @@
 <script>
 function bulkAddQuestions() {
-  let textarea = document.getElementById("bulkQuestions");
+
+  const textarea = document.getElementById("bulkQuestions");
 
   if (!textarea) {
-    alert("bulkQuestions textarea not found");
+    alert("Bulk textarea not found");
     return;
   }
 
-  let text = textarea.value.trim();
+  let raw = textarea.value.trim();
 
-  if (text === "") {
+  if (raw === "") {
     alert("Paste questions first");
     return;
   }
 
-  let lines = text.split(/\r?\n/);
-  let questions = [];
+  let lines = raw.split(/\r?\n/);
+  let imported = [];
   let current = null;
 
-  function saveCurrent() {
-    if (
-      current &&
-      current.question &&
-      current.options.length >= 2
-    ) {
-      if (current.answer === "" || current.answer === null) {
-        current.answer = 0;
-      }
-
-      questions.push(current);
-    }
+  function clean(t) {
+    return t.replace(/\s+/g, " ").trim();
   }
 
-  function newQuestion(qText) {
-    saveCurrent();
+  function createQuestion(q) {
+    saveQuestion();
 
     current = {
-      question: qText.trim(),
+      question: clean(q),
       options: [],
-      answer: ""
+      answer: 0
     };
   }
 
+  function saveQuestion() {
+    if (!current) return;
+
+    current.question = clean(current.question);
+
+    // remove empty options
+    current.options = current.options.filter(x => clean(x) !== "");
+
+    // minimum 2 options
+    if (current.question !== "" && current.options.length >= 2) {
+
+      // make 4 options compulsory
+      while (current.options.length < 4) {
+        current.options.push("Option " + (current.options.length + 1));
+      }
+
+      // max 4 options
+      current.options = current.options.slice(0, 4);
+
+      // safe answer
+      if (current.answer < 0 || current.answer > 3) {
+        current.answer = 0;
+      }
+
+      imported.push(current);
+    }
+
+    current = null;
+  }
+
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i].trim();
+
+    let line = clean(lines[i]);
 
     if (line === "") continue;
 
-    // Question detect
+    // ======================
+    // NEW QUESTION DETECT
+    // ======================
     if (
-      /^(Q\s*\d*[\.\):-]?|Question\s*\d*[\.\):-]?|\d+[\.\)])/i.test(line)
+      /^(Q\s*\d+|Q\d+|Q\.|Question\s*\d+|\d+\.)/i.test(line)
     ) {
+
       line = line.replace(
-        /^(Q\s*\d*[\.\):-]?|Question\s*\d*[\.\):-]?|\d+[\.\)])\s*/i,
+        /^(Q\s*\d+|Q\d+|Q\.|Question\s*\d+|\d+\.)\s*/i,
         ""
       );
 
-      newQuestion(line);
+      createQuestion(line);
       continue;
     }
 
-    // If first line without number
+    // first line question if no question yet
     if (!current) {
-      newQuestion(line);
+      createQuestion(line);
       continue;
     }
 
-    // Option detect
+    // ======================
+    // OPTION DETECT A-D
+    // ======================
     if (
-      /^[A-Da-d][\.\):-\s]+/.test(line) ||
-      /^\([A-Da-d]\)\s*/.test(line)
+      /^[A-Da-d][\)\.\:\-\s]+/.test(line) ||
+      /^\([A-Da-d]\)/.test(line)
     ) {
-      line = line.replace(/^[A-Da-d][\.\):-\s]+/, "");
+
+      line = line.replace(/^[A-Da-d][\)\.\:\-\s]+/, "");
       line = line.replace(/^\([A-Da-d]\)\s*/, "");
 
-      current.options.push(line.trim());
+      current.options.push(clean(line));
       continue;
     }
 
-    // Answer detect
-    if (/^(Answer|Ans|उत्तर| सही उत्तर)/i.test(line)) {
-      let ans = line
-        .replace(/^(Answer|Ans|उत्तर| सही उत्तर)\s*[:\-]?\s*/i, "")
-        .trim()
-        .toUpperCase();
+    // ======================
+    // OPTION DETECT 1-4
+    // ======================
+    if (/^[1-4][\)\.\:\-\s]+/.test(line)) {
+
+      line = line.replace(/^[1-4][\)\.\:\-\s]+/, "");
+
+      current.options.push(clean(line));
+      continue;
+    }
+
+    // ======================
+    // ANSWER DETECT
+    // ======================
+    if (
+      /^(Answer|Ans|उत्तर|सही उत्तर|Correct)/i.test(line)
+    ) {
+
+      let ans = line.replace(
+        /^(Answer|Ans|उत्तर|सही उत्तर|Correct)\s*[:\-]?\s*/i,
+        ""
+      ).trim().toUpperCase();
 
       if (ans === "A" || ans === "1") current.answer = 0;
       else if (ans === "B" || ans === "2") current.answer = 1;
@@ -93,33 +137,47 @@ function bulkAddQuestions() {
       continue;
     }
 
-    // If options started then treat as continued option
-    if (current.options.length > 0 && current.options.length < 4) {
+    // ======================
+    // EXTRA TEXT JOIN
+    // ======================
+
+    if (current.options.length > 0) {
       current.options[current.options.length - 1] += " " + line;
     } else {
-      // otherwise question continuation
       current.question += " " + line;
     }
+
   }
 
-  saveCurrent();
+  saveQuestion();
 
-  if (questions.length === 0) {
+  if (imported.length === 0) {
     alert("No valid questions found");
     return;
   }
 
-  let oldData =
-    JSON.parse(localStorage.getItem("quizQuestions")) || [];
+  // ======================
+  // SAVE TO LOCAL STORAGE
+  // ======================
 
-  let finalData = oldData.concat(questions);
+  let oldQuestions = [];
+
+  try {
+    oldQuestions = JSON.parse(
+      localStorage.getItem("quizQuestions")
+    ) || [];
+  } catch (e) {
+    oldQuestions = [];
+  }
+
+  let finalQuestions = oldQuestions.concat(imported);
 
   localStorage.setItem(
     "quizQuestions",
-    JSON.stringify(finalData)
+    JSON.stringify(finalQuestions)
   );
 
-  alert(questions.length + " Questions Added Successfully");
+  alert(imported.length + " Questions Added Successfully");
 
   textarea.value = "";
 }
