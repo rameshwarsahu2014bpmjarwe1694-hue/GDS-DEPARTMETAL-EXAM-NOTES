@@ -1,1 +1,239 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start Quiz</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f2f2f2;
+padding:15px;
+}
+
+.topbar{
+background:#000;
+color:#fff;
+padding:14px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+border-radius:8px;
+margin-bottom:20px;
+}
+
+.container{
+max-width:600px;
+margin:auto;
+background:#fff;
+padding:20px;
+border-radius:12px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+#qno{
+font-size:18px;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+#question{
+font-size:20px;
+font-weight:bold;
+margin-bottom:20px;
+line-height:30px;
+}
+
+.option{
+display:block;
+width:100%;
+padding:14px;
+margin-bottom:10px;
+border:none;
+border-radius:8px;
+background:#eee;
+font-size:16px;
+text-align:left;
+cursor:pointer;
+}
+
+.option:hover{
+background:#dcdcdc;
+}
+
+.nextBtn{
+width:100%;
+padding:14px;
+background:#000;
+color:#fff;
+border:none;
+border-radius:8px;
+font-size:17px;
+font-weight:bold;
+cursor:pointer;
+margin-top:10px;
+}
+
+.result{
+text-align:center;
+font-size:24px;
+font-weight:bold;
+line-height:40px;
+}
+
+.backBtn{
+background:#d40000;
+margin-top:15px;
+}
+
+.timer{
+text-align:right;
+font-weight:bold;
+color:red;
+margin-bottom:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">📝 Mock Test</div>
+
+<div class="container" id="quizBox">
+
+<div class="timer" id="timer">Time: 00:00</div>
+
+<div id="qno"></div>
+<div id="question"></div>
+
+<button class="option" onclick="checkAnswer('A')" id="btnA"></button>
+<button class="option" onclick="checkAnswer('B')" id="btnB"></button>
+<button class="option" onclick="checkAnswer('C')" id="btnC"></button>
+<button class="option" onclick="checkAnswer('D')" id="btnD"></button>
+
+<button class="nextBtn" onclick="nextQuestion()">Next Question</button>
+
+</div>
+
+<script>
+
+let quiz = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+
+let current = 0;
+let score = 0;
+let selected = "";
+
+let seconds = 0;
+
+if(quiz.length == 0){
+document.getElementById("quizBox").innerHTML =
+"<div class='result'>No Questions Found!<br><br>Please Add Quiz First.</div>";
+}
+else{
+loadQuestion();
+startTimer();
+}
+
+function loadQuestion(){
+
+let q = quiz[current];
+
+document.getElementById("qno").innerHTML =
+"Question " + (current+1) + " / " + quiz.length;
+
+document.getElementById("question").innerHTML = q.question;
+
+document.getElementById("btnA").innerHTML = "A) " + q.a;
+document.getElementById("btnB").innerHTML = "B) " + q.b;
+document.getElementById("btnC").innerHTML = "C) " + q.c;
+document.getElementById("btnD").innerHTML = "D) " + q.d;
+
+resetButtons();
+
+selected = "";
+
+}
+
+function checkAnswer(ans){
+
+selected = ans;
+
+resetButtons();
+
+document.getElementById("btn"+ans).style.background = "#90ee90";
+
+}
+
+function resetButtons(){
+
+document.getElementById("btnA").style.background="#eee";
+document.getElementById("btnB").style.background="#eee";
+document.getElementById("btnC").style.background="#eee";
+document.getElementById("btnD").style.background="#eee";
+
+}
+
+function nextQuestion(){
+
+if(selected == ""){
+alert("Please select an option");
+return;
+}
+
+if(selected == quiz[current].answer){
+score++;
+}
+
+current++;
+
+if(current < quiz.length){
+loadQuestion();
+}
+else{
+showResult();
+}
+
+}
+
+function showResult(){
+
+document.getElementById("quizBox").innerHTML =
+"<div class='result'>🎉 Quiz Completed<br><br>Total Questions: "+quiz.length+
+"<br>Correct Answers: "+score+
+"<br>Wrong Answers: "+(quiz.length-score)+
+"<br>Score: "+score+" / "+quiz.length+
+"<br><br><a href='candidate.html'><button class='nextBtn backBtn'>Back</button></a></div>";
+
+}
+
+function startTimer(){
+
+setInterval(function(){
+
+seconds++;
+
+let min = Math.floor(seconds/60);
+let sec = seconds%60;
+
+if(min<10) min="0"+min;
+if(sec<10) sec="0"+sec;
+
+document.getElementById("timer").innerHTML =
+"Time: "+min+":"+sec;
+
+},1000);
+
+}
+
+</script>
+
+</body>
+</html>
