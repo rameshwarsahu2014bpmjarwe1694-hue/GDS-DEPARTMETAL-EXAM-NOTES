@@ -6,9 +6,8 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-// Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyDjzmo0A4KhOkrqFQdyCEek6bsPF-UVPQ",
+  apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
   authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
   projectId: "gds-departmental-exam-studyhub",
   storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
@@ -16,15 +15,10 @@ const firebaseConfig = {
   appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Global Access for script.js
 window.auth = auth;
 window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
 window.signInWithEmailAndPassword = signInWithEmailAndPassword;
 window.signOut = signOut;
-
-// Check Loaded
-console.log("Firebase Loaded Successfully");
