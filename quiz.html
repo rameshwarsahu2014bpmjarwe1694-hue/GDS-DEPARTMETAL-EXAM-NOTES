@@ -1,1 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Quiz</title>
 
+<style>
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#f4f4f4;
+}
+
+.topbar{
+background:#000;
+color:#fff;
+padding:15px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+}
+
+.container{
+max-width:600px;
+margin:auto;
+padding:20px;
+}
+
+.box{
+background:#fff;
+padding:25px;
+border-radius:14px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+
+h2{
+margin-top:0;
+text-align:center;
+color:#111;
+margin-bottom:20px;
+}
+
+input, textarea, select{
+width:100%;
+padding:12px;
+margin:10px 0;
+border:1px solid #ccc;
+border-radius:8px;
+font-size:16px;
+box-sizing:border-box;
+}
+
+button{
+width:100%;
+padding:12px;
+background:#000;
+color:#fff;
+border:none;
+border-radius:8px;
+font-size:17px;
+font-weight:bold;
+cursor:pointer;
+margin-top:10px;
+}
+
+button:hover{
+background:#222;
+}
+
+#msg{
+margin-top:15px;
+text-align:center;
+font-weight:bold;
+color:green;
+}
+
+.back{
+display:block;
+margin-top:20px;
+text-align:center;
+background:#b30000;
+color:#fff;
+padding:12px;
+border-radius:10px;
+text-decoration:none;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">📝 Add Quiz</div>
+
+<div class="container">
+
+<div class="box">
+
+<h2>Create New MCQ</h2>
+
+<textarea id="question" placeholder="Enter Question"></textarea>
+
+<input type="text" id="option1" placeholder="Option A">
+<input type="text" id="option2" placeholder="Option B">
+<input type="text" id="option3" placeholder="Option C">
+<input type="text" id="option4" placeholder="Option D">
+
+<select id="answer">
+<option value="">Select Correct Answer</option>
+<option value="Option A">Option A</option>
+<option value="Option B">Option B</option>
+<option value="Option C">Option C</option>
+<option value="Option D">Option D</option>
+</select>
+
+<button onclick="saveQuiz()">Save Quiz</button>
+
+<div id="msg"></div>
+
+<a href="admin-panel.html" class="back">⬅ Back to Admin Panel</a>
+
+</div>
+
+</div>
+
+<script>
+function saveQuiz(){
+
+let question = document.getElementById("question").value.trim();
+let a = document.getElementById("option1").value.trim();
+let b = document.getElementById("option2").value.trim();
+let c = document.getElementById("option3").value.trim();
+let d = document.getElementById("option4").value.trim();
+let answer = document.getElementById("answer").value;
+
+if(!question || !a || !b || !c || !d || !answer){
+alert("Fill all fields");
+return;
+}
+
+document.getElementById("msg").innerHTML = "Quiz Saved Successfully";
+
+document.getElementById("question").value="";
+document.getElementById("option1").value="";
+document.getElementById("option2").value="";
+document.getElementById("option3").value="";
+document.getElementById("option4").value="";
+document.getElementById("answer").value="";
+}
+</script>
+
+</body>
+</html>
