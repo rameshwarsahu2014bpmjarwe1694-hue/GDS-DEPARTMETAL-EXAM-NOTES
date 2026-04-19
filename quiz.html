@@ -10,12 +10,12 @@
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial, sans-serif;
+font-family:Arial,sans-serif;
 }
 
 body{
 background:#f2f2f2;
-padding:20px;
+padding:15px;
 }
 
 .topbar{
@@ -25,8 +25,8 @@ text-align:center;
 padding:14px;
 font-size:20px;
 font-weight:bold;
-margin-bottom:20px;
 border-radius:8px;
+margin-bottom:20px;
 }
 
 .container{
@@ -45,9 +45,15 @@ margin-bottom:15px;
 
 .info{
 font-size:14px;
-color:#444;
-margin-bottom:10px;
 line-height:22px;
+color:#444;
+margin-bottom:15px;
+}
+
+.countBox{
+text-align:center;
+font-weight:bold;
+margin-bottom:10px;
 }
 
 textarea{
@@ -89,16 +95,8 @@ color:#fff;
 
 #msg{
 text-align:center;
+font-weight:bold;
 margin-top:15px;
-font-weight:bold;
-font-size:16px;
-}
-
-.countBox{
-text-align:center;
-margin-bottom:10px;
-font-weight:bold;
-color:#000;
 }
 </style>
 </head>
@@ -116,12 +114,13 @@ Format:<br>
 Question | Option A | Option B | Option C | Option D | Correct Answer<br><br>
 
 Example:<br>
-What is capital of India?|Delhi|Mumbai|Kolkata|Chennai|A
+भारत की राजधानी क्या है?|दिल्ली|मुंबई|कोलकाता|चेन्नई|A<br>
+2+2 कितना है?|3|4|5|6|B
 </div>
 
 <div class="countBox" id="count">Saved Questions: 0</div>
 
-<textarea id="bulkData" placeholder="Paste many questions here..."></textarea>
+<textarea id="bulkData" placeholder="Paste Hindi / English / Mixed Questions Here..."></textarea>
 
 <button class="saveBtn" onclick="saveBulkQuiz()">Save All Questions</button>
 
@@ -136,6 +135,7 @@ What is capital of India?|Delhi|Mumbai|Kolkata|Chennai|A
 </div>
 
 <script>
+
 showCount();
 
 function saveBulkQuiz(){
@@ -148,14 +148,33 @@ document.getElementById("msg").style.color="red";
 return;
 }
 
-let lines = data.split("\n");
+/* split lines */
+let lines = data.split(/\r?\n/);
+
 let quiz = [];
 
 lines.forEach(line => {
 
+line = line.trim();
+
+/* blank line ignore */
+if(line=="") return;
+
+/* spaces around | remove */
+line = line.replace(/\s*\|\s*/g,"|");
+
+/* comma support */
+if(line.split("|").length < 6){
+line = line.replace(/\s*,\s*/g,"|");
+}
+
 let parts = line.split("|");
 
-if(parts.length==6){
+if(parts.length >= 6){
+
+let ans = parts[5].trim().toUpperCase();
+
+ans = ans.replace(/[^ABCD]/g,"");
 
 quiz.push({
 question: parts[0].trim(),
@@ -163,7 +182,7 @@ a: parts[1].trim(),
 b: parts[2].trim(),
 c: parts[3].trim(),
 d: parts[4].trim(),
-answer: parts[5].trim().toUpperCase()
+answer: ans
 });
 
 }
@@ -185,7 +204,7 @@ showCount();
 
 function clearAllQuiz(){
 
-if(confirm("Delete all saved quiz questions?")){
+if(confirm("Delete all saved questions?")){
 
 localStorage.removeItem("quizQuestions");
 
@@ -206,6 +225,7 @@ document.getElementById("count").innerHTML =
 "Saved Questions: " + old.length;
 
 }
+
 </script>
 
 </body>
