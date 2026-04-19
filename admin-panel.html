@@ -1,1 +1,85 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+<style>
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#f4f4f4;
+}
+
+.topbar{
+background:#000;
+color:#fff;
+padding:15px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+}
+
+.container{
+padding:20px;
+max-width:1000px;
+margin:auto;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+}
+
+.card{
+background:#fff;
+padding:25px 15px;
+border-radius:14px;
+text-align:center;
+font-weight:bold;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+text-decoration:none;
+color:#111;
+}
+
+.logout{
+margin-top:25px;
+display:block;
+background:#b30000;
+color:#fff;
+padding:12px;
+text-align:center;
+border-radius:10px;
+text-decoration:none;
+font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">Admin Control Panel</div>
+
+<div class="container">
+
+<div class="grid">
+<a href="#" class="card">👥 Total Candidates</a>
+<a href="#" class="card">📚 Manage Notes</a>
+<a href="#" class="card">📝 Add Quiz</a>
+<a href="#" class="card">📢 Notifications</a>
+<a href="#" class="card">💳 Payments</a>
+<a href="#" class="card">⚙ Settings</a>
+<a href="#" class="card">📊 Reports</a>
+<a href="#" class="card">🔒 Security</a>
+</div>
+
+<a href="#" onclick="logoutUser()" class="logout">Logout</a>
+
+</div>
+
+<script src="firebase.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
