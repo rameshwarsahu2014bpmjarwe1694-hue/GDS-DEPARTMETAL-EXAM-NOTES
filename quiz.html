@@ -6,85 +6,99 @@
 <title>Add Quiz</title>
 
 <style>
-body{
+*{
 margin:0;
-font-family:Arial,sans-serif;
-background:#f4f4f4;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
+}
+
+body{
+background:#f2f2f2;
+padding:20px;
 }
 
 .topbar{
 background:#000;
 color:#fff;
-padding:15px;
 text-align:center;
-font-size:22px;
+padding:14px;
+font-size:20px;
 font-weight:bold;
+margin-bottom:20px;
+border-radius:8px;
 }
 
 .container{
 max-width:600px;
 margin:auto;
-padding:20px;
-}
-
-.box{
 background:#fff;
-padding:25px;
-border-radius:14px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
+padding:20px;
+border-radius:12px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 h2{
-margin-top:0;
 text-align:center;
-color:#111;
-margin-bottom:20px;
+margin-bottom:15px;
 }
 
-input, textarea, select{
+.info{
+font-size:14px;
+color:#444;
+margin-bottom:10px;
+line-height:22px;
+}
+
+textarea{
 width:100%;
+height:320px;
 padding:12px;
-margin:10px 0;
+font-size:16px;
 border:1px solid #ccc;
 border-radius:8px;
-font-size:16px;
-box-sizing:border-box;
+resize:none;
+margin-bottom:15px;
 }
 
 button{
 width:100%;
-padding:12px;
-background:#000;
-color:#fff;
+padding:14px;
+font-size:16px;
+font-weight:bold;
 border:none;
 border-radius:8px;
-font-size:17px;
-font-weight:bold;
 cursor:pointer;
 margin-top:10px;
 }
 
-button:hover{
-background:#222;
+.saveBtn{
+background:#000;
+color:#fff;
+}
+
+.clearBtn{
+background:#666;
+color:#fff;
+}
+
+.backBtn{
+background:#d40000;
+color:#fff;
 }
 
 #msg{
-margin-top:15px;
 text-align:center;
+margin-top:15px;
 font-weight:bold;
-color:green;
+font-size:16px;
 }
 
-.back{
-display:block;
-margin-top:20px;
+.countBox{
 text-align:center;
-background:#b30000;
-color:#fff;
-padding:12px;
-border-radius:10px;
-text-decoration:none;
+margin-bottom:10px;
 font-weight:bold;
+color:#000;
 }
 </style>
 </head>
@@ -95,58 +109,102 @@ font-weight:bold;
 
 <div class="container">
 
-<div class="box">
+<h2>Create Bulk MCQ Quiz</h2>
 
-<h2>Create New MCQ</h2>
+<div class="info">
+Format:<br>
+Question | Option A | Option B | Option C | Option D | Correct Answer<br><br>
 
-<textarea id="question" placeholder="Enter Question"></textarea>
-
-<input type="text" id="option1" placeholder="Option A">
-<input type="text" id="option2" placeholder="Option B">
-<input type="text" id="option3" placeholder="Option C">
-<input type="text" id="option4" placeholder="Option D">
-
-<select id="answer">
-<option value="">Select Correct Answer</option>
-<option value="Option A">Option A</option>
-<option value="Option B">Option B</option>
-<option value="Option C">Option C</option>
-<option value="Option D">Option D</option>
-</select>
-
-<button onclick="saveQuiz()">Save Quiz</button>
-
-<div id="msg"></div>
-
-<a href="admin-panel.html" class="back">⬅ Back to Admin Panel</a>
-
+Example:<br>
+What is capital of India?|Delhi|Mumbai|Kolkata|Chennai|A
 </div>
+
+<div class="countBox" id="count">Saved Questions: 0</div>
+
+<textarea id="bulkData" placeholder="Paste many questions here..."></textarea>
+
+<button class="saveBtn" onclick="saveBulkQuiz()">Save All Questions</button>
+
+<button class="clearBtn" onclick="clearAllQuiz()">Clear All Questions</button>
+
+<a href="admin-panel.html">
+<button class="backBtn">← Back to Admin Panel</button>
+</a>
+
+<p id="msg"></p>
 
 </div>
 
 <script>
-function saveQuiz(){
+showCount();
 
-let question = document.getElementById("question").value.trim();
-let a = document.getElementById("option1").value.trim();
-let b = document.getElementById("option2").value.trim();
-let c = document.getElementById("option3").value.trim();
-let d = document.getElementById("option4").value.trim();
-let answer = document.getElementById("answer").value;
+function saveBulkQuiz(){
 
-if(!question || !a || !b || !c || !d || !answer){
-alert("Fill all fields");
+let data = document.getElementById("bulkData").value.trim();
+
+if(data==""){
+document.getElementById("msg").innerHTML="Please paste questions first!";
+document.getElementById("msg").style.color="red";
 return;
 }
 
-document.getElementById("msg").innerHTML = "Quiz Saved Successfully";
+let lines = data.split("\n");
+let quiz = [];
 
-document.getElementById("question").value="";
-document.getElementById("option1").value="";
-document.getElementById("option2").value="";
-document.getElementById("option3").value="";
-document.getElementById("option4").value="";
-document.getElementById("answer").value="";
+lines.forEach(line => {
+
+let parts = line.split("|");
+
+if(parts.length==6){
+
+quiz.push({
+question: parts[0].trim(),
+a: parts[1].trim(),
+b: parts[2].trim(),
+c: parts[3].trim(),
+d: parts[4].trim(),
+answer: parts[5].trim().toUpperCase()
+});
+
+}
+
+});
+
+localStorage.setItem("quizQuestions", JSON.stringify(quiz));
+
+document.getElementById("msg").innerHTML =
+quiz.length + " Questions Saved Successfully!";
+
+document.getElementById("msg").style.color="green";
+
+document.getElementById("bulkData").value="";
+
+showCount();
+
+}
+
+function clearAllQuiz(){
+
+if(confirm("Delete all saved quiz questions?")){
+
+localStorage.removeItem("quizQuestions");
+
+document.getElementById("msg").innerHTML="All Questions Deleted!";
+document.getElementById("msg").style.color="red";
+
+showCount();
+
+}
+
+}
+
+function showCount(){
+
+let old = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+
+document.getElementById("count").innerHTML =
+"Saved Questions: " + old.length;
+
 }
 </script>
 
