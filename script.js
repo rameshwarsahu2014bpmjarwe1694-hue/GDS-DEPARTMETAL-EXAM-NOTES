@@ -42,11 +42,6 @@ alert("Fill all fields");
 return;
 }
 
-if (mobile.length < 10) {
-alert("Enter valid mobile number");
-return;
-}
-
 try {
 
 const userCredential =
@@ -78,7 +73,7 @@ alert(error.message);
 /* =========================
    CANDIDATE LOGIN
 ========================= */
-window.candidateLogin = function () {
+window.candidateLogin = async function () {
 
 const email = document.getElementById("loginEmail")?.value.trim();
 const password = document.getElementById("loginPassword")?.value;
@@ -88,14 +83,38 @@ alert("Enter email and password");
 return;
 }
 
-signInWithEmailAndPassword(auth, email, password)
-.then(() => {
+try {
+
+const userCredential =
+await signInWithEmailAndPassword(auth, email, password);
+
+const user = userCredential.user;
+
+const { doc, getDoc, setDoc } = await import(
+"https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js"
+);
+
+const ref = doc(window.db, "candidates", user.uid);
+const snap = await getDoc(ref);
+
+if (!snap.exists()) {
+
+await setDoc(ref, {
+name: user.email.split("@")[0],
+mobile: "-",
+email: user.email,
+uid: user.uid,
+createdAt: new Date().toISOString()
+});
+
+}
+
 alert("Login Successful");
 window.location.href = "dashboard.html";
-})
-.catch((error) => {
+
+} catch(error) {
 alert(error.message);
-});
+}
 
 };
 
