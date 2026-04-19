@@ -1,22 +1,63 @@
-// Candidate Register
-window.registerUser = function () {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+// Wait until page loads
+window.onload = function () {
+  console.log("script.js loaded");
+};
 
-  createUserWithEmailAndPassword(auth, email, password)
+/* =========================
+   ADMIN LOGIN
+========================= */
+window.adminLogin = function () {
+  const email = document.getElementById("adminEmail")?.value.trim();
+  const password = document.getElementById("adminPassword")?.value;
+
+  if (!email || !password) {
+    alert("Enter email and password");
+    return;
+  }
+
+  signInWithEmailAndPassword(auth, email, password)
     .then(() => {
-      alert("Registration Successful");
-      window.location.href = "login.html";
+      alert("Admin Login Successful");
+      window.location.href = "admin-panel.html";
     })
     .catch((error) => {
       alert(error.message);
     });
 };
 
-// Candidate Login
-window.loginUser = function () {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+/* =========================
+   CANDIDATE REGISTER
+========================= */
+window.register = function () {
+  const email = document.getElementById("email")?.value.trim();
+  const password = document.getElementById("password")?.value;
+
+  if (!email || !password) {
+    alert("Enter email and password");
+    return;
+  }
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      alert("Registration Successful");
+      window.location.href = "candidate-login.html";
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
+};
+
+/* =========================
+   CANDIDATE LOGIN
+========================= */
+window.candidateLogin = function () {
+  const email = document.getElementById("loginEmail")?.value.trim();
+  const password = document.getElementById("loginPassword")?.value;
+
+  if (!email || !password) {
+    alert("Enter email and password");
+    return;
+  }
 
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
@@ -28,31 +69,16 @@ window.loginUser = function () {
     });
 };
 
-window.adminLogin = function () {
-const email = document.getElementById("adminEmail").value.trim();
-const password = document.getElementById("adminPassword").value;
-
-alert("Function Running");
-
-if (email !== "rameshwarsahu2014bpmjarwe1694@gmail.com") {
-  alert("Only Admin Allowed");
-  return;
-}
-
-signInWithEmailAndPassword(auth, email, password)
-.then(() => {
-  alert("Admin Login Successful");
-  window.location.href = "admin-panel.html";
-})
-.catch((error) => {
-  alert(error.message);
-});
-};
-
-// Logout
-window.logoutUser = function () {
-  signOut(auth).then(() => {
-    alert("Logged Out");
-    window.location.href = "index.html";
-  });
+/* =========================
+   LOGOUT
+========================= */
+window.logout = function () {
+  signOut(auth)
+    .then(() => {
+      alert("Logged Out");
+      window.location.href = "index.html";
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
 };
