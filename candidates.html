@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,8 +29,8 @@ margin:auto;
 
 .summary{
 background:#fff;
-padding:20px;
-border-radius:15px;
+padding:18px;
+border-radius:14px;
 text-align:center;
 font-size:24px;
 font-weight:bold;
@@ -75,6 +74,13 @@ border-radius:10px;
 text-decoration:none;
 font-weight:bold;
 }
+
+.empty{
+text-align:center;
+color:#fff;
+font-size:18px;
+margin-top:30px;
+}
 </style>
 </head>
 
@@ -84,33 +90,77 @@ font-weight:bold;
 
 <div class="container">
 
-<div class="summary">Registered Candidates: 12</div>
+<div class="summary" id="countBox">Registered Candidates: 0</div>
 
-<div class="list">
-
-<div class="card">
-<div class="name">Rameshwar Sahu</div>
-<div class="info">Mobile: 9876543210</div>
-<div class="info">Email: demo1@gmail.com</div>
-</div>
-
-<div class="card">
-<div class="name">Amit Kumar</div>
-<div class="info">Mobile: 9123456780</div>
-<div class="info">Email: demo2@gmail.com</div>
-</div>
-
-<div class="card">
-<div class="name">Sanjay Verma</div>
-<div class="info">Mobile: 9988776655</div>
-<div class="info">Email: demo3@gmail.com</div>
-</div>
-
-</div>
+<div class="list" id="candidateList"></div>
 
 <a href="admin-panel.html" class="back">⬅ Back to Admin Panel</a>
 
 </div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* APNA FIREBASE CONFIG YAHA DALO */
+const firebaseConfig = {
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_PROJECT.firebaseapp.com",
+projectId: "YOUR_PROJECT_ID",
+storageBucket: "YOUR_PROJECT.appspot.com",
+messagingSenderId: "XXXXXX",
+appId: "XXXXXX"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const countBox = document.getElementById("countBox");
+const candidateList = document.getElementById("candidateList");
+
+async function loadCandidates(){
+
+candidateList.innerHTML = "";
+
+const querySnapshot = await getDocs(collection(db,"candidates"));
+
+let total = 0;
+
+querySnapshot.forEach((doc) => {
+
+total++;
+
+const data = doc.data();
+
+candidateList.innerHTML += `
+<div class="card">
+<div class="name">${data.name || "No Name"}</div>
+<div class="info">Mobile: ${data.mobile || "-"}</div>
+<div class="info">Email: ${data.email || "-"}</div>
+</div>
+`;
+
+});
+
+countBox.innerHTML = `Registered Candidates: ${total}`;
+
+if(total === 0){
+candidateList.innerHTML = `
+<div class="empty">No candidates registered yet.</div>
+`;
+}
+
+}
+
+loadCandidates();
+
+</script>
 
 </body>
 </html>
