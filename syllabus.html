@@ -1,1 +1,41 @@
+<div class="upload-box">
+    <h2>Upload Syllabus</h2>
+    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.jpg,.png">
+    <button onclick="uploadFile()">Upload</button>
+</div>
 
+<div id="fileList"></div>
+
+<script>
+function uploadFile() {
+    let file = document.getElementById("fileInput").files[0];
+
+    if (!file) {
+        alert("Please select file");
+        return;
+    }
+
+    let reader = new FileReader();
+
+    reader.onload = function(e) {
+        localStorage.setItem("syllabusFile", e.target.result);
+        localStorage.setItem("syllabusFileName", file.name);
+        showFile();
+        alert("File Uploaded Successfully");
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function showFile() {
+    let fileData = localStorage.getItem("syllabusFile");
+    let fileName = localStorage.getItem("syllabusFileName");
+
+    if(fileData){
+        document.getElementById("fileList").innerHTML =
+        `<a href="${fileData}" download="${fileName}">📄 ${fileName}</a>`;
+    }
+}
+
+showFile();
+</script>
