@@ -72,6 +72,10 @@ text-align:left;
 cursor:pointer;
 }
 
+.option:hover{
+background:#ddd;
+}
+
 .nextBtn{
 width:100%;
 padding:14px;
@@ -95,31 +99,6 @@ line-height:42px;
 .backBtn{
 background:#d40000;
 margin-top:15px;
-}
-
-.reviewBox{
-margin-top:25px;
-text-align:left;
-font-size:16px;
-line-height:28px;
-}
-
-.reviewCard{
-background:#f9f9f9;
-padding:15px;
-border-radius:10px;
-margin-bottom:15px;
-border-left:5px solid #000;
-}
-
-.correct{
-color:green;
-font-weight:bold;
-}
-
-.wrong{
-color:red;
-font-weight:bold;
 }
 </style>
 </head>
@@ -152,8 +131,9 @@ font-weight:bold;
 import { onAuthStateChanged }
 from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+initializeApp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getDatabase,
@@ -164,7 +144,7 @@ get
 const firebaseConfig = {
 apiKey: "YOUR_API_KEY",
 authDomain: "YOUR_AUTH_DOMAIN",
-databaseURL: "YOUR_DB_URL",
+databaseURL: "YOUR_DATABASE_URL",
 projectId: "YOUR_PROJECT_ID",
 storageBucket: "YOUR_BUCKET",
 messagingSenderId: "YOUR_MSG_ID",
@@ -180,18 +160,19 @@ let current = 0;
 let score = 0;
 let selected = "";
 
-let userAnswers = [];
-
 let totalSeconds = 0;
 let remainingSeconds = 0;
 let timerInterval;
+let submitted = false;
 
 function waitForFirebase(){
+
 if(window.auth){
 checkLogin();
 }else{
 setTimeout(waitForFirebase,300);
 }
+
 }
 
 function checkLogin(){
@@ -205,7 +186,7 @@ return;
 }
 
 userEmail = user.email;
-loadFirebaseQuestions();
+loadQuestions();
 
 });
 
@@ -223,12 +204,12 @@ document.getElementById("btn"+ans).style.background="#90ee90";
 
 window.nextQuestion = function(){
 
+if(submitted) return;
+
 if(selected==""){
 alert("Please select an option");
 return;
 }
-
-userAnswers[current] = selected;
 
 if(selected == quiz[current].answer){
 score++;
@@ -288,7 +269,6 @@ document.getElementById("timer").innerHTML =
 "Time: " + min + ":" + sec;
 
 if(remainingSeconds <= 0){
-clearInterval(timerInterval);
 showResult();
 }
 
@@ -316,58 +296,15 @@ JSON.stringify(history)
 
 }
 
-function getOptionText(q, key){
-
-if(key=="A") return q.a;
-if(key=="B") return q.b;
-if(key=="C") return q.c;
-if(key=="D") return q.d;
-
-return "Not Answered";
-
-}
-
 function showResult(){
+
+if(submitted) return;
+
+submitted = true;
 
 clearInterval(timerInterval);
 
 saveScore();
-
-let reviewHTML = "";
-
-for(let i=0;i<quiz.length;i++){
-
-let q = quiz[i];
-
-let userAns = userAnswers[i] || "";
-
-let correctAns = q.answer;
-
-let status = userAns == correctAns ?
-"<span class='correct'>✅ Correct</span>" :
-"<span class='wrong'>❌ Wrong</span>";
-
-reviewHTML += `
-<div class="reviewCard">
-
-<b>Q${i+1}. ${q.question}</b><br><br>
-
-Your Answer:
-${userAns ? userAns + ") " + getOptionText(q,userAns) : "Not Answered"}
-
-<br>
-
-Correct Answer:
-<span class="correct">
-${correctAns}) ${getOptionText(q,correctAns)}
-</span>
-
-<br>${status}
-
-</div>
-`;
-
-}
 
 document.getElementById("quizBox").innerHTML =
 
@@ -379,26 +316,13 @@ document.getElementById("quizBox").innerHTML =
 
 "<br>Score: "+score+" / "+quiz.length+
 
-"</div>"+
-
-"<button class='nextBtn' onclick='showReview()'>View Correct Answers</button>"+
-
-"<a href='dashboard.html'><button class='nextBtn backBtn'>Back</button></a>"+
-
-"<div id='reviewArea'></div>";
-
-window.fullReview = reviewHTML;
+"<br><a href='dashboard.html'><button class='nextBtn backBtn'>Back</button></a></div>";
 
 }
 
-window.showReview = function(){
+async function loadQuestions(){
 
-document.getElementById("reviewArea").innerHTML =
-"<div class='reviewBox'>" + window.fullReview + "</div>";
-
-}
-
-async function loadFirebaseQuestions(){
+try{
 
 const snap = await get(ref(db,"quizQuestions"));
 
@@ -423,7 +347,34 @@ document.getElementById("quizBox").innerHTML =
 
 }
 
+}catch(error){
+
+document.getElementById("quizBox").innerHTML =
+"<div class='result'>Failed to Load Questions</div>";
+
 }
+
+}
+
+document.addEventListener("contextmenu",e=>e.preventDefault());
+
+document.addEventListener("keydown",function(e){
+
+if(e.key==="F12" ||
+(e.ctrlKey && e.shiftKey && e.key==="I") ||
+(e.ctrlKey && e.key==="u")){
+e.preventDefault();
+}
+
+});
+
+document.addEventListener("visibilitychange",function(){
+
+if(document.hidden && !submitted){
+alert("Tab switching detected!");
+}
+
+});
 
 waitForFirebase();
 
