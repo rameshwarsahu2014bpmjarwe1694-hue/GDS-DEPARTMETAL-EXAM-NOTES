@@ -72,10 +72,6 @@ text-align:left;
 cursor:pointer;
 }
 
-.option:hover{
-background:#ddd;
-}
-
 .nextBtn{
 width:100%;
 padding:14px;
@@ -112,7 +108,7 @@ margin-top:15px;
 <div class="timer" id="timer">Time: 00:00</div>
 
 <div id="qno"></div>
-<div id="question">Loading Questions...</div>
+<div id="question">Checking Login...</div>
 
 <button class="option" id="btnA" onclick="selectAns('A')"></button>
 <button class="option" id="btnB" onclick="selectAns('B')"></button>
@@ -123,9 +119,17 @@ margin-top:15px;
 
 </div>
 
+<script type="module" src="firebase.js"></script>
+
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+import {
+initializeApp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getDatabase,
@@ -152,12 +156,34 @@ let score = 0;
 let selected = "";
 let seconds = 0;
 
+function waitForFirebase(){
+if(window.auth){
+checkLogin();
+}else{
+setTimeout(waitForFirebase,300);
+}
+}
+
+function checkLogin(){
+
+onAuthStateChanged(window.auth,(user)=>{
+
+if(!user){
+alert("Please login first.");
+window.location.href="login.html";
+return;
+}
+
+loadFirebaseQuestions();
+
+});
+
+}
+
 window.selectAns = function(ans){
 
 selected = ans;
-
 resetBtns();
-
 document.getElementById("btn"+ans).style.background="#90ee90";
 
 }
@@ -197,18 +223,17 @@ document.getElementById("btnB").innerHTML = "B) " + q.b;
 document.getElementById("btnC").innerHTML = "C) " + q.c;
 document.getElementById("btnD").innerHTML = "D) " + q.d;
 
-selected="";
-
+selected = "";
 resetBtns();
 
 }
 
 function resetBtns(){
 
-document.getElementById("btnA").style.background="#eee";
-document.getElementById("btnB").style.background="#eee";
-document.getElementById("btnC").style.background="#eee";
-document.getElementById("btnD").style.background="#eee";
+btnA.style.background="#eee";
+btnB.style.background="#eee";
+btnC.style.background="#eee";
+btnD.style.background="#eee";
 
 }
 
@@ -219,7 +244,7 @@ document.getElementById("quizBox").innerHTML =
 "<br>Correct Answers: "+score+
 "<br>Wrong Answers: "+(quiz.length-score)+
 "<br>Score: "+score+" / "+quiz.length+
-"<br><a href='candidate.html'><button class='nextBtn backBtn'>Back</button></a></div>";
+"<br><a href='dashboard.html'><button class='nextBtn backBtn'>Back</button></a></div>";
 
 }
 
@@ -249,9 +274,7 @@ const snap = await get(ref(db,"quizQuestions"));
 if(snap.exists()){
 
 quiz = snap.val();
-
 loadQuestion();
-
 startTimer();
 
 }else{
@@ -263,7 +286,7 @@ document.getElementById("quizBox").innerHTML =
 
 }
 
-loadFirebaseQuestions();
+waitForFirebase();
 
 </script>
 
