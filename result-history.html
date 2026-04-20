@@ -1,1 +1,154 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Result History</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#f2f2f2;
+}
+
+.topbar{
+background:#000;
+color:#fff;
+padding:15px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:#fff;
+padding:18px;
+border-radius:14px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+margin-bottom:15px;
+}
+
+.title{
+font-size:18px;
+font-weight:bold;
+margin-bottom:8px;
+}
+
+.info{
+font-size:15px;
+color:#555;
+margin:4px 0;
+}
+
+.empty{
+background:#fff;
+padding:20px;
+border-radius:14px;
+text-align:center;
+font-size:18px;
+font-weight:bold;
+}
+
+.btn{
+display:block;
+width:100%;
+padding:12px;
+margin-top:15px;
+border:none;
+border-radius:10px;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.back{
+background:#111;
+color:#fff;
+text-decoration:none;
+text-align:center;
+}
+
+.clear{
+background:#d40000;
+color:#fff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">📊 Result History</div>
+
+<div class="container">
+
+<div id="historyBox"></div>
+
+<button class="btn clear" onclick="clearHistory()">🗑 Clear History</button>
+
+<a href="dashboard.html" class="btn back">⬅ Back to Dashboard</a>
+
+</div>
+
+<script>
+
+loadHistory();
+
+function loadHistory(){
+
+let history =
+JSON.parse(localStorage.getItem("quizHistory")) || [];
+
+let box = document.getElementById("historyBox");
+
+if(history.length === 0){
+box.innerHTML =
+"<div class='empty'>No Result History Found</div>";
+return;
+}
+
+history.reverse();
+
+let html = "";
+
+history.forEach((item,index)=>{
+
+html += `
+<div class="card">
+<div class="title">Attempt ${index+1}</div>
+<div class="info">📅 Date: ${item.date}</div>
+<div class="info">📧 Email: ${item.email}</div>
+<div class="info">✅ Score: ${item.score} / ${item.total}</div>
+<div class="info">❌ Wrong: ${item.wrong}</div>
+</div>
+`;
+
+});
+
+box.innerHTML = html;
+
+}
+
+function clearHistory(){
+
+if(confirm("Delete all result history?")){
+
+localStorage.removeItem("quizHistory");
+
+loadHistory();
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
