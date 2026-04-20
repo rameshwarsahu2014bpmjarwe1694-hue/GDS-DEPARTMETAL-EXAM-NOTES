@@ -19,6 +19,7 @@ return;
 window.signInWithEmailAndPassword(window.auth, email, password)
 .then(function () {
 alert("Admin Login Successful");
+localStorage.setItem("isAdmin","true");
 window.location.href = "admin-panel.html";
 })
 .catch(function (error) {
