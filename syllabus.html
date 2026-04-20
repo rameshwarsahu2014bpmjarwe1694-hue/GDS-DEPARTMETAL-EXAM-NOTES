@@ -1,41 +1,162 @@
-<div class="upload-box">
-    <h2>Upload Syllabus</h2>
-    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.jpg,.png">
-    <button onclick="uploadFile()">Upload</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Syllabus</title>
+
+<style>
+body{
+margin:0;
+padding:20px;
+font-family:Arial,sans-serif;
+background:#f5f5f5;
+text-align:center;
+}
+
+.box{
+max-width:500px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h2{
+color:#333;
+}
+
+input,button{
+width:95%;
+padding:12px;
+margin-top:10px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:16px;
+}
+
+button{
+background:#007bff;
+color:white;
+border:none;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+background:#0056b3;
+}
+
+a{
+display:block;
+margin-top:20px;
+padding:12px;
+background:green;
+color:white;
+text-decoration:none;
+border-radius:8px;
+font-weight:bold;
+}
+
+#status{
+margin-top:15px;
+font-weight:bold;
+color:#444;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>GDS Syllabus PDF</h2>
+
+<input type="file" id="pdfFile" accept=".pdf">
+<button onclick="uploadPDF()">Upload PDF</button>
+
+<div id="status"></div>
+
+<a id="downloadBtn" href="#" target="_blank" style="display:none;">
+📄 Download Syllabus PDF
+</a>
+
 </div>
 
-<div id="fileList"></div>
+<script type="module">
 
-<script>
-function uploadFile() {
-    let file = document.getElementById("fileInput").files[0];
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-    if (!file) {
-        alert("Please select file");
-        return;
-    }
+import { getStorage, ref, uploadBytes, getDownloadURL }
 
-    let reader = new FileReader();
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    reader.onload = function(e) {
-        localStorage.setItem("syllabusFile", e.target.result);
-        localStorage.setItem("syllabusFileName", file.name);
-        showFile();
-        alert("File Uploaded Successfully");
-    };
+const firebaseConfig = {
+apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+databaseURL: "https://gds-departmental-exam-studyhub-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId: "gds-departmental-exam-studyhub",
+storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
+messagingSenderId: "759916756080",
+appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+};
 
-    reader.readAsDataURL(file);
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
+
+window.uploadPDF = async function(){
+
+let file = document.getElementById("pdfFile").files[0];
+
+if(!file){
+alert("Please Select PDF");
+return;
 }
 
-function showFile() {
-    let fileData = localStorage.getItem("syllabusFile");
-    let fileName = localStorage.getItem("syllabusFileName");
+document.getElementById("status").innerHTML="Uploading...";
 
-    if(fileData){
-        document.getElementById("fileList").innerHTML =
-        `<a href="${fileData}" download="${fileName}">📄 ${fileName}</a>`;
-    }
+try{
+
+const fileRef = ref(storage, "syllabus/latest.pdf");
+
+await uploadBytes(fileRef, file);
+
+const url = await getDownloadURL(fileRef);
+
+localStorage.setItem("syllabusURL", url);
+
+document.getElementById("status").innerHTML="Upload Successful";
+
+showPDF();
+
+}catch(error){
+
+document.getElementById("status").innerHTML="Upload Failed";
+
 }
 
-showFile();
+}
+
+async function showPDF(){
+
+try{
+
+const fileRef = ref(storage, "syllabus/latest.pdf");
+
+const url = await getDownloadURL(fileRef);
+
+document.getElementById("downloadBtn").href = url;
+document.getElementById("downloadBtn").style.display="block";
+
+}catch(error){
+
+}
+
+}
+
+showPDF();
+
 </script>
+
+</body>
+</html>
