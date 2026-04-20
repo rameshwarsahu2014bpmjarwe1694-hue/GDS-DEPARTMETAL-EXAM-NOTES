@@ -31,22 +31,28 @@ margin:auto;
 background:#fff;
 padding:18px;
 border-radius:12px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
-margin-bottom:20px;
-font-size:18px;
-font-weight:bold;
-}
-
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:15px;
+grid-template-columns:repeat(2,1fr);
+gap:14px;
+margin-top:15px;
 }
 
 .card{
-background:#fff;
-padding:25px 15px;
-border-radius:14px;
+background:linear-gradient(135deg,#ffffff,#f8f8f8);
+padding:18px 12px;
+border-radius:16px;
+text-align:center;
+font-weight:700;
+font-size:16px;
+box-shadow:0 6px 14px rgba(0,0,0,0.10);
+text-decoration:none;
+color:#111;
+display:flex;
+align-items:center;
+justify-content:center;
+min-height:72px;
+}
 text-align:center;
 font-weight:bold;
 box-shadow:0 4px 10px rgba(0,0,0,0.08);
@@ -58,14 +64,16 @@ color:#111;
 margin-top:25px;
 display:block;
 background:#111;
-color:#fff;
-padding:12px;
-text-align:center;
-border-radius:10px;
-text-decoration:none;
-font-weight:bold;
 <div class="grid">
-}
+
+<a href="syllabus.html" class="card">📘 Syllabus</a>
+<a href="index.html" class="card">📚 Notes</a>
+<a href="start-quiz.html" class="card">📝 Mock Test</a>
+<a href="start-quiz.html" class="card">❓ Quiz</a>
+<a href="index.html" class="card">📄 PYQ</a>
+<a href="index.html" class="card">🏆 Result</a>
+
+</div>
 </style>
 </head>
 <body>
