@@ -4,27 +4,136 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mock Test</title>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#f2f2f2;padding:15px}
-.topbar{background:#000;color:#fff;padding:14px;text-align:center;font-size:22px;font-weight:bold;border-radius:8px;margin-bottom:20px}
-.container{max-width:650px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,.1)}
-.timer{text-align:right;font-size:18px;font-weight:bold;color:red;margin-bottom:10px}
-#qno{font-size:18px;font-weight:bold;margin-bottom:10px}
-#question{font-size:21px;font-weight:bold;line-height:30px;margin-bottom:20px}
-.option{display:block;width:100%;padding:14px;margin-bottom:10px;border:none;border-radius:8px;background:#eee;font-size:16px;text-align:left;cursor:pointer}
-.nextBtn{width:100%;padding:14px;background:#000;color:#fff;border:none;border-radius:8px;font-size:17px;font-weight:bold;cursor:pointer;margin-top:10px}
-.result{text-align:center;font-size:24px;font-weight:bold;line-height:42px}
-.backBtn{background:#d40000;margin-top:15px}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f2f2f2;
+padding:15px;
+}
+
+.topbar{
+background:#000;
+color:#fff;
+padding:14px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+border-radius:8px;
+margin-bottom:20px;
+}
+
+.container{
+max-width:650px;
+margin:auto;
+background:#fff;
+padding:20px;
+border-radius:12px;
+box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+
+.timer{
+text-align:right;
+font-size:18px;
+font-weight:bold;
+color:red;
+margin-bottom:10px;
+}
+
+#qno{
+font-size:18px;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+#question{
+font-size:21px;
+font-weight:bold;
+line-height:30px;
+margin-bottom:20px;
+}
+
+.option{
+display:block;
+width:100%;
+padding:14px;
+margin-bottom:10px;
+border:none;
+border-radius:8px;
+background:#eee;
+font-size:16px;
+text-align:left;
+cursor:pointer;
+}
+
+.nextBtn{
+width:100%;
+padding:14px;
+background:#000;
+color:#fff;
+border:none;
+border-radius:8px;
+font-size:17px;
+font-weight:bold;
+cursor:pointer;
+margin-top:10px;
+}
+
+.result{
+text-align:center;
+font-size:24px;
+font-weight:bold;
+line-height:42px;
+}
+
+.backBtn{
+background:#d40000;
+margin-top:15px;
+}
+
+.reviewBox{
+margin-top:25px;
+text-align:left;
+font-size:16px;
+line-height:28px;
+}
+
+.reviewCard{
+background:#f9f9f9;
+padding:15px;
+border-radius:10px;
+margin-bottom:15px;
+border-left:5px solid #000;
+}
+
+.correct{
+color:green;
+font-weight:bold;
+}
+
+.wrong{
+color:red;
+font-weight:bold;
+}
 </style>
 </head>
+
 <body>
 
 <div class="topbar">📝 Mock Test</div>
 
 <div class="container" id="quizBox">
+
 <div class="timer" id="timer">Checking Login...</div>
+
 <div id="qno"></div>
+
 <div id="question">Loading...</div>
 
 <button class="option" id="btnA" onclick="selectAns('A')"></button>
@@ -33,6 +142,7 @@ body{background:#f2f2f2;padding:15px}
 <button class="option" id="btnD" onclick="selectAns('D')"></button>
 
 <button class="nextBtn" onclick="nextQuestion()">Next Question</button>
+
 </div>
 
 <script type="module" src="firebase.js"></script>
@@ -52,13 +162,13 @@ get
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-databaseURL: "https://gds-departmental-exam-studyhub-default-rtdb.asia-southeast1.firebasedatabase.app/",
-projectId: "gds-departmental-exam-studyhub",
-storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
-messagingSenderId: "759916756080",
-appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_AUTH_DOMAIN",
+databaseURL: "YOUR_DB_URL",
+projectId: "YOUR_PROJECT_ID",
+storageBucket: "YOUR_BUCKET",
+messagingSenderId: "YOUR_MSG_ID",
+appId: "YOUR_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -69,6 +179,8 @@ let quiz = [];
 let current = 0;
 let score = 0;
 let selected = "";
+
+let userAnswers = [];
 
 let totalSeconds = 0;
 let remainingSeconds = 0;
@@ -100,9 +212,13 @@ loadFirebaseQuestions();
 }
 
 window.selectAns = function(ans){
+
 selected = ans;
+
 resetBtns();
+
 document.getElementById("btn"+ans).style.background="#90ee90";
+
 }
 
 window.nextQuestion = function(){
@@ -111,6 +227,8 @@ if(selected==""){
 alert("Please select an option");
 return;
 }
+
+userAnswers[current] = selected;
 
 if(selected == quiz[current].answer){
 score++;
@@ -146,10 +264,12 @@ resetBtns();
 }
 
 function resetBtns(){
+
 btnA.style.background="#eee";
 btnB.style.background="#eee";
 btnC.style.background="#eee";
 btnD.style.background="#eee";
+
 }
 
 function startTimer(){
@@ -196,18 +316,85 @@ JSON.stringify(history)
 
 }
 
+function getOptionText(q, key){
+
+if(key=="A") return q.a;
+if(key=="B") return q.b;
+if(key=="C") return q.c;
+if(key=="D") return q.d;
+
+return "Not Answered";
+
+}
+
 function showResult(){
 
 clearInterval(timerInterval);
 
 saveScore();
 
+let reviewHTML = "";
+
+for(let i=0;i<quiz.length;i++){
+
+let q = quiz[i];
+
+let userAns = userAnswers[i] || "";
+
+let correctAns = q.answer;
+
+let status = userAns == correctAns ?
+"<span class='correct'>✅ Correct</span>" :
+"<span class='wrong'>❌ Wrong</span>";
+
+reviewHTML += `
+<div class="reviewCard">
+
+<b>Q${i+1}. ${q.question}</b><br><br>
+
+Your Answer:
+${userAns ? userAns + ") " + getOptionText(q,userAns) : "Not Answered"}
+
+<br>
+
+Correct Answer:
+<span class="correct">
+${correctAns}) ${getOptionText(q,correctAns)}
+</span>
+
+<br>${status}
+
+</div>
+`;
+
+}
+
 document.getElementById("quizBox").innerHTML =
+
 "<div class='result'>🎉 Quiz Completed<br><br>Total Questions: "+quiz.length+
+
 "<br>Correct Answers: "+score+
+
 "<br>Wrong Answers: "+(quiz.length-score)+
+
 "<br>Score: "+score+" / "+quiz.length+
-"<br><a href='dashboard.html'><button class='nextBtn backBtn'>Back</button></a></div>";
+
+"</div>"+
+
+"<button class='nextBtn' onclick='showReview()'>View Correct Answers</button>"+
+
+"<a href='dashboard.html'><button class='nextBtn backBtn'>Back</button></a>"+
+
+"<div id='reviewArea'></div>";
+
+window.fullReview = reviewHTML;
+
+}
+
+window.showReview = function(){
+
+document.getElementById("reviewArea").innerHTML =
+"<div class='reviewBox'>" + window.fullReview + "</div>";
 
 }
 
@@ -220,10 +407,13 @@ if(snap.exists()){
 quiz = snap.val();
 
 let minutes = Math.ceil(quiz.length * 1.2);
+
 totalSeconds = minutes * 60;
+
 remainingSeconds = totalSeconds;
 
 loadQuestion();
+
 startTimer();
 
 }else{
@@ -238,5 +428,6 @@ document.getElementById("quizBox").innerHTML =
 waitForFirebase();
 
 </script>
+
 </body>
 </html>
