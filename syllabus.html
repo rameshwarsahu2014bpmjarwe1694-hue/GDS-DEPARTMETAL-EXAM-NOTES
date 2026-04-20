@@ -3,193 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GDS Syllabus</title>
+<title>Syllabus</title>
 
 <style>
-*{box-sizing:border-box}
-body{
+*{
 margin:0;
-padding:18px;
-font-family:Arial,sans-serif;
-background:#f2f5f9;
-color:#222;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
 }
 
-.box{
-max-width:760px;
+body{
+background:#f2f5f9;
+padding:15px;
+}
+
+.container{
+max-width:700px;
 margin:auto;
 background:#fff;
 padding:20px;
 border-radius:14px;
-box-shadow:0 6px 18px rgba(0,0,0,.08);
+box-shadow:0 0 12px rgba(0,0,0,0.08);
 }
 
-h1,h2,h3{margin:0 0 12px 0}
-.top{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px;
-flex-wrap:wrap;
-margin-bottom:15px;
+h2{
+text-align:center;
+margin-bottom:20px;
+color:#222;
 }
 
-.badge{
-background:#e8f0ff;
-padding:6px 10px;
-border-radius:20px;
-font-size:13px;
-font-weight:bold;
+#adminPanel{
+display:none;
+background:#f8f9fa;
+padding:15px;
+border-radius:12px;
+margin-bottom:20px;
+border:1px solid #ddd;
 }
 
 input,select,button{
 width:100%;
 padding:12px;
 margin-top:10px;
-border-radius:10px;
-border:1px solid #cfd6df;
+border-radius:8px;
+border:1px solid #ccc;
 font-size:16px;
 }
 
 button{
-background:#0d6efd;
-color:#fff;
+background:#007bff;
+color:white;
 border:none;
 font-weight:bold;
 cursor:pointer;
 }
 
-button:hover{opacity:.95}
-
-.secondary{
-background:#198754;
+button:hover{
+background:#0056b3;
 }
 
-#adminPanel{
-display:none;
-margin-bottom:18px;
-padding:15px;
-border:1px solid #e2e6ea;
-border-radius:12px;
-background:#fafcff;
-}
-
-#status{
-margin-top:10px;
-font-weight:bold;
-}
-
-.search{
-margin-bottom:14px;
-}
-
-.grid{
-display:grid;
-grid-template-columns:1fr;
-gap:12px;
-}
-
-.item{
-border:1px solid #e4e7eb;
-padding:14px;
-border-radius:12px;
+.card{
 background:#fff;
+border:1px solid #ddd;
+padding:15px;
+border-radius:12px;
+margin-top:15px;
+box-shadow:0 3px 8px rgba(0,0,0,0.05);
 }
 
-.item h4{
-margin:0 0 8px 0;
-font-size:17px;
-word-break:break-word;
+.card h3{
+margin-bottom:10px;
+color:#111;
 }
 
-.meta{
-font-size:13px;
-color:#666;
-margin-bottom:8px;
-}
-
-.row{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-}
-
-.row a,.row button{
-width:auto;
-padding:10px 14px;
-margin:0;
+.downloadBtn{
+display:block;
+text-align:center;
+padding:10px;
+background:green;
+color:white;
 text-decoration:none;
 border-radius:8px;
+font-weight:bold;
+margin-top:10px;
 }
 
-.row a{
-background:#198754;
-color:#fff;
-}
-
-.del{
-background:#dc3545;
-color:#fff;
+.status{
+margin-top:10px;
+font-weight:bold;
+text-align:center;
 }
 
 .note{
 font-size:13px;
-color:#666;
-margin-top:8px;
-}
-
-.empty{
-padding:20px;
+color:#555;
+margin-top:10px;
 text-align:center;
-color:#666;
-border:1px dashed #ccc;
-border-radius:10px;
-}
-
-@media(max-width:600px){
-.row a,.row button{width:100%}
 }
 </style>
 </head>
 
 <body>
 
-<div class="box">
+<div class="container">
 
-<div class="top">
-<h2>GDS Departmental Exam Syllabus</h2>
-<div class="badge">Live PDF Library</div>
-</div>
+<h2>Departmental Exam Syllabus</h2>
 
-<!-- ADMIN -->
+<!-- Admin Panel -->
 <div id="adminPanel">
-
-<h3>Admin Upload Panel</h3>
 
 <input type="password" id="adminPass" placeholder="Enter Admin Password">
 
 <select id="postName">
 <option value="">Select Post</option>
-<option>Postman</option>
-<option>MTS</option>
-<option>PA SA</option>
+<option value="mts">MTS</option>
+<option value="postman">Postman / Mail Guard</option>
+<option value="pa">Postal Assistant / Sorting Assistant</option>
 </select>
-
-<input type="text" id="customTitle" placeholder="Optional Custom Title (Example: Postman 2026 New Syllabus)">
 
 <input type="file" id="pdfFile" accept=".pdf">
 
 <button onclick="uploadPDF()">Upload PDF</button>
 
-<p class="note">Old files delete nahi honge. Har upload alag save hoga.</p>
-<p id="status"></p>
+<div class="status" id="status"></div>
+
+<div class="note">Only admin can upload syllabus.</div>
 
 </div>
 
-<!-- PUBLIC -->
-<input class="search" type="text" id="searchBox" placeholder="Search syllabus..." onkeyup="filterFiles()">
+<!-- Candidate Cards -->
 
-<div id="listArea" class="grid"></div>
+<div class="card">
+<h3>MTS</h3>
+<a id="mtsBtn" class="downloadBtn" href="#" target="_blank" style="display:none;">Download PDF</a>
+<div id="mtsText">No syllabus uploaded</div>
+</div>
+
+<div class="card">
+<h3>Postman / Mail Guard</h3>
+<a id="postmanBtn" class="downloadBtn" href="#" target="_blank" style="display:none;">Download PDF</a>
+<div id="postmanText">No syllabus uploaded</div>
+</div>
+
+<div class="card">
+<h3>Postal Assistant / Sorting Assistant</h3>
+<a id="paBtn" class="downloadBtn" href="#" target="_blank" style="display:none;">Download PDF</a>
+<div id="paText">No syllabus uploaded</div>
+</div>
 
 </div>
 
@@ -198,8 +159,7 @@ border-radius:10px;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
-getStorage, ref, uploadBytes, getDownloadURL,
-listAll, deleteObject, getMetadata
+getStorage, ref, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
@@ -215,161 +175,85 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 
-/* CHANGE PASSWORD */
+/* Change Password Here */
 const ADMIN_PASSWORD = "12345";
 
-let isAdmin = false;
-let cacheFiles = [];
+/* Admin Access */
+let pass = prompt("Admin only password. Candidate Cancel dabaye.");
 
-/* Candidate sees page directly.
-Admin opens page and enters password in prompt */
-const ask = prompt("Admin ho to password daalo. Candidate Cancel dabaye.");
-
-if(ask === ADMIN_PASSWORD){
-isAdmin = true;
-document.getElementById("adminPanel").style.display = "block";
+if(pass === ADMIN_PASSWORD){
+document.getElementById("adminPanel").style.display="block";
 }
 
-/* Upload */
+/* Upload PDF */
 window.uploadPDF = async function(){
 
-const pass = document.getElementById("adminPass").value;
-if(pass !== ADMIN_PASSWORD){
+let pass2 = document.getElementById("adminPass").value;
+let post = document.getElementById("postName").value;
+let file = document.getElementById("pdfFile").files[0];
+
+if(pass2 !== ADMIN_PASSWORD){
 alert("Wrong Password");
 return;
 }
 
-const post = document.getElementById("postName").value;
-const title = document.getElementById("customTitle").value.trim();
-const file = document.getElementById("pdfFile").files[0];
-
-if(!post){ alert("Select Post"); return; }
-if(!file){ alert("Select PDF"); return; }
-
-const finalName = (title || post) + "-" + Date.now() + ".pdf";
-
-document.getElementById("status").innerText = "Uploading...";
-
-try{
-
-const fileRef = ref(storage, "syllabus/" + finalName);
-
-await uploadBytes(fileRef, file);
-
-document.getElementById("status").innerText = "Upload Successful";
-
-document.getElementById("pdfFile").value="";
-document.getElementById("customTitle").value="";
-
-loadFiles();
-
-}catch(e){
-document.getElementById("status").innerText = "Upload Failed";
-}
-
-}
-
-/* Load Files */
-async function loadFiles(){
-
-const area = document.getElementById("listArea");
-area.innerHTML = "<div class='empty'>Loading PDFs...</div>";
-
-try{
-
-const folderRef = ref(storage,"syllabus");
-const result = await listAll(folderRef);
-
-cacheFiles = [];
-
-for(const item of result.items){
-
-const url = await getDownloadURL(item);
-const meta = await getMetadata(item);
-
-cacheFiles.push({
-name:item.name,
-url:url,
-path:item.fullPath,
-date:new Date(meta.timeCreated)
-});
-
-}
-
-/* newest first */
-cacheFiles.sort((a,b)=> b.date - a.date);
-
-renderFiles(cacheFiles);
-
-}catch(e){
-area.innerHTML = "<div class='empty'>No syllabus available.</div>";
-}
-
-}
-
-/* Render */
-function renderFiles(files){
-
-const area = document.getElementById("listArea");
-
-if(files.length===0){
-area.innerHTML = "<div class='empty'>No matching syllabus found.</div>";
+if(post === ""){
+alert("Select Post");
 return;
 }
 
-area.innerHTML = "";
-
-files.forEach(file=>{
-
-const date = file.date.toLocaleDateString();
-
-area.innerHTML += `
-<div class="item">
-<h4>${file.name.replace(".pdf","")}</h4>
-<div class="meta">Uploaded: ${date}</div>
-
-<div class="row">
-<a href="${file.url}" target="_blank">Download PDF</a>
-
-${isAdmin ? `<button class="del" onclick="deletePDF('${file.path.replace(/'/g,"")}')">Delete</button>` : ""}
-</div>
-</div>
-`;
-
-});
-
+if(!file){
+alert("Select PDF");
+return;
 }
 
-/* Search */
-window.filterFiles = function(){
-
-const q = document.getElementById("searchBox").value.toLowerCase();
-
-const filtered = cacheFiles.filter(f =>
-f.name.toLowerCase().includes(q)
-);
-
-renderFiles(filtered);
-
-}
-
-/* Delete Admin Only */
-window.deletePDF = async function(path){
-
-if(!isAdmin) return;
-
-if(!confirm("Delete this PDF?")) return;
+document.getElementById("status").innerHTML="Uploading...";
 
 try{
-await deleteObject(ref(storage,path));
-loadFiles();
+
+let fileRef = ref(storage,"syllabus/"+post+".pdf");
+
+await uploadBytes(fileRef,file);
+
+document.getElementById("status").innerHTML="Upload Successful";
+
+loadPDFs();
+
 }catch(e){
-alert("Delete Failed");
-}
+
+document.getElementById("status").innerHTML="Upload Failed";
 
 }
 
-loadFiles();
+}
+
+/* Load PDFs */
+
+async function loadOne(path,btn,text){
+
+try{
+
+let url = await getDownloadURL(ref(storage,path));
+
+document.getElementById(btn).href=url;
+document.getElementById(btn).style.display="block";
+document.getElementById(text).style.display="none";
+
+}catch(e){
+
+}
+
+}
+
+function loadPDFs(){
+
+loadOne("syllabus/mts.pdf","mtsBtn","mtsText");
+loadOne("syllabus/postman.pdf","postmanBtn","postmanText");
+loadOne("syllabus/pa.pdf","paBtn","paText");
+
+}
+
+loadPDFs();
 
 </script>
 
