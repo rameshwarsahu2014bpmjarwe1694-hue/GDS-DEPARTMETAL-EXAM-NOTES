@@ -4,111 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mock Test</title>
-
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-body{
-background:#f2f2f2;
-padding:15px;
-}
-
-.topbar{
-background:#000;
-color:#fff;
-padding:14px;
-text-align:center;
-font-size:22px;
-font-weight:bold;
-border-radius:8px;
-margin-bottom:20px;
-}
-
-.container{
-max-width:650px;
-margin:auto;
-background:#fff;
-padding:20px;
-border-radius:12px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-
-.timer{
-text-align:right;
-font-size:18px;
-font-weight:bold;
-color:red;
-margin-bottom:10px;
-}
-
-#qno{
-font-size:18px;
-font-weight:bold;
-margin-bottom:10px;
-}
-
-#question{
-font-size:21px;
-font-weight:bold;
-line-height:30px;
-margin-bottom:20px;
-}
-
-.option{
-display:block;
-width:100%;
-padding:14px;
-margin-bottom:10px;
-border:none;
-border-radius:8px;
-background:#eee;
-font-size:16px;
-text-align:left;
-cursor:pointer;
-}
-
-.nextBtn{
-width:100%;
-padding:14px;
-background:#000;
-color:#fff;
-border:none;
-border-radius:8px;
-font-size:17px;
-font-weight:bold;
-cursor:pointer;
-margin-top:10px;
-}
-
-.result{
-text-align:center;
-font-size:24px;
-font-weight:bold;
-line-height:42px;
-}
-
-.backBtn{
-background:#d40000;
-margin-top:15px;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f2f2f2;padding:15px}
+.topbar{background:#000;color:#fff;padding:14px;text-align:center;font-size:22px;font-weight:bold;border-radius:8px;margin-bottom:20px}
+.container{max-width:650px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 0 10px rgba(0,0,0,.1)}
+.timer{text-align:right;font-size:18px;font-weight:bold;color:red;margin-bottom:10px}
+#qno{font-size:18px;font-weight:bold;margin-bottom:10px}
+#question{font-size:21px;font-weight:bold;line-height:30px;margin-bottom:20px}
+.option{display:block;width:100%;padding:14px;margin-bottom:10px;border:none;border-radius:8px;background:#eee;font-size:16px;text-align:left;cursor:pointer}
+.nextBtn{width:100%;padding:14px;background:#000;color:#fff;border:none;border-radius:8px;font-size:17px;font-weight:bold;cursor:pointer;margin-top:10px}
+.result{text-align:center;font-size:24px;font-weight:bold;line-height:42px}
+.backBtn{background:#d40000;margin-top:15px}
 </style>
 </head>
-
 <body>
 
 <div class="topbar">📝 Mock Test</div>
 
 <div class="container" id="quizBox">
-
-<div class="timer" id="timer">Time: 00:00</div>
-
+<div class="timer" id="timer">Checking Login...</div>
 <div id="qno"></div>
-<div id="question">Checking Login...</div>
+<div id="question">Loading...</div>
 
 <button class="option" id="btnA" onclick="selectAns('A')"></button>
 <button class="option" id="btnB" onclick="selectAns('B')"></button>
@@ -116,20 +33,17 @@ margin-top:15px;
 <button class="option" id="btnD" onclick="selectAns('D')"></button>
 
 <button class="nextBtn" onclick="nextQuestion()">Next Question</button>
-
 </div>
 
 <script type="module" src="firebase.js"></script>
 
 <script type="module">
 
-import {
-onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { onAuthStateChanged }
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-import {
-initializeApp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getDatabase,
@@ -150,11 +64,15 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+let userEmail = "";
 let quiz = [];
 let current = 0;
 let score = 0;
 let selected = "";
-let seconds = 0;
+
+let totalSeconds = 0;
+let remainingSeconds = 0;
+let timerInterval;
 
 function waitForFirebase(){
 if(window.auth){
@@ -169,11 +87,12 @@ function checkLogin(){
 onAuthStateChanged(window.auth,(user)=>{
 
 if(!user){
-alert("Please login first.");
+alert("Please login first");
 window.location.href="login.html";
 return;
 }
 
+userEmail = user.email;
 loadFirebaseQuestions();
 
 });
@@ -181,11 +100,9 @@ loadFirebaseQuestions();
 }
 
 window.selectAns = function(ans){
-
 selected = ans;
 resetBtns();
 document.getElementById("btn"+ans).style.background="#90ee90";
-
 }
 
 window.nextQuestion = function(){
@@ -229,15 +146,61 @@ resetBtns();
 }
 
 function resetBtns(){
-
 btnA.style.background="#eee";
 btnB.style.background="#eee";
 btnC.style.background="#eee";
 btnD.style.background="#eee";
+}
+
+function startTimer(){
+
+timerInterval = setInterval(function(){
+
+remainingSeconds--;
+
+let min = Math.floor(remainingSeconds/60);
+let sec = remainingSeconds%60;
+
+if(min<10) min="0"+min;
+if(sec<10) sec="0"+sec;
+
+document.getElementById("timer").innerHTML =
+"Time: " + min + ":" + sec;
+
+if(remainingSeconds <= 0){
+clearInterval(timerInterval);
+showResult();
+}
+
+},1000);
+
+}
+
+function saveScore(){
+
+let history =
+JSON.parse(localStorage.getItem("quizHistory")) || [];
+
+history.push({
+email:userEmail,
+date:new Date().toLocaleString(),
+score:score,
+total:quiz.length,
+wrong:(quiz.length-score)
+});
+
+localStorage.setItem(
+"quizHistory",
+JSON.stringify(history)
+);
 
 }
 
 function showResult(){
+
+clearInterval(timerInterval);
+
+saveScore();
 
 document.getElementById("quizBox").innerHTML =
 "<div class='result'>🎉 Quiz Completed<br><br>Total Questions: "+quiz.length+
@@ -248,25 +211,6 @@ document.getElementById("quizBox").innerHTML =
 
 }
 
-function startTimer(){
-
-setInterval(function(){
-
-seconds++;
-
-let min = Math.floor(seconds/60);
-let sec = seconds%60;
-
-if(min<10) min="0"+min;
-if(sec<10) sec="0"+sec;
-
-document.getElementById("timer").innerHTML =
-"Time: "+min+":"+sec;
-
-},1000);
-
-}
-
 async function loadFirebaseQuestions(){
 
 const snap = await get(ref(db,"quizQuestions"));
@@ -274,13 +218,18 @@ const snap = await get(ref(db,"quizQuestions"));
 if(snap.exists()){
 
 quiz = snap.val();
+
+let minutes = Math.ceil(quiz.length * 1.2);
+totalSeconds = minutes * 60;
+remainingSeconds = totalSeconds;
+
 loadQuestion();
 startTimer();
 
 }else{
 
 document.getElementById("quizBox").innerHTML =
-"<div class='result'>No Questions Found!<br><br>Please Contact Admin.</div>";
+"<div class='result'>No Questions Found!</div>";
 
 }
 
@@ -289,6 +238,5 @@ document.getElementById("quizBox").innerHTML =
 waitForFirebase();
 
 </script>
-
 </body>
 </html>
