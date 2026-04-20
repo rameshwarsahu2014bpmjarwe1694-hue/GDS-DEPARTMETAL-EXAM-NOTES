@@ -3,66 +3,151 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Syllabus</title>
+<title>GDS Syllabus</title>
 
 <style>
+*{box-sizing:border-box}
 body{
 margin:0;
-padding:20px;
+padding:18px;
 font-family:Arial,sans-serif;
-background:#f5f5f5;
-text-align:center;
+background:#f2f5f9;
+color:#222;
 }
 
 .box{
-max-width:500px;
+max-width:760px;
 margin:auto;
-background:white;
+background:#fff;
 padding:20px;
-border-radius:12px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
+border-radius:14px;
+box-shadow:0 6px 18px rgba(0,0,0,.08);
 }
 
-h2{
-color:#333;
+h1,h2,h3{margin:0 0 12px 0}
+.top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:15px;
 }
 
-input,button{
-width:95%;
+.badge{
+background:#e8f0ff;
+padding:6px 10px;
+border-radius:20px;
+font-size:13px;
+font-weight:bold;
+}
+
+input,select,button{
+width:100%;
 padding:12px;
 margin-top:10px;
-border-radius:8px;
-border:1px solid #ccc;
+border-radius:10px;
+border:1px solid #cfd6df;
 font-size:16px;
 }
 
 button{
-background:#007bff;
-color:white;
+background:#0d6efd;
+color:#fff;
 border:none;
 font-weight:bold;
 cursor:pointer;
 }
 
-button:hover{
-background:#0056b3;
+button:hover{opacity:.95}
+
+.secondary{
+background:#198754;
 }
 
-a{
-display:block;
-margin-top:20px;
-padding:12px;
-background:green;
-color:white;
-text-decoration:none;
-border-radius:8px;
-font-weight:bold;
+#adminPanel{
+display:none;
+margin-bottom:18px;
+padding:15px;
+border:1px solid #e2e6ea;
+border-radius:12px;
+background:#fafcff;
 }
 
 #status{
-margin-top:15px;
+margin-top:10px;
 font-weight:bold;
-color:#444;
+}
+
+.search{
+margin-bottom:14px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr;
+gap:12px;
+}
+
+.item{
+border:1px solid #e4e7eb;
+padding:14px;
+border-radius:12px;
+background:#fff;
+}
+
+.item h4{
+margin:0 0 8px 0;
+font-size:17px;
+word-break:break-word;
+}
+
+.meta{
+font-size:13px;
+color:#666;
+margin-bottom:8px;
+}
+
+.row{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.row a,.row button{
+width:auto;
+padding:10px 14px;
+margin:0;
+text-decoration:none;
+border-radius:8px;
+}
+
+.row a{
+background:#198754;
+color:#fff;
+}
+
+.del{
+background:#dc3545;
+color:#fff;
+}
+
+.note{
+font-size:13px;
+color:#666;
+margin-top:8px;
+}
+
+.empty{
+padding:20px;
+text-align:center;
+color:#666;
+border:1px dashed #ccc;
+border-radius:10px;
+}
+
+@media(max-width:600px){
+.row a,.row button{width:100%}
 }
 </style>
 </head>
@@ -70,16 +155,41 @@ color:#444;
 <body>
 
 <div class="box">
-<h2>GDS Syllabus PDF</h2>
+
+<div class="top">
+<h2>GDS Departmental Exam Syllabus</h2>
+<div class="badge">Live PDF Library</div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminPanel">
+
+<h3>Admin Upload Panel</h3>
+
+<input type="password" id="adminPass" placeholder="Enter Admin Password">
+
+<select id="postName">
+<option value="">Select Post</option>
+<option>Postman</option>
+<option>MTS</option>
+<option>PA SA</option>
+</select>
+
+<input type="text" id="customTitle" placeholder="Optional Custom Title (Example: Postman 2026 New Syllabus)">
 
 <input type="file" id="pdfFile" accept=".pdf">
+
 <button onclick="uploadPDF()">Upload PDF</button>
 
-<div id="status"></div>
+<p class="note">Old files delete nahi honge. Har upload alag save hoga.</p>
+<p id="status"></p>
 
-<a id="downloadBtn" href="#" target="_blank" style="display:none;">
-📄 Download Syllabus PDF
-</a>
+</div>
+
+<!-- PUBLIC -->
+<input class="search" type="text" id="searchBox" placeholder="Search syllabus..." onkeyup="filterFiles()">
+
+<div id="listArea" class="grid"></div>
 
 </div>
 
@@ -87,9 +197,10 @@ color:#444;
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-import { getStorage, ref, uploadBytes, getDownloadURL }
-
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import {
+getStorage, ref, uploadBytes, getDownloadURL,
+listAll, deleteObject, getMetadata
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
@@ -104,57 +215,161 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 
+/* CHANGE PASSWORD */
+const ADMIN_PASSWORD = "12345";
+
+let isAdmin = false;
+let cacheFiles = [];
+
+/* Candidate sees page directly.
+Admin opens page and enters password in prompt */
+const ask = prompt("Admin ho to password daalo. Candidate Cancel dabaye.");
+
+if(ask === ADMIN_PASSWORD){
+isAdmin = true;
+document.getElementById("adminPanel").style.display = "block";
+}
+
+/* Upload */
 window.uploadPDF = async function(){
 
-let file = document.getElementById("pdfFile").files[0];
-
-if(!file){
-alert("Please Select PDF");
+const pass = document.getElementById("adminPass").value;
+if(pass !== ADMIN_PASSWORD){
+alert("Wrong Password");
 return;
 }
 
-document.getElementById("status").innerHTML="Uploading...";
+const post = document.getElementById("postName").value;
+const title = document.getElementById("customTitle").value.trim();
+const file = document.getElementById("pdfFile").files[0];
+
+if(!post){ alert("Select Post"); return; }
+if(!file){ alert("Select PDF"); return; }
+
+const finalName = (title || post) + "-" + Date.now() + ".pdf";
+
+document.getElementById("status").innerText = "Uploading...";
 
 try{
 
-const fileRef = ref(storage, "syllabus/latest.pdf");
+const fileRef = ref(storage, "syllabus/" + finalName);
 
 await uploadBytes(fileRef, file);
 
-const url = await getDownloadURL(fileRef);
+document.getElementById("status").innerText = "Upload Successful";
 
-localStorage.setItem("syllabusURL", url);
+document.getElementById("pdfFile").value="";
+document.getElementById("customTitle").value="";
 
-document.getElementById("status").innerHTML="Upload Successful";
+loadFiles();
 
-showPDF();
-
-}catch(error){
-
-document.getElementById("status").innerHTML="Upload Failed";
-
+}catch(e){
+document.getElementById("status").innerText = "Upload Failed";
 }
 
 }
 
-async function showPDF(){
+/* Load Files */
+async function loadFiles(){
+
+const area = document.getElementById("listArea");
+area.innerHTML = "<div class='empty'>Loading PDFs...</div>";
 
 try{
 
-const fileRef = ref(storage, "syllabus/latest.pdf");
+const folderRef = ref(storage,"syllabus");
+const result = await listAll(folderRef);
 
-const url = await getDownloadURL(fileRef);
+cacheFiles = [];
 
-document.getElementById("downloadBtn").href = url;
-document.getElementById("downloadBtn").style.display="block";
+for(const item of result.items){
 
-}catch(error){
+const url = await getDownloadURL(item);
+const meta = await getMetadata(item);
 
+cacheFiles.push({
+name:item.name,
+url:url,
+path:item.fullPath,
+date:new Date(meta.timeCreated)
+});
+
+}
+
+/* newest first */
+cacheFiles.sort((a,b)=> b.date - a.date);
+
+renderFiles(cacheFiles);
+
+}catch(e){
+area.innerHTML = "<div class='empty'>No syllabus available.</div>";
 }
 
 }
 
-showPDF();
+/* Render */
+function renderFiles(files){
+
+const area = document.getElementById("listArea");
+
+if(files.length===0){
+area.innerHTML = "<div class='empty'>No matching syllabus found.</div>";
+return;
+}
+
+area.innerHTML = "";
+
+files.forEach(file=>{
+
+const date = file.date.toLocaleDateString();
+
+area.innerHTML += `
+<div class="item">
+<h4>${file.name.replace(".pdf","")}</h4>
+<div class="meta">Uploaded: ${date}</div>
+
+<div class="row">
+<a href="${file.url}" target="_blank">Download PDF</a>
+
+${isAdmin ? `<button class="del" onclick="deletePDF('${file.path.replace(/'/g,"")}')">Delete</button>` : ""}
+</div>
+</div>
+`;
+
+});
+
+}
+
+/* Search */
+window.filterFiles = function(){
+
+const q = document.getElementById("searchBox").value.toLowerCase();
+
+const filtered = cacheFiles.filter(f =>
+f.name.toLowerCase().includes(q)
+);
+
+renderFiles(filtered);
+
+}
+
+/* Delete Admin Only */
+window.deletePDF = async function(path){
+
+if(!isAdmin) return;
+
+if(!confirm("Delete this PDF?")) return;
+
+try{
+await deleteObject(ref(storage,path));
+loadFiles();
+}catch(e){
+alert("Delete Failed");
+}
+
+}
+
+loadFiles();
 
 </script>
 
