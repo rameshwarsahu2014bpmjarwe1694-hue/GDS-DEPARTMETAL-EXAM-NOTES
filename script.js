@@ -3,6 +3,22 @@ window.onload = function () {
 console.log("script.js loaded");
 };
 
+/* Firebase wait helper */
+function waitForFirebase(callback) {
+if (
+window.auth &&
+window.db &&
+window.signInWithEmailAndPassword &&
+window.createUserWithEmailAndPassword
+) {
+callback();
+} else {
+setTimeout(function () {
+waitForFirebase(callback);
+}, 300);
+}
+}
+
 /* =========================
 ADMIN LOGIN
 ========================= */
@@ -16,6 +32,8 @@ alert("Enter email and password");
 return;
 }
 
+waitForFirebase(function () {
+
 window.signInWithEmailAndPassword(window.auth, email, password)
 .then(function () {
 alert("Admin Login Successful");
@@ -26,12 +44,14 @@ window.location.href = "admin-panel.html";
 alert(error.message);
 });
 
+});
+
 };
 
 /* =========================
 CANDIDATE LOGIN
 ========================= */
-window.candidateLogin = async function () {
+window.candidateLogin = function () {
 
 const email = document.getElementById("loginEmail").value.trim();
 const password = document.getElementById("loginPassword").value;
@@ -41,10 +61,10 @@ alert("Enter email and password");
 return;
 }
 
-try {
+waitForFirebase(function () {
 
-const userCredential =
-await window.signInWithEmailAndPassword(window.auth, email, password);
+window.signInWithEmailAndPassword(window.auth, email, password)
+.then(async function (userCredential) {
 
 const user = userCredential.user;
 
@@ -55,7 +75,6 @@ const { doc, getDoc, setDoc } = await import(
 const ref = doc(window.db, "candidates", user.uid);
 const snap = await getDoc(ref);
 
-/* Old users auto add */
 if (!snap.exists()) {
 await setDoc(ref, {
 uid: user.uid,
@@ -69,16 +88,19 @@ createdAt: new Date().toISOString()
 alert("Login Successful");
 window.location.href = "dashboard.html";
 
-} catch (error) {
+})
+.catch(function (error) {
 alert(error.message);
-}
+});
+
+});
 
 };
 
 /* =========================
 REGISTER
 ========================= */
-window.register = async function () {
+window.register = function () {
 
 const name = document.getElementById("name").value.trim();
 const mobile = document.getElementById("mobile").value.trim();
@@ -89,6 +111,8 @@ if (!name || !mobile || !email || !password) {
 alert("Fill all fields");
 return;
 }
+
+waitForFirebase(async function () {
 
 try {
 
@@ -116,12 +140,16 @@ window.location.href = "login.html";
 alert(error.message);
 }
 
+});
+
 };
 
 /* =========================
 LOGOUT
 ========================= */
 window.logout = function () {
+
+waitForFirebase(function () {
 
 window.signOut(window.auth)
 .then(function () {
@@ -130,6 +158,8 @@ window.location.href = "index.html";
 })
 .catch(function (error) {
 alert(error.message);
+});
+
 });
 
 };
