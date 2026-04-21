@@ -1,235 +1,275 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GDS Departmental Exam Notes</title>
-    <link rel="stylesheet" href="https://cloudflare.com">
-    <style>
-        body { font-family: sans-serif; margin: 0; background: #f4f4f4; }
-        header { background: #b8351a; color: white; padding: 1rem; text-align: center; }
-        .container { padding: 20px; max-width: 800px; margin: auto; }
-        .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .cat-card { background: white; padding: 20px; border-radius: 10px; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; text-align: center; }
-        .active { display: block !important; }
-        .view { display: none; }
-        #view-home { display: block; }
-    </style>
-</head>
-<body>
-    <!-- HOME TOP PORTAL SECTION -->
-<section class="main-portal">
-  <div class="portal-box">
-    <h1>GDS Departmental Exam Study Hub</h1>
-    <p>Welcome to India’s Best GDS Preparation Platform</p>
-    <p>Crack GDS Exam With Smart Study</p>
-
-    
-  </div>
-</section>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GDS Departmental Exam Study Hub</title>
 
 <style>
-.main-portal{
-  background:linear-gradient(135deg,#b30000,#0044cc,#008000,#800080);
-  padding:30px 15px;
-  text-align:center;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
 }
 
-.portal-box{
-  background:rgba(255,255,255,0.12);
-  padding:25px;
-  border-radius:18px;
-  max-width:850px;
-  margin:auto;
+body{
+background:#f4f6fb;
+color:#222;
 }
 
-.portal-box h1{
-  color:#fff;
-  font-size:30px;
-  margin-bottom:10px;
+/* HERO SECTION */
+.hero{
+background:linear-gradient(135deg,#8d151a,#c62828,#0d47a1);
+padding:35px 15px;
+text-align:center;
+color:#fff;
 }
 
-.portal-box p{
-  color:#fff;
-  font-size:17px;
-  margin:8px 0;
-}
-
-.portal-btns{
-  margin-top:20px;
-}
-
-.portal-btn{
-  display:inline-block;
-  margin:8px;
-  padding:12px 18px;
-  background:#fff;
-  color:#000;
-  text-decoration:none;
-  border-radius:10px;
-  font-weight:bold;
-}
-
-.admin-btn{
-  background:#000;
-  color:#fff;
-}
-
-@media(max-width:768px){
-.portal-box h1{
-font-size:22px;
-}
-.portal-btn{
-display:block;
-margin:10px auto;
-max-width:250px;
-}
-}
-</style>
-    <!-- प्रोफाइल लोगो इमेज -->
-<div class="title-bar">
-   <img src="GDS ICON.jpg" class="logo">
-   <h1>GDS Departmental Exam Study Hub</h1>
-</div>
-
-<style>
-.title-bar{
-   background:#b52a0f;
-   text-align:center;
-   padding:15px;
-   color:#fff;
+.hero-box{
+max-width:900px;
+margin:auto;
 }
 
 .logo{
-   width:90px;
-   height:90px;
-   border-radius:50%;
-   object-fit:cover;
-   border:3px solid #fff;
-   margin-bottom:10px;
+width:100px;
+height:100px;
+border-radius:50%;
+object-fit:cover;
+border:4px solid #fff;
+box-shadow:0 6px 20px rgba(0,0,0,0.25);
+margin-bottom:15px;
 }
 
-.title-bar h1{
-   margin:0;
-   font-size:26px;
+.hero h1{
+font-size:32px;
+margin-bottom:10px;
+font-weight:bold;
+}
+
+.hero p{
+font-size:17px;
+margin:6px 0;
+opacity:0.95;
+}
+
+/* BUTTONS */
+.btn-group{
+margin-top:25px;
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:15px;
+}
+
+.btn{
+padding:14px 22px;
+border:none;
+border-radius:10px;
+text-decoration:none;
+font-weight:bold;
+font-size:16px;
+transition:0.3s;
+min-width:180px;
+display:inline-block;
+text-align:center;
+}
+
+.btn:hover{
+transform:translateY(-3px);
+}
+
+.btn-login{
+background:#fff;
+color:#8d151a;
+}
+
+.btn-register{
+background:#ffd600;
+color:#000;
+}
+
+.btn-admin{
+background:#111;
+color:#fff;
+}
+
+/* CONTACT */
+.contact{
+background:#fff;
+padding:12px;
+text-align:center;
+font-size:15px;
+border-bottom:1px solid #ddd;
+}
+
+.contact span{
+display:inline-block;
+margin:6px 12px;
+font-weight:bold;
+}
+
+/* FEATURES */
+.section{
+max-width:1000px;
+margin:auto;
+padding:30px 15px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:18px;
+margin-top:20px;
+}
+
+.card{
+background:#fff;
+padding:22px;
+border-radius:14px;
+box-shadow:0 6px 18px rgba(0,0,0,0.08);
+text-align:center;
+transition:0.3s;
+}
+
+.card:hover{
+transform:translateY(-5px);
+}
+
+.card h3{
+color:#8d151a;
+margin-bottom:10px;
+}
+
+/* DISCLAIMER */
+.disclaimer{
+background:#fff3f3;
+border-left:5px solid #8d151a;
+padding:18px;
+margin-top:30px;
+border-radius:8px;
+line-height:1.7;
+}
+
+/* FOOTER */
+footer{
+background:#111;
+color:#fff;
+text-align:center;
+padding:25px 15px;
+margin-top:40px;
+}
+
+.footer-whatsapp{
+width:42px;
+margin-top:10px;
+}
+
+@media(max-width:768px){
+
+.hero h1{
+font-size:24px;
+}
+
+.hero p{
+font-size:15px;
+}
+
+.btn{
+width:100%;
+max-width:260px;
+}
+
+.logo{
+width:85px;
+height:85px;
+}
+
 }
 </style>
-    </header>
-<!-- Contact Information Section -->
-<div style="background: #fff; padding: 10px; border-bottom: 2px solid #eee; text-align: center; font-size: 14px; color: #333;">
-    <div style="display: inline-block; margin: 0 15px;">
-        <i class="fas fa-phone-alt" style="color: #b8351a;"></i> <b>Contact Us:</b> +91 8963999086
-    </div>
-    <div style="display: inline-block; margin: 0 15px;">
-        <i class="fab fa-whatsapp" style="color: #25d366;"></i> <b>WhatsApp:</b> 8963999086
-    </div>
-    
-   <!-- Main Container -->
-<div class="container">
+</head>
 
-    <!-- 1. Home View (Select Category) -->
-    <div id="view-home" class="view active">
-        <h2>Select Category</h2>
-        <div id="catGrid" class="cat-grid">
-            <!-- यहाँ JavaScript के ज़रिए कैटेगरी बटन लोड होंगे -->
-        </div>
-    </div>
+<body>
 
-    <!-- 2. Quiz View -->
-    <div id="view-quiz" class="view">
-        <h2 id="quizCat">Quiz</h2>
-        <div id="qContainer"></div>
-        
-        <!-- Navigation Buttons -->
-        <div style="margin-top:20px;">
-            <button id="prevBtn">Previous</button>
-            <button id="nextBtn">Next</button>
-            <!-- Submit Button (Hidden by default) -->
-            <button id="submitBtn" style="display:none; background-color: #28a745; color: white;">Submit Quiz</button>
-            <button id="quitBtn">Quit</button>
-        </div>
-    </div>
+<!-- HERO -->
+<section class="hero">
+<div class="hero-box">
+
+<img src="GDS ICON.jpg" class="logo" alt="Logo">
+
+<h1>GDS Departmental Exam Study Hub</h1>
+
+<p>Welcome to India’s Best GDS Preparation Platform</p>
+<p>Crack GDS Exam With Smart Study</p>
+
+<div class="btn-group">
+<a href="login.html" class="btn btn-login">Candidate Login</a>
+<a href="register.html" class="btn btn-register">Register</a>
+<a href="admin.html" class="btn btn-admin">Admin Login</a>
+</div>
+
+</div>
+</section>
+
+<!-- CONTACT -->
+<div class="contact">
+<span>📞 Contact Us: +91 8963999086</span>
+<span>🟢 WhatsApp: 8963999086</span>
+</div>
+
+<!-- FEATURES -->
+<section class="section">
+
+<h2 style="text-align:center;color:#8d151a;">Why Choose Us?</h2>
+
+<div class="cards">
+
+<div class="card">
+<h3>📘 Updated Notes</h3>
+<p>Latest syllabus based notes for MTS, Postman & PA/SA exam.</p>
+</div>
+
+<div class="card">
+<h3>📝 Mock Tests</h3>
+<p>Practice tests with score checking and result history.</p>
+</div>
+
+<div class="card">
+<h3>📚 PDF Study Material</h3>
+<p>Easy downloadable study content and PO Guide topics.</p>
+</div>
+
+<div class="card">
+<h3>🚀 Smart Preparation</h3>
+<p>Simple and fast learning platform for departmental exam.</p>
+</div>
 
 </div>
 
-<div class="portal-btns">
-      <a href="login.html" class="portal-btn">Candidate Login</a>
-      <a href="register.html" class="portal-btn">Register</a>
-      <a href="admin.html" class="portal-btn admin-btn">Admin Login</a>
-    </div>
+<!-- SAME DISCLAIMER -->
+<div class="disclaimer">
+<h3>⚠️ डिस्क्लेमर (Disclaimer)</h3>
+<p>
+यह वेबसाइट और इसमें दी गई PDF केवल शैक्षिक उद्देश्यों के लिए हैं। इसमें दी गई जानकारी डाक विभाग की आधिकारिक गाइड (PO Guide) और सार्वजनिक डोमेन से ली गई है। आधिकारिक पुष्टि के लिए कृपया इण्डिया पोस्ट की वेबसाइट देखें।
+</p>
+</div>
 
+</section>
+
+<!-- FOOTER -->
 <footer>
-    <p>Share This Website on WhatsApp</p>
-    <a href="https://api.whatsapp.com/send?text=Check%20this%20useful%20website:%20https://rameshwarsahu2014bpmjarwe1694-hue.github.io/GDS-DEPARTMETAL-EXAM-NOTES/" target="_blank">
-        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" class="footer-whatsapp" alt="WhatsApp">
-    </a>
+
+<p>Share This Website on WhatsApp</p>
+
+<a href="https://api.whatsapp.com/send?text=Check%20this%20useful%20website:%20https://rameshwarsahu2014bpmjarwe1694-hue.github.io/GDS-DEPARTMETAL-EXAM-NOTES/" target="_blank">
+
+<img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" class="footer-whatsapp">
+
+</a>
+
+<p style="margin-top:15px;">© 2026 Rameshwar Sahu | Hosted on GitHub</p>
+
 </footer>
 
-<style>
-.whatsapp-share{
-    position:fixed;
-    bottom:80px;
-    right:20px;
-    z-index:999;
-}
-.whatsapp-share img{
-    width:55px;
-    height:55px;
-    border-radius:50%;
-    box-shadow:0 4px 10px rgba(0,0,0,0.3);
-}
-footer{
-    background:#111;
-    color:#fff;
-    text-align:center;
-    padding:15px;
-    margin-top:30px;
-}
-.footer-whatsapp{
-    width:40px;
-    margin-top:10px;
-}
-</style>
 </body>
 </html>
-
-</div>
-</div>
-        
-<!-- README कंटेंट सेक्शन शुरू -->
-<hr style="margin: 50px 0; border: 0; border-top: 2px solid #8d151a; width: 80%;">
-
-<div class="readme-section" style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.8; color: #444; background: #fff;">
-    
-    <h1 style="color: #8d151a; text-align: center; border-bottom: 2px solid #8d151a; padding-bottom: 10px;">📚 GDS Departmental Exam Notes 📝</h1>
-    
-    <p style="text-align: center; font-style: italic;">यह प्लेटफार्म ग्रामीण डाक सेवकों (GDS) के लिए विभागीय परीक्षाओं (MTS, Postman, PA/SA) की तैयारी को आसान बनाने के लिए बनाया गया है।</p>
-
-    <h2 style="color: #d32f2f; border-left: 5px solid #d32f2f; padding-left: 10px;">🚀 मुख्य विशेषताएँ (Features)</h2>
-    <ul style="list-style-type: square;">
-        <li><strong>संगठनात्मक ढांचा:</strong> डाक विभाग के कंट्रोल और 23 सर्किलों की पूरी जानकारी।</li>
-        <li><strong>महत्वपूर्ण MCQs:</strong> परीक्षा के नवीनतम पैटर्न पर आधारित प्रश्न उत्तर।</li>
-        <li><strong>सिलेबस नोट्स:</strong> PO Guide Part 1 और अन्य महत्वपूर्ण टॉपिक्स की PDF।</li>
-        <li><strong>नियमित अपडेट:</strong> 2026 की परीक्षाओं के लिए पूरी तरह अपडेटेड कंटेंट।</li>
-    </ul>
-
-    <h2 style="color: #d32f2f; border-left: 5px solid #d32f2f; padding-left: 10px;">📖 कंटेंट की सूची (Table of Contents)</h2>
-    <ol>
-        <li>डाक विभाग का परिचय और महानिदेशक का नियंत्रण।</li>
-        <li>भारत के 23 डाक सर्किल और उनके मुख्यालय।</li>
-        <li>डाकघरों के प्रकार और उनके कार्य समय।</li>
-        <li>GDS to MTS परीक्षा पैटर्न 2026।</li>
-    </ol>
-
-    <div style="background-color: #fdf2f2; border: 1px solid #d32f2f; padding: 15px; border-radius: 8px; margin-top: 30px;">
-        <h3 style="margin-top: 0; color: #d32f2f;">⚠️ डिस्क्लेमर (Disclaimer)</h3>
-        <p style="margin-bottom: 0; font-size: 14px;">
-            यह वेबसाइट और इसमें दी गई PDF केवल शैक्षिक उद्देश्यों के लिए हैं। इसमें दी गई जानकारी डाक विभाग की आधिकारिक गाइड (PO Guide) और सार्वजनिक डोमेन से ली गई है। आधिकारिक पुष्टि के लिए कृपया इण्डिया पोस्ट की वेबसाइट देखें।
-        </p>
-    </div>
-
-    <p style="text-align: center; margin-top: 40px; font-weight: bold; color: #8d151a;">
-        © 2026 Rameshwar Sahu | GDS Departmental Exam Hub | Hosted on GitHub
-    </p>
-</div>
-<!-- README कंटेंट सेक्शन समाप्त -->
