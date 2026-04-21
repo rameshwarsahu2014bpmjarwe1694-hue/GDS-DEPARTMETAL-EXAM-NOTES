@@ -1,383 +1,263 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mock Test</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Start Quiz</title>
 
 <style>
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial,sans-serif;
+font-family:Arial, sans-serif;
 }
 
 body{
-background:#f2f2f2;
-padding:15px;
-}
-
-.topbar{
-background:#000;
-color:#fff;
-padding:14px;
-text-align:center;
-font-size:22px;
-font-weight:bold;
-border-radius:8px;
-margin-bottom:20px;
+background:#f4f6f9;
+padding:20px;
 }
 
 .container{
-max-width:650px;
+max-width:500px;
 margin:auto;
 background:#fff;
-padding:20px;
+padding:25px;
 border-radius:12px;
-box-shadow:0 0 10px rgba(0,0,0,.1);
+box-shadow:0 4px 10px rgba(0,0,0,.08);
 }
 
-.timer{
-text-align:right;
-font-size:18px;
-font-weight:bold;
-color:red;
-margin-bottom:10px;
-}
-
-#qno{
-font-size:18px;
-font-weight:bold;
-margin-bottom:10px;
-}
-
-#question{
-font-size:21px;
-font-weight:bold;
-line-height:30px;
+h2{
+text-align:center;
 margin-bottom:20px;
+color:#222;
 }
 
-.option{
+label{
 display:block;
+margin-top:15px;
+font-weight:bold;
+color:#333;
+}
+
+input,select{
 width:100%;
-padding:14px;
-margin-bottom:10px;
-border:none;
+padding:12px;
+margin-top:6px;
+border:1px solid #ccc;
 border-radius:8px;
-background:#eee;
 font-size:16px;
-text-align:left;
-cursor:pointer;
+outline:none;
 }
 
-.option:hover{
-background:#ddd;
+input:focus,select:focus{
+border-color:#007bff;
 }
 
-.nextBtn{
+button{
 width:100%;
 padding:14px;
-background:#000;
-color:#fff;
+margin-top:22px;
 border:none;
-border-radius:8px;
+background:#007bff;
+color:#fff;
 font-size:17px;
 font-weight:bold;
+border-radius:8px;
 cursor:pointer;
+transition:.3s;
+}
+
+button:hover{
+background:#0056b3;
+}
+
+.info{
+margin-top:18px;
+background:#eef5ff;
+padding:12px;
+border-radius:8px;
+font-size:14px;
+color:#333;
+line-height:1.6;
+}
+
+.error{
+color:red;
 margin-top:10px;
-}
-
-.result{
+font-size:14px;
 text-align:center;
-font-size:24px;
-font-weight:bold;
-line-height:42px;
 }
 
-.backBtn{
-background:#d40000;
-margin-top:15px;
+.success{
+color:green;
+margin-top:10px;
+font-size:14px;
+text-align:center;
 }
 </style>
 </head>
 
 <body>
 
-<div class="topbar">📝 Mock Test</div>
+<div class="container">
 
-<div class="container" id="quizBox">
+<h2>Start Quiz</h2>
 
-<div class="timer" id="timer">Checking Login...</div>
+<form id="quizForm">
 
-<div id="qno"></div>
+<label>Candidate Name</label>
+<input type="text" id="name" maxlength="40" required>
 
-<div id="question">Loading...</div>
+<label>Select Subject</label>
+<select id="subject" required>
+<option value="">Choose Subject</option>
+<option value="Post Office Guide 1">Post Office Guide 1</option>
+<option value="Post Office Guide 2">Post Office Guide 2</option>
+<option value="PO Manual Volume 5">PO Manual Volume 5</option>
+<option value="Math">Math</option>
+<option value="Reasoning">Reasoning</option>
+<option value="GK">GK</option>
+<option value="English">English</option>
+<option value="Mixed Mock Test">Mixed Mock Test</option>
+</select>
 
-<button class="option" id="btnA" onclick="selectAns('A')"></button>
-<button class="option" id="btnB" onclick="selectAns('B')"></button>
-<button class="option" id="btnC" onclick="selectAns('C')"></button>
-<button class="option" id="btnD" onclick="selectAns('D')"></button>
+<label>Select Questions</label>
+<select id="questions" required>
+<option value="">Choose</option>
+<option value="25">25 Questions</option>
+<option value="50">50 Questions</option>
+<option value="100">100 Questions</option>
+</select>
 
-<button class="nextBtn" onclick="nextQuestion()">Next Question</button>
+<button type="submit">Start Test</button>
+
+<div id="msg"></div>
+
+</form>
+
+<div class="info">
+<b>Rules:</b><br>
+• Full screen recommended<br>
+• Refresh = Auto submit risk<br>
+• Timer starts immediately<br>
+• Result auto save in device
+</div>
 
 </div>
 
-<script type="module" src="firebase.js"></script>
-
-<script type="module">
-
-import { onAuthStateChanged }
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-
-import {
-initializeApp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-getDatabase,
-ref,
-get
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-const firebaseConfig = {
-apiKey: "YOUR_API_KEY",
-authDomain: "YOUR_AUTH_DOMAIN",
-databaseURL: "YOUR_DATABASE_URL",
-projectId: "YOUR_PROJECT_ID",
-storageBucket: "YOUR_BUCKET",
-messagingSenderId: "YOUR_MSG_ID",
-appId: "YOUR_APP_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-let userEmail = "";
-let quiz = [];
-let current = 0;
-let score = 0;
-let selected = "";
-
-let totalSeconds = 0;
-let remainingSeconds = 0;
-let timerInterval;
-let submitted = false;
-
-function waitForFirebase(){
-
-if(window.auth){
-checkLogin();
-}else{
-setTimeout(waitForFirebase,300);
-}
-
-}
-
-function checkLogin(){
-
-onAuthStateChanged(window.auth,(user)=>{
-
-if(!user){
-alert("Please login first");
-window.location.href="login.html";
-return;
-}
-
-userEmail = user.email;
-loadQuestions();
-
-});
-
-}
-
-window.selectAns = function(ans){
-
-selected = ans;
-
-resetBtns();
-
-document.getElementById("btn"+ans).style.background="#90ee90";
-
-}
-
-window.nextQuestion = function(){
-
-if(submitted) return;
-
-if(selected==""){
-alert("Please select an option");
-return;
-}
-
-if(selected == quiz[current].answer){
-score++;
-}
-
-current++;
-
-if(current < quiz.length){
-loadQuestion();
-}else{
-showResult();
-}
-
-}
-
-function loadQuestion(){
-
-let q = quiz[current];
-
-document.getElementById("qno").innerHTML =
-"Question " + (current+1) + " / " + quiz.length;
-
-document.getElementById("question").innerHTML = q.question;
-
-document.getElementById("btnA").innerHTML = "A) " + q.a;
-document.getElementById("btnB").innerHTML = "B) " + q.b;
-document.getElementById("btnC").innerHTML = "C) " + q.c;
-document.getElementById("btnD").innerHTML = "D) " + q.d;
-
-selected = "";
-resetBtns();
-
-}
-
-function resetBtns(){
-
-btnA.style.background="#eee";
-btnB.style.background="#eee";
-btnC.style.background="#eee";
-btnD.style.background="#eee";
-
-}
-
-function startTimer(){
-
-timerInterval = setInterval(function(){
-
-remainingSeconds--;
-
-let min = Math.floor(remainingSeconds/60);
-let sec = remainingSeconds%60;
-
-if(min<10) min="0"+min;
-if(sec<10) sec="0"+sec;
-
-document.getElementById("timer").innerHTML =
-"Time: " + min + ":" + sec;
-
-if(remainingSeconds <= 0){
-showResult();
-}
-
-},1000);
-
-}
-
-function saveScore(){
-
-let history =
-JSON.parse(localStorage.getItem("quizHistory")) || [];
-
-history.push({
-email:userEmail,
-date:new Date().toLocaleString(),
-score:score,
-total:quiz.length,
-wrong:(quiz.length-score)
-});
-
-localStorage.setItem(
-"quizHistory",
-JSON.stringify(history)
-);
-
-}
-
-function showResult(){
-
-if(submitted) return;
-
-submitted = true;
-
-clearInterval(timerInterval);
-
-saveScore();
-
-document.getElementById("quizBox").innerHTML =
-
-"<div class='result'>🎉 Quiz Completed<br><br>Total Questions: "+quiz.length+
-
-"<br>Correct Answers: "+score+
-
-"<br>Wrong Answers: "+(quiz.length-score)+
-
-"<br>Score: "+score+" / "+quiz.length+
-
-"<br><a href='dashboard.html'><button class='nextBtn backBtn'>Back</button></a></div>";
-
-}
-
-async function loadQuestions(){
-
-try{
-
-const snap = await get(ref(db,"quizQuestions"));
-
-if(snap.exists()){
-
-quiz = snap.val();
-
-let minutes = Math.ceil(quiz.length * 1.2);
-
-totalSeconds = minutes * 60;
-
-remainingSeconds = totalSeconds;
-
-loadQuestion();
-
-startTimer();
-
-}else{
-
-document.getElementById("quizBox").innerHTML =
-"<div class='result'>No Questions Found!</div>";
-
-}
-
-}catch(error){
-
-document.getElementById("quizBox").innerHTML =
-"<div class='result'>Failed to Load Questions</div>";
-
-}
-
-}
-
-document.addEventListener("contextmenu",e=>e.preventDefault());
-
-document.addEventListener("keydown",function(e){
-
-if(e.key==="F12" ||
-(e.ctrlKey && e.shiftKey && e.key==="I") ||
-(e.ctrlKey && e.key==="u")){
+<script>
+"use strict";
+
+/* ========= SECURITY ========= */
+
+// Disable right click
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+// Disable inspect shortcuts
+document.addEventListener("keydown", function(e){
+if(
+e.key === "F12" ||
+(e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key.toUpperCase())) ||
+(e.ctrlKey && e.key.toUpperCase() === "U")
+){
 e.preventDefault();
 }
-
 });
 
-document.addEventListener("visibilitychange",function(){
+// Prevent back cache reload issue
+window.history.pushState(null,null,window.location.href);
+window.onpopstate=function(){
+window.history.go(1);
+};
 
-if(document.hidden && !submitted){
-alert("Tab switching detected!");
+// Tab switch warning
+document.addEventListener("visibilitychange", function(){
+if(document.hidden){
+alert("Warning: Tab switching detected.");
+}
+});
+
+/* ========= FORM ========= */
+
+const form = document.getElementById("quizForm");
+const msg = document.getElementById("msg");
+
+form.addEventListener("submit", function(e){
+e.preventDefault();
+
+msg.innerHTML = "";
+
+let name = document.getElementById("name").value.trim();
+let subject = document.getElementById("subject").value;
+let questions = document.getElementById("questions").value;
+
+// Validation
+if(name.length < 3){
+showError("Enter valid name");
+return;
 }
 
+if(!/^[a-zA-Z ]+$/.test(name)){
+showError("Only letters allowed in name");
+return;
+}
+
+if(subject === ""){
+showError("Select subject");
+return;
+}
+
+if(questions === ""){
+showError("Select question limit");
+return;
+}
+
+// Timer logic (1 question = 1.2 min)
+let totalMinutes = Math.ceil(parseInt(questions) * 1.2);
+
+// Save securely
+const quizData = {
+name: escapeHTML(name),
+subject: subject,
+questions: parseInt(questions),
+time: totalMinutes,
+startTime: Date.now()
+};
+
+localStorage.setItem("quizSession", JSON.stringify(quizData));
+
+showSuccess("Redirecting to test...");
+
+// Redirect
+setTimeout(()=>{
+window.location.href = "quiz.html";
+},1200);
+
 });
 
-waitForFirebase();
+/* ========= FUNCTIONS ========= */
 
+function showError(text){
+msg.innerHTML = `<div class="error">${text}</div>`;
+}
+
+function showSuccess(text){
+msg.innerHTML = `<div class="success">${text}</div>`;
+}
+
+function escapeHTML(str){
+return str.replace(/[&<>"']/g,function(m){
+return {
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
+}[m];
+});
+}
 </script>
 
 </body>
