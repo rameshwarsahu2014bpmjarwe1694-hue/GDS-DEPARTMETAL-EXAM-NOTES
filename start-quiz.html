@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,6 +25,22 @@ background:#fff;
 padding:25px;
 border-radius:12px;
 box-shadow:0 4px 10px rgba(0,0,0,.08);
+position:relative;
+}
+
+/* NEW BACK BUTTON */
+.back-btn{
+width:auto;
+padding:10px 14px;
+margin-top:0;
+margin-bottom:15px;
+background:#6c757d;
+font-size:15px;
+border-radius:8px;
+}
+
+.back-btn:hover{
+background:#545b62;
 }
 
 h2{
@@ -103,6 +118,8 @@ text-align:center;
 
 <div class="container">
 
+<button type="button" class="back-btn" onclick="goBack()">⬅ Go Back</button>
+
 <h2>Start Quiz</h2>
 
 <form id="quizForm">
@@ -142,13 +159,34 @@ text-align:center;
 • Full screen recommended<br>
 • Refresh = Auto submit risk<br>
 • Timer starts immediately<br>
-• Result auto save in device
+• Result auto save permanently
 </div>
 
 </div>
 
-<script>
+<script type="module">
 "use strict";
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+getFirestore,
+doc,
+setDoc,
+serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE CONFIG */
+const firebaseConfig = {
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_PROJECT.firebaseapp.com",
+projectId: "YOUR_PROJECT_ID",
+storageBucket: "YOUR_PROJECT.appspot.com",
+messagingSenderId: "YOUR_ID",
+appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 /* ========= SECURITY ========= */
 
@@ -166,12 +204,6 @@ e.preventDefault();
 }
 });
 
-// Prevent back cache reload issue
-window.history.pushState(null,null,window.location.href);
-window.onpopstate=function(){
-window.history.go(1);
-};
-
 // Tab switch warning
 document.addEventListener("visibilitychange", function(){
 if(document.hidden){
@@ -179,12 +211,21 @@ alert("Warning: Tab switching detected.");
 }
 });
 
+/* ========= BACK BUTTON ========= */
+window.goBack = function(){
+if(history.length > 1){
+history.back();
+}else{
+window.location.href="candidate-dashboard.html";
+}
+};
+
 /* ========= FORM ========= */
 
 const form = document.getElementById("quizForm");
 const msg = document.getElementById("msg");
 
-form.addEventListener("submit", function(e){
+form.addEventListener("submit", async function(e){
 e.preventDefault();
 
 msg.innerHTML = "";
@@ -193,7 +234,7 @@ let name = document.getElementById("name").value.trim();
 let subject = document.getElementById("subject").value;
 let questions = document.getElementById("questions").value;
 
-// Validation
+/* Validation */
 if(name.length < 3){
 showError("Enter valid name");
 return;
@@ -214,10 +255,10 @@ showError("Select question limit");
 return;
 }
 
-// Timer logic (1 question = 1.2 min)
+/* Timer */
 let totalMinutes = Math.ceil(parseInt(questions) * 1.2);
 
-// Save securely
+/* Secure Session Data */
 const quizData = {
 name: escapeHTML(name),
 subject: subject,
@@ -226,14 +267,30 @@ time: totalMinutes,
 startTime: Date.now()
 };
 
-localStorage.setItem("quizSession", JSON.stringify(quizData));
+try{
+
+/* Permanent Firestore Save */
+await setDoc(doc(db,"quizSessions",Date.now().toString()),{
+name: quizData.name,
+subject: quizData.subject,
+questions: quizData.questions,
+time: quizData.time,
+startTime: quizData.startTime,
+createdAt: serverTimestamp()
+});
+
+/* Temporary session for quiz.html */
+sessionStorage.setItem("quizSession", JSON.stringify(quizData));
 
 showSuccess("Redirecting to test...");
 
-// Redirect
 setTimeout(()=>{
 window.location.href = "quiz.html";
 },1200);
+
+}catch(error){
+showError("Server error. Try again.");
+}
 
 });
 
