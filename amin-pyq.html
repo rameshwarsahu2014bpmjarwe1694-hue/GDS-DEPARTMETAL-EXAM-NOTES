@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin PYQ Panel</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f4f4f4;
+}
+
+.topbar{
+background:#000;
+color:#fff;
+padding:15px;
+text-align:center;
+font-size:20px;
+font-weight:bold;
+}
+
+.container{
+max-width:1000px;
+margin:auto;
+padding:20px;
+}
+
+.welcome{
+background:#fff;
+padding:14px;
+border-radius:12px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+margin-bottom:18px;
+font-weight:bold;
+font-size:16px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:14px;
+}
+
+.card{
+background:#fff;
+padding:18px 10px;
+border-radius:14px;
+text-align:center;
+font-weight:bold;
+font-size:16px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+cursor:pointer;
+transition:.3s;
+}
+
+.card:hover{
+transform:translateY(-3px);
+}
+
+.back{
+margin-top:22px;
+display:block;
+background:#111;
+color:#fff;
+padding:13px;
+text-align:center;
+border-radius:10px;
+text-decoration:none;
+font-weight:bold;
+}
+
+@media(min-width:700px){
+.grid{
+grid-template-columns:repeat(3,1fr);
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">📄 Admin PYQ Manager</div>
+
+<div class="container">
+
+<div class="welcome" id="welcomeBox">
+Welcome Admin 🔐 Manage Previous Year Questions
+</div>
+
+<div class="grid">
+
+<div class="card" onclick="openPage('PYQ-2021')">📘 PYQ 2021</div>
+
+<div class="card" onclick="openPage('PYQ-2022')">📘 PYQ 2022</div>
+
+<div class="card" onclick="openPage('PYQ-2023')">📘 PYQ 2023</div>
+
+<div class="card" onclick="openPage('PYQ-2024')">📘 PYQ 2024</div>
+
+<div class="card" onclick="openPage('MODEL-PAPER')">📝 Model Paper</div>
+
+<div class="card" onclick="openPage('PRACTICE-SET')">🏆 Practice Set</div>
+
+</div>
+
+<a href="admin-pannel.html" class="back">⬅ Back to Admin Panel</a>
+
+</div>
+
+<script>
+"use strict";
+
+/* ---------- SECURITY ---------- */
+document.addEventListener("contextmenu",e=>e.preventDefault());
+
+document.addEventListener("keydown",function(e){
+if(
+e.key==="F12" ||
+(e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key.toUpperCase())) ||
+(e.ctrlKey && e.key.toUpperCase()==="U")
+){
+e.preventDefault();
+}
+});
+
+/* ---------- ADMIN CHECK ---------- */
+let adminEmail = "rameshwarsahu2014bpmjarwe1694@gmail.com";
+
+let currentUser =
+localStorage.getItem("loggedUser") || "";
+
+if(currentUser !== adminEmail){
+alert("Unauthorized Access");
+location.href="admin.html";
+}
+
+/* ---------- OPEN CATEGORY ---------- */
+function openPage(cat){
+
+localStorage.setItem("pyqCategory",cat);
+
+location.href="admin-pyq-form.html";
+
+}
+
+/* ---------- WELCOME ---------- */
+document.getElementById("welcomeBox").innerText =
+"Welcome Admin 🔐 Manage Previous Year Questions";
+</script>
+
+</body>
+</html>
