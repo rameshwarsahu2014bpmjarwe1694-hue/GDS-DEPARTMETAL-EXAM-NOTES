@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Quiz Test</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f4f6f9;
+padding:15px;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+background:#fff;
+padding:20px;
+border-radius:14px;
+box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.topbar{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+justify-content:space-between;
+margin-bottom:20px;
+}
+
+.box{
+background:#eef4ff;
+padding:10px 14px;
+border-radius:10px;
+font-weight:bold;
+font-size:15px;
+}
+
+#questionNo{
+margin-bottom:10px;
+font-size:15px;
+font-weight:bold;
+color:#666;
+}
+
+#question{
+font-size:21px;
+font-weight:bold;
+line-height:1.5;
+margin-bottom:20px;
+}
+
+.option{
+display:block;
+width:100%;
+padding:14px;
+margin-bottom:12px;
+border:1px solid #ddd;
+border-radius:10px;
+background:#fff;
+cursor:pointer;
+font-size:16px;
+text-align:left;
+}
+
+.option:hover{
+background:#f5f9ff;
+}
+
+.active{
+border:2px solid #007bff;
+background:#eaf2ff;
+}
+
+.buttons{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:18px;
+}
+
+button{
+padding:12px 18px;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.prev{background:#555;color:#fff;}
+.next{background:#007bff;color:#fff;}
+.submit{background:green;color:#fff;}
+
+.result{
+text-align:center;
+padding:20px;
+}
+
+.result h2{
+margin-bottom:15px;
+}
+
+@media(max-width:600px){
+#question{font-size:18px;}
+.option{font-size:15px;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="topbar">
+<div class="box" id="nameBox">Candidate</div>
+<div class="box" id="subjectBox">Subject</div>
+<div class="box" id="timerBox">00:00</div>
+<div class="box" id="progressBox">0/0</div>
+</div>
+
+<div id="quizArea">
+<div id="questionNo"></div>
+<div id="question"></div>
+<div id="options"></div>
+
+<div class="buttons">
+<button class="prev" onclick="prevQuestion()">Previous</button>
+<button class="next" onclick="nextQuestion()">Next</button>
+<button class="submit" onclick="submitQuiz()">Submit</button>
+</div>
+</div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ---------- SECURITY ---------- */
+document.addEventListener("contextmenu",e=>e.preventDefault());
+
+document.addEventListener("keydown",function(e){
+if(
+e.key==="F12" ||
+(e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key.toUpperCase())) ||
+(e.ctrlKey && e.key.toUpperCase()==="U")
+){
+e.preventDefault();
+}
+});
+
+document.addEventListener("visibilitychange",function(){
+if(document.hidden){
+alert("Warning: Tab switching detected.");
+}
+});
+
+/* ---------- SESSION ---------- */
+let session = JSON.parse(localStorage.getItem("quizSession"));
+
+if(!session){
+alert("Please start test first.");
+location.href="start-quiz.html";
+}
+
+/* ---------- QUESTIONS ---------- */
+let allQuestions =
+JSON.parse(localStorage.getItem("quizQuestions")) || [];
+
+/* fallback demo */
+if(allQuestions.length===0){
+allQuestions = [
+{
+subject:"GK",
+question:"Capital of India?",
+options:["Delhi","Mumbai","Patna","Bhopal"],
+answer:"Delhi"
+},
+{
+subject:"Maths",
+question:"12 + 8 = ?",
+options:["18","20","21","22"],
+answer:"20"
+}
+];
+}
+
+/* ---------- FILTER ---------- */
+let questions = allQuestions.filter(q =>
+session.subject==="Mixed Mock Test" ||
+q.subject===session.subject
+);
+
+if(questions.length===0){
+questions = allQuestions;
+}
+
+questions = questions.slice(0,session.questions);
+
+/* ---------- VARIABLES ---------- */
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let totalTime = session.time * 60;
+
+/* ---------- TOP ---------- */
+document.getElementById("nameBox").innerText = session.name;
+document.getElementById("subjectBox").innerText = session.subject;
+
+/* ---------- TIMER ---------- */
+function startTimer(){
+
+let x = setInterval(function(){
+
+totalTime--;
+
+let min = Math.floor(totalTime/60);
+let sec = totalTime%60;
+
+document.getElementById("timerBox").innerText =
+String(min).padStart(2,"0")+":"+
+String(sec).padStart(2,"0");
+
+if(totalTime<=0){
+clearInterval(x);
+submitQuiz();
+}
+
+},1000);
+
+}
+startTimer();
+
+/* ---------- LOAD ---------- */
+function loadQuestion(){
+
+let q = questions[current];
+
+document.getElementById("questionNo").innerText =
+"Question " + (current+1);
+
+document.getElementById("progressBox").innerText =
+(current+1)+"/"+questions.length;
+
+document.getElementById("question").innerText =
+q.question;
+
+let html = "";
+
+q.options.forEach(function(opt){
+
+let active = answers[current]===opt ? "active":"";
+
+html += `
+<button class="option ${active}"
+onclick="selectOption('${safe(opt)}')">
+${opt}
+</button>
+`;
+
+});
+
+document.getElementById("options").innerHTML = html;
+}
+
+function safe(t){
+return t.replace(/'/g,"&#39;");
+}
+
+/* ---------- SELECT ---------- */
+function selectOption(val){
+answers[current]=val;
+loadQuestion();
+}
+
+/* ---------- NAVIGATION ---------- */
+function nextQuestion(){
+if(current < questions.length-1){
+current++;
+loadQuestion();
+}
+}
+
+function prevQuestion(){
+if(current > 0){
+current--;
+loadQuestion();
+}
+}
+
+/* ---------- SUBMIT ---------- */
+function submitQuiz(){
+
+let score = 0;
+
+for(let i=0;i<questions.length;i++){
+if(answers[i]===questions[i].answer){
+score++;
+}
+}
+
+let percent = Math.round((score/questions.length)*100);
+
+let result = {
+name:session.name,
+subject:session.subject,
+score:score,
+total:questions.length,
+percent:percent,
+date:new Date().toLocaleString()
+};
+
+let history =
+JSON.parse(localStorage.getItem("resultHistory")) || [];
+
+history.unshift(result);
+
+localStorage.setItem(
+"resultHistory",
+JSON.stringify(history)
+);
+
+document.querySelector(".container").innerHTML = `
+<div class="result">
+<h2>Quiz Submitted</h2>
+<p><b>Name:</b> ${session.name}</p>
+<p><b>Subject:</b> ${session.subject}</p>
+<p><b>Score:</b> ${score} / ${questions.length}</p>
+<p><b>Percentage:</b> ${percent}%</p>
+<br>
+<button class="next"
+onclick="location.href='result-history.html'">
+View Result
+</button>
+</div>
+`;
+
+localStorage.removeItem("quizSession");
+}
+
+/* ---------- START ---------- */
+loadQuestion();
+
+</script>
+
+</body>
+</html>
