@@ -12,12 +12,10 @@ padding:0;
 box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
-
 body{
 background:#f4f6f9;
 padding:15px;
 }
-
 .container{
 max-width:900px;
 margin:auto;
@@ -26,7 +24,6 @@ padding:20px;
 border-radius:14px;
 box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
-
 .topbar{
 display:flex;
 flex-wrap:wrap;
@@ -34,7 +31,6 @@ gap:10px;
 justify-content:space-between;
 margin-bottom:20px;
 }
-
 .box{
 background:#eef4ff;
 padding:10px 14px;
@@ -42,21 +38,18 @@ border-radius:10px;
 font-weight:bold;
 font-size:15px;
 }
-
 #questionNo{
 margin-bottom:10px;
 font-size:15px;
 font-weight:bold;
 color:#666;
 }
-
 #question{
 font-size:21px;
 font-weight:bold;
 line-height:1.5;
 margin-bottom:20px;
 }
-
 .option{
 display:block;
 width:100%;
@@ -69,23 +62,19 @@ cursor:pointer;
 font-size:16px;
 text-align:left;
 }
-
 .option:hover{
 background:#f5f9ff;
 }
-
 .active{
 border:2px solid #007bff;
 background:#eaf2ff;
 }
-
 .buttons{
 display:flex;
 gap:10px;
 flex-wrap:wrap;
 margin-top:18px;
 }
-
 button{
 padding:12px 18px;
 border:none;
@@ -93,20 +82,16 @@ border-radius:10px;
 font-weight:bold;
 cursor:pointer;
 }
-
 .prev{background:#555;color:#fff;}
 .next{background:#007bff;color:#fff;}
 .submit{background:green;color:#fff;}
-
 .result{
 text-align:center;
 padding:20px;
 }
-
 .result h2{
 margin-bottom:15px;
 }
-
 @media(max-width:600px){
 #question{font-size:18px;}
 .option{font-size:15px;}
@@ -139,7 +124,17 @@ margin-bottom:15px;
 
 </div>
 
-<script>
+<script type="module" src="firebase.js"></script>
+
+<script type="module">
+import {
+collection,
+getDocs,
+query,
+where,
+addDoc
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
 "use strict";
 
 /* ---------- SECURITY ---------- */
@@ -169,48 +164,56 @@ alert("Please start test first.");
 location.href="start-quiz.html";
 }
 
-/* ---------- QUESTIONS ---------- */
-let allQuestions =
-JSON.parse(localStorage.getItem("quizQuestions")) || [];
-
-/* fallback demo */
-if(allQuestions.length===0){
-allQuestions = [
-{
-subject:"GK",
-question:"Capital of India?",
-options:["Delhi","Mumbai","Patna","Bhopal"],
-answer:"Delhi"
-},
-{
-subject:"Maths",
-question:"12 + 8 = ?",
-options:["18","20","21","22"],
-answer:"20"
-}
-];
-}
-
-/* ---------- FILTER ---------- */
-let questions = allQuestions.filter(q =>
-session.subject==="Mixed Mock Test" ||
-q.subject===session.subject
-);
-
-if(questions.length===0){
-questions = allQuestions;
-}
-
-questions = questions.slice(0,session.questions);
-
 /* ---------- VARIABLES ---------- */
+let questions = [];
 let current = 0;
-let answers = new Array(questions.length).fill(null);
+let answers = [];
 let totalTime = session.time * 60;
 
 /* ---------- TOP ---------- */
 document.getElementById("nameBox").innerText = session.name;
 document.getElementById("subjectBox").innerText = session.subject;
+
+/* ---------- LOAD QUESTIONS FROM FIRESTORE ---------- */
+async function loadQuestions(){
+
+let snap;
+
+if(session.subject==="Mixed Mock Test"){
+
+snap = await getDocs(
+collection(window.db,"quizQuestions")
+);
+
+}else{
+
+let q = query(
+collection(window.db,"quizQuestions"),
+where("subject","==",session.subject)
+);
+
+snap = await getDocs(q);
+
+}
+
+snap.forEach(doc=>{
+questions.push(doc.data());
+});
+
+if(questions.length===0){
+alert("No Questions Found");
+location.href="start-quiz.html";
+return;
+}
+
+questions = questions.slice(0,session.questions);
+
+answers = new Array(questions.length).fill(null);
+
+loadQuestion();
+startTimer();
+
+}
 
 /* ---------- TIMER ---------- */
 function startTimer(){
@@ -234,10 +237,9 @@ submitQuiz();
 },1000);
 
 }
-startTimer();
 
-/* ---------- LOAD ---------- */
-function loadQuestion(){
+/* ---------- LOAD QUESTION ---------- */
+window.loadQuestion = function(){
 
 let q = questions[current];
 
@@ -266,35 +268,37 @@ ${opt}
 });
 
 document.getElementById("options").innerHTML = html;
-}
 
+};
+
+/* ---------- SAFE ---------- */
 function safe(t){
 return t.replace(/'/g,"&#39;");
 }
 
 /* ---------- SELECT ---------- */
-function selectOption(val){
+window.selectOption = function(val){
 answers[current]=val;
 loadQuestion();
-}
+};
 
 /* ---------- NAVIGATION ---------- */
-function nextQuestion(){
+window.nextQuestion = function(){
 if(current < questions.length-1){
 current++;
 loadQuestion();
 }
-}
+};
 
-function prevQuestion(){
+window.prevQuestion = function(){
 if(current > 0){
 current--;
 loadQuestion();
 }
-}
+};
 
 /* ---------- SUBMIT ---------- */
-function submitQuiz(){
+window.submitQuiz = async function(){
 
 let score = 0;
 
@@ -306,24 +310,19 @@ score++;
 
 let percent = Math.round((score/questions.length)*100);
 
-let result = {
+let user = window.auth.currentUser;
+
+await addDoc(collection(window.db,"results"),{
+uid:user ? user.uid : "",
+email:user ? user.email : "",
 name:session.name,
 subject:session.subject,
 score:score,
 total:questions.length,
 percent:percent,
-date:new Date().toLocaleString()
-};
-
-let history =
-JSON.parse(localStorage.getItem("resultHistory")) || [];
-
-history.unshift(result);
-
-localStorage.setItem(
-"resultHistory",
-JSON.stringify(history)
-);
+date:new Date().toLocaleString(),
+createdAt:Date.now()
+});
 
 document.querySelector(".container").innerHTML = `
 <div class="result">
@@ -341,10 +340,11 @@ View Result
 `;
 
 localStorage.removeItem("quizSession");
-}
+
+};
 
 /* ---------- START ---------- */
-loadQuestion();
+loadQuestions();
 
 </script>
 
