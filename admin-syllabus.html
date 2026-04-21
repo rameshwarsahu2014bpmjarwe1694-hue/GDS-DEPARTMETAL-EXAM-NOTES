@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin Syllabus Panel</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+background:#f4f6f9;
+padding:20px;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+background:#fff;
+padding:20px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+h1{
+text-align:center;
+margin-bottom:20px;
+color:#222;
+}
+
+.input-box{
+display:grid;
+gap:12px;
+margin-bottom:20px;
+}
+
+input,select,textarea{
+padding:12px;
+border:1px solid #ccc;
+border-radius:8px;
+font-size:16px;
+outline:none;
+}
+
+input:focus,select:focus,textarea:focus{
+border-color:#007bff;
+}
+
+button{
+padding:12px;
+border:none;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.save-btn{
+background:#007bff;
+color:#fff;
+}
+
+.save-btn:hover{
+background:#0056b3;
+}
+
+.delete-btn{
+background:#dc3545;
+color:#fff;
+padding:8px 12px;
+font-size:14px;
+}
+
+.delete-btn:hover{
+background:#b02a37;
+}
+
+.card{
+background:#fafafa;
+padding:15px;
+border:1px solid #ddd;
+border-radius:10px;
+margin-bottom:12px;
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.small{
+font-size:14px;
+color:#666;
+margin-top:5px;
+word-break:break-word;
+}
+
+.secure{
+text-align:center;
+margin-top:15px;
+font-size:13px;
+color:green;
+font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Admin Syllabus Panel</h1>
+
+<div class="input-box">
+
+<input type="text" id="title" placeholder="Syllabus Title">
+
+<select id="category">
+<option value="">Select Category</option>
+<option>MTS</option>
+<option>Postman</option>
+<option>PA/SA</option>
+</select>
+
+<input type="url" id="pdfLink" placeholder="PDF Link">
+
+<textarea id="desc" rows="4" placeholder="Short Description"></textarea>
+
+<button class="save-btn" onclick="saveSyllabus()">Save Syllabus</button>
+
+</div>
+
+<div id="list"></div>
+
+<div class="secure">
+Permanent Firestore Secure Storage Enabled
+</div>
+
+</div>
+
+<!-- Firebase -->
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+doc,
+serverTimestamp,
+query,
+orderBy
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ====== YOUR FIREBASE CONFIG ====== */
+const firebaseConfig = {
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_PROJECT.firebaseapp.com",
+projectId: "YOUR_PROJECT_ID",
+storageBucket: "YOUR_PROJECT.appspot.com",
+messagingSenderId: "YOUR_ID",
+appId: "YOUR_APP_ID"
+};
+/* ================================ */
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const list = document.getElementById("list");
+
+window.saveSyllabus = async function(){
+
+let title = document.getElementById("title").value.trim();
+let category = document.getElementById("category").value.trim();
+let pdfLink = document.getElementById("pdfLink").value.trim();
+let desc = document.getElementById("desc").value.trim();
+
+if(title.length < 3){
+alert("Enter valid title");
+return;
+}
+
+if(category === ""){
+alert("Select category");
+return;
+}
+
+if(!pdfLink.startsWith("http")){
+alert("Enter valid PDF link");
+return;
+}
+
+try{
+
+await addDoc(collection(db,"syllabus"),{
+title: escapeHTML(title),
+category: escapeHTML(category),
+pdfLink: pdfLink,
+desc: escapeHTML(desc),
+createdAt: serverTimestamp()
+});
+
+document.getElementById("title").value="";
+document.getElementById("category").value="";
+document.getElementById("pdfLink").value="";
+document.getElementById("desc").value="";
+
+alert("Syllabus Saved Permanently");
+
+loadData();
+
+}catch(error){
+alert("Save Failed");
+console.log(error);
+}
+
+};
+
+async function loadData(){
+
+list.innerHTML = "Loading...";
+
+const q = query(collection(db,"syllabus"),orderBy("createdAt","desc"));
+
+const snapshot = await getDocs(q);
+
+list.innerHTML = "";
+
+if(snapshot.empty){
+list.innerHTML = "<p>No syllabus added.</p>";
+return;
+}
+
+snapshot.forEach((item)=>{
+
+const data = item.data();
+
+list.innerHTML += `
+<div class="card">
+<div class="row">
+<div>
+<h3>${safe(data.title)}</h3>
+<p>${safe(data.category)}</p>
+<p class="small">${safe(data.desc || "")}</p>
+<p class="small">${safe(data.pdfLink)}</p>
+</div>
+
+<div>
+<button class="delete-btn" onclick="deleteItem('${item.id}')">Delete</button>
+</div>
+</div>
+</div>
+`;
+
+});
+
+}
+
+window.deleteItem = async function(id){
+
+if(!confirm("Delete this syllabus?")) return;
+
+await deleteDoc(doc(db,"syllabus",id));
+
+loadData();
+
+};
+
+function escapeHTML(str){
+return str.replace(/[&<>"']/g,function(m){
+return ({
+'&':'&amp;',
+'<':'&lt;',
+'>':'&gt;',
+'"':'&quot;',
+"'":'&#39;'
+})[m];
+});
+}
+
+function safe(str){
+if(!str) return "";
+return str;
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
