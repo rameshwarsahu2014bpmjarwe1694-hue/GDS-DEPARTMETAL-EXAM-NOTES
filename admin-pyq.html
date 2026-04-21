@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin PYQ Manager</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin PYQ Bulk Manager</title>
 
 <style>
 *{
@@ -32,20 +32,19 @@ margin:auto;
 padding:20px;
 }
 
-.welcome{
+.box{
 background:#fff;
-padding:14px;
-border-radius:12px;
+padding:18px;
+border-radius:14px;
 box-shadow:0 4px 10px rgba(0,0,0,.08);
 margin-bottom:18px;
-font-weight:bold;
 }
 
 .grid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:14px;
-margin-bottom:20px;
+margin-bottom:18px;
 }
 
 .card{
@@ -64,71 +63,58 @@ transition:.3s;
 transform:translateY(-3px);
 }
 
-.formbox{
-background:#fff;
-padding:18px;
-border-radius:14px;
-box-shadow:0 4px 10px rgba(0,0,0,.08);
-display:none;
-}
-
-label{
-display:block;
-margin-top:12px;
-font-weight:bold;
-}
-
 input,textarea,select{
 width:100%;
 padding:11px;
-margin-top:6px;
+margin-top:8px;
 border:1px solid #ccc;
 border-radius:10px;
 font-size:15px;
 }
 
 textarea{
+min-height:100px;
 resize:vertical;
-min-height:90px;
 }
 
 button{
-margin-top:16px;
+width:100%;
 padding:12px;
 border:none;
 border-radius:10px;
-cursor:pointer;
 font-weight:bold;
+cursor:pointer;
+margin-top:12px;
 }
 
-.save{
-background:#007bff;
-color:#fff;
-width:100%;
-}
-
+.save{background:#007bff;color:#fff;}
+.bulk{background:green;color:#fff;}
 .back{
-margin-top:20px;
 display:block;
+text-align:center;
+text-decoration:none;
 background:#111;
 color:#fff;
-padding:13px;
-text-align:center;
+padding:12px;
 border-radius:10px;
-text-decoration:none;
 font-weight:bold;
+margin-top:18px;
 }
 
 .list{
-margin-top:18px;
+margin-top:15px;
 }
 
 .item{
 background:#f8f8f8;
-padding:12px;
+padding:10px;
 border-radius:10px;
 margin-bottom:10px;
 border-left:4px solid #007bff;
+}
+
+.hide{
+display:none;
 }
 
 @media(min-width:700px){
@@ -141,41 +127,41 @@ grid-template-columns:repeat(3,1fr);
 
 <body>
 
-<div class="topbar">📄 Admin PYQ Manager</div>
+<div class="topbar">📄 Admin PYQ Bulk Manager</div>
 
 <div class="container">
 
-<div class="welcome" id="welcomeBox">
-Welcome Admin 🔐 Manage Previous Year Questions
+<div class="box">
+<b id="welcomeText">Welcome Admin 🔐 Manage PYQ</b>
 </div>
 
 <div class="grid">
-<div class="card" onclick="selectCategory('PYQ 2021')">📘 PYQ 2021</div>
-<div class="card" onclick="selectCategory('PYQ 2022')">📘 PYQ 2022</div>
-<div class="card" onclick="selectCategory('PYQ 2023')">📘 PYQ 2023</div>
-<div class="card" onclick="selectCategory('PYQ 2024')">📘 PYQ 2024</div>
-<div class="card" onclick="selectCategory('Model Paper')">📝 Model Paper</div>
-<div class="card" onclick="selectCategory('Practice Set')">🏆 Practice Set</div>
+<div class="card" onclick="choose('PYQ 2021')">📘 PYQ 2021</div>
+<div class="card" onclick="choose('PYQ 2022')">📘 PYQ 2022</div>
+<div class="card" onclick="choose('PYQ 2023')">📘 PYQ 2023</div>
+<div class="card" onclick="choose('PYQ 2024')">📘 PYQ 2024</div>
+<div class="card" onclick="choose('Model Paper')">📝 Model Paper</div>
+<div class="card" onclick="choose('Practice Set')">🏆 Practice Set</div>
 </div>
 
-<div class="formbox" id="formBox">
+<div class="box hide" id="panel">
 
-<h3 id="title">Add PYQ</h3>
+<h3 id="title">Add Questions</h3>
 
 <label>Question</label>
 <textarea id="question"></textarea>
 
 <label>Option A</label>
-<input type="text" id="opt1">
+<input id="opt1">
 
 <label>Option B</label>
-<input type="text" id="opt2">
+<input id="opt2">
 
 <label>Option C</label>
-<input type="text" id="opt3">
+<input id="opt3">
 
 <label>Option D</label>
-<input type="text" id="opt4">
+<input id="opt4">
 
 <label>Correct Answer</label>
 <select id="answer">
@@ -185,7 +171,24 @@ Welcome Admin 🔐 Manage Previous Year Questions
 <option value="D">Option D</option>
 </select>
 
-<button class="save" onclick="savePYQ()">Save Question</button>
+<button class="save" onclick="saveSingle()">Save Single Question</button>
+
+<hr style="margin:18px 0">
+
+<h3>Bulk Paste Questions</h3>
+
+<textarea id="bulkBox" placeholder="Format:
+
+Question text
+A) option
+B) option
+C) option
+D) option
+Answer: A
+
+(next question)..."></textarea>
+
+<button class="bulk" onclick="bulkImport()">Bulk Import</button>
 
 <div class="list" id="listBox"></div>
 
@@ -195,14 +198,8 @@ Welcome Admin 🔐 Manage Previous Year Questions
 
 </div>
 
-<!-- Firebase -->
-<script type="module" src="firebase.js"></script>
-<script defer src="script.js"></script>
-
-<script type="module">
-import {
-onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+<script>
+"use strict";
 
 /* ---------- SECURITY ---------- */
 document.addEventListener("contextmenu",e=>e.preventDefault());
@@ -217,54 +214,18 @@ e.preventDefault();
 }
 });
 
-/* ---------- ADMIN AUTH ---------- */
-function waitForFirebase(){
-if(window.auth){
-checkAdmin();
-}else{
-setTimeout(waitForFirebase,300);
-}
-}
-
-function checkAdmin(){
-
-onAuthStateChanged(window.auth,(user)=>{
-
-if(!user){
-alert("Please login first.");
-location.href="admin.html";
-return;
-}
-
-if(user.email !== "rameshwarsahu2014bpmjarwe1694@gmail.com"){
-alert("Unauthorized Access");
-location.href="login.html";
-return;
-}
-
-let name = user.email.split("@")[0];
-
-document.getElementById("welcomeBox").innerText =
-"Welcome " + name + " 🔐 Manage Previous Year Questions";
-
-});
-
-}
-
-waitForFirebase();
-
 /* ---------- STORAGE ---------- */
 let allPYQ =
 JSON.parse(localStorage.getItem("pyqQuestions")) || [];
 
-let currentCategory = "";
+let current = "";
 
-/* ---------- SELECT CATEGORY ---------- */
-window.selectCategory = function(cat){
+/* ---------- CHOOSE CATEGORY ---------- */
+function choose(cat){
 
-currentCategory = cat;
+current = cat;
 
-document.getElementById("formBox").style.display="block";
+document.getElementById("panel").classList.remove("hide");
 
 document.getElementById("title").innerText =
 cat + " - Add Questions";
@@ -278,8 +239,13 @@ behavior:"smooth"
 
 }
 
-/* ---------- SAVE ---------- */
-window.savePYQ = function(){
+/* ---------- SAVE SINGLE ---------- */
+function saveSingle(){
+
+if(current===""){
+alert("Select category first.");
+return;
+}
 
 let q = val("question");
 let a = val("opt1");
@@ -287,11 +253,6 @@ let b = val("opt2");
 let c = val("opt3");
 let d = val("opt4");
 let ans = val("answer");
-
-if(currentCategory===""){
-alert("Select category first.");
-return;
-}
 
 if(q===""||a===""||b===""||c===""||d===""){
 alert("Fill all fields.");
@@ -305,37 +266,93 @@ if(ans==="C") correct=c;
 if(ans==="D") correct=d;
 
 allPYQ.push({
-category:currentCategory,
+category:current,
 question:q,
 options:[a,b,c,d],
 answer:correct
 });
 
-localStorage.setItem(
-"pyqQuestions",
-JSON.stringify(allPYQ)
-);
-
-clearInputs();
+saveData();
+clearSingle();
 showList();
 
 alert("Question Saved");
 
 }
 
+/* ---------- BULK IMPORT ---------- */
+function bulkImport(){
+
+if(current===""){
+alert("Select category first.");
+return;
+}
+
+let text = val("bulkBox");
+
+if(text===""){
+alert("Paste questions first.");
+return;
+}
+
+let blocks = text.split(/\n\s*\n/);
+
+let count = 0;
+
+blocks.forEach(function(block){
+
+let lines = block.split("\n").map(x=>x.trim()).filter(Boolean);
+
+if(lines.length >= 6){
+
+let q = lines[0];
+let a = clean(lines[1]);
+let b = clean(lines[2]);
+let c = clean(lines[3]);
+let d = clean(lines[4]);
+
+let ansLine = lines[5].toUpperCase();
+
+let correct = a;
+
+if(ansLine.includes("B")) correct=b;
+if(ansLine.includes("C")) correct=c;
+if(ansLine.includes("D")) correct=d;
+
+allPYQ.push({
+category:current,
+question:q,
+options:[a,b,c,d],
+answer:correct
+});
+
+count++;
+
+}
+
+});
+
+saveData();
+document.getElementById("bulkBox").value="";
+showList();
+
+alert(count + " Questions Imported");
+
+}
+
 /* ---------- SHOW ---------- */
 function showList(){
 
-let box = document.getElementById("listBox");
+let data = allPYQ.filter(x=>x.category===current);
 
-let data = allPYQ.filter(x => x.category===currentCategory);
+let box = document.getElementById("listBox");
 
 if(data.length===0){
 box.innerHTML="<br><b>No Questions Added</b>";
 return;
 }
 
-let html="<br><b>Total: "+data.length+"</b><br><br>";
+let html="<br><b>Total Questions: "+data.length+"</b><br><br>";
 
 data.forEach(function(x,i){
 
@@ -357,14 +374,25 @@ box.innerHTML = html;
 }
 
 /* ---------- HELPERS ---------- */
+function saveData(){
+localStorage.setItem(
+"pyqQuestions",
+JSON.stringify(allPYQ)
+);
+}
+
 function val(id){
 return document.getElementById(id).value.trim();
 }
 
-function clearInputs(){
+function clearSingle(){
 ["question","opt1","opt2","opt3","opt4"].forEach(id=>{
 document.getElementById(id).value="";
 });
+}
+
+function clean(t){
+return t.replace(/^A\)|^B\)|^C\)|^D\)/i,"").trim();
 }
 </script>
 
