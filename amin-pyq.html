@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin PYQ Panel</title>
+<title>Admin PYQ Manager</title>
 
 <style>
 *{
@@ -36,16 +36,16 @@ padding:20px;
 background:#fff;
 padding:14px;
 border-radius:12px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
+box-shadow:0 4px 10px rgba(0,0,0,.08);
 margin-bottom:18px;
 font-weight:bold;
-font-size:16px;
 }
 
 .grid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:14px;
+margin-bottom:20px;
 }
 
 .card{
@@ -55,7 +55,7 @@ border-radius:14px;
 text-align:center;
 font-weight:bold;
 font-size:16px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
+box-shadow:0 4px 10px rgba(0,0,0,.08);
 cursor:pointer;
 transition:.3s;
 }
@@ -64,8 +64,51 @@ transition:.3s;
 transform:translateY(-3px);
 }
 
+.formbox{
+background:#fff;
+padding:18px;
+border-radius:14px;
+box-shadow:0 4px 10px rgba(0,0,0,.08);
+display:none;
+}
+
+label{
+display:block;
+margin-top:12px;
+font-weight:bold;
+}
+
+input,textarea,select{
+width:100%;
+padding:11px;
+margin-top:6px;
+border:1px solid #ccc;
+border-radius:10px;
+font-size:15px;
+}
+
+textarea{
+resize:vertical;
+min-height:90px;
+}
+
+button{
+margin-top:16px;
+padding:12px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.save{
+background:#007bff;
+color:#fff;
+width:100%;
+}
+
 .back{
-margin-top:22px;
+margin-top:20px;
 display:block;
 background:#111;
 color:#fff;
@@ -74,6 +117,18 @@ text-align:center;
 border-radius:10px;
 text-decoration:none;
 font-weight:bold;
+}
+
+.list{
+margin-top:18px;
+}
+
+.item{
+background:#f8f8f8;
+padding:12px;
+border-radius:10px;
+margin-bottom:10px;
+border-left:4px solid #007bff;
 }
 
 @media(min-width:700px){
@@ -90,23 +145,51 @@ grid-template-columns:repeat(3,1fr);
 
 <div class="container">
 
-<div class="welcome" id="welcomeBox">
+<div class="welcome">
 Welcome Admin 🔐 Manage Previous Year Questions
 </div>
 
 <div class="grid">
 
-<div class="card" onclick="openPage('PYQ-2021')">📘 PYQ 2021</div>
+<div class="card" onclick="selectCategory('PYQ 2021')">📘 PYQ 2021</div>
+<div class="card" onclick="selectCategory('PYQ 2022')">📘 PYQ 2022</div>
+<div class="card" onclick="selectCategory('PYQ 2023')">📘 PYQ 2023</div>
+<div class="card" onclick="selectCategory('PYQ 2024')">📘 PYQ 2024</div>
+<div class="card" onclick="selectCategory('Model Paper')">📝 Model Paper</div>
+<div class="card" onclick="selectCategory('Practice Set')">🏆 Practice Set</div>
 
-<div class="card" onclick="openPage('PYQ-2022')">📘 PYQ 2022</div>
+</div>
 
-<div class="card" onclick="openPage('PYQ-2023')">📘 PYQ 2023</div>
+<div class="formbox" id="formBox">
 
-<div class="card" onclick="openPage('PYQ-2024')">📘 PYQ 2024</div>
+<h3 id="title">Add PYQ</h3>
 
-<div class="card" onclick="openPage('MODEL-PAPER')">📝 Model Paper</div>
+<label>Question</label>
+<textarea id="question"></textarea>
 
-<div class="card" onclick="openPage('PRACTICE-SET')">🏆 Practice Set</div>
+<label>Option A</label>
+<input type="text" id="opt1">
+
+<label>Option B</label>
+<input type="text" id="opt2">
+
+<label>Option C</label>
+<input type="text" id="opt3">
+
+<label>Option D</label>
+<input type="text" id="opt4">
+
+<label>Correct Answer</label>
+<select id="answer">
+<option value="A">Option A</option>
+<option value="B">Option B</option>
+<option value="C">Option C</option>
+<option value="D">Option D</option>
+</select>
+
+<button class="save" onclick="savePYQ()">Save Question</button>
+
+<div class="list" id="listBox"></div>
 
 </div>
 
@@ -131,28 +214,116 @@ e.preventDefault();
 });
 
 /* ---------- ADMIN CHECK ---------- */
-let adminEmail = "rameshwarsahu2014bpmjarwe1694@gmail.com";
+let adminEmail="rameshwarsahu2014bpmjarwe1694@gmail.com";
+let user=localStorage.getItem("loggedUser")||"";
 
-let currentUser =
-localStorage.getItem("loggedUser") || "";
-
-if(currentUser !== adminEmail){
+if(user!==adminEmail){
 alert("Unauthorized Access");
 location.href="admin.html";
 }
 
-/* ---------- OPEN CATEGORY ---------- */
-function openPage(cat){
+/* ---------- STORAGE ---------- */
+let allPYQ =
+JSON.parse(localStorage.getItem("pyqQuestions")) || [];
 
-localStorage.setItem("pyqCategory",cat);
+let currentCategory = "";
 
-location.href="admin-pyq-form.html";
+/* ---------- SELECT ---------- */
+function selectCategory(cat){
 
+currentCategory = cat;
+
+document.getElementById("formBox").style.display="block";
+
+document.getElementById("title").innerText =
+cat + " - Add Questions";
+
+showList();
+
+window.scrollTo(0,500);
 }
 
-/* ---------- WELCOME ---------- */
-document.getElementById("welcomeBox").innerText =
-"Welcome Admin 🔐 Manage Previous Year Questions";
+/* ---------- SAVE ---------- */
+function savePYQ(){
+
+let q = val("question");
+let a = val("opt1");
+let b = val("opt2");
+let c = val("opt3");
+let d = val("opt4");
+let ans = val("answer");
+
+if(q===""||a===""||b===""||c===""||d===""){
+alert("Fill all fields");
+return;
+}
+
+let correct = a;
+
+if(ans==="B") correct=b;
+if(ans==="C") correct=c;
+if(ans==="D") correct=d;
+
+allPYQ.push({
+category:currentCategory,
+question:q,
+options:[a,b,c,d],
+answer:correct
+});
+
+localStorage.setItem(
+"pyqQuestions",
+JSON.stringify(allPYQ)
+);
+
+clearInputs();
+showList();
+
+alert("Question Saved");
+}
+
+/* ---------- SHOW ---------- */
+function showList(){
+
+let box = document.getElementById("listBox");
+
+let data = allPYQ.filter(x=>x.category===currentCategory);
+
+if(data.length===0){
+box.innerHTML="<br><b>No Questions Added</b>";
+return;
+}
+
+let html="<br><b>Total: "+data.length+"</b><br><br>";
+
+data.forEach(function(x,i){
+
+html += `
+<div class="item">
+<b>${i+1}. ${x.question}</b><br>
+A. ${x.options[0]}<br>
+B. ${x.options[1]}<br>
+C. ${x.options[2]}<br>
+D. ${x.options[3]}<br>
+<b>Answer:</b> ${x.answer}
+</div>
+`;
+
+});
+
+box.innerHTML=html;
+}
+
+/* ---------- HELPERS ---------- */
+function val(id){
+return document.getElementById(id).value.trim();
+}
+
+function clearInputs(){
+["question","opt1","opt2","opt3","opt4"].forEach(id=>{
+document.getElementById(id).value="";
+});
+}
 </script>
 
 </body>
