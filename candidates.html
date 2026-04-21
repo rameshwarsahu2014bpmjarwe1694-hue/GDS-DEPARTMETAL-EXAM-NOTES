@@ -2,29 +2,35 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Total Candidates</title>
 
 <style>
-body{
+*{
 margin:0;
-font-family:Arial,sans-serif;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
 background:linear-gradient(135deg,#2193b0,#6dd5ed);
+min-height:100vh;
 }
 
 .topbar{
 background:#111;
 color:#fff;
-padding:15px;
+padding:16px;
 text-align:center;
-font-size:22px;
-font-weight:bold;
+font-size:24px;
+font-weight:700;
 }
 
 .container{
-padding:20px;
-max-width:1000px;
+max-width:1100px;
 margin:auto;
+padding:20px;
 }
 
 .summary{
@@ -35,51 +41,109 @@ text-align:center;
 font-size:24px;
 font-weight:bold;
 color:#2193b0;
-box-shadow:0 5px 12px rgba(0,0,0,0.1);
-margin-bottom:20px;
+box-shadow:0 6px 15px rgba(0,0,0,.10);
+margin-bottom:16px;
+}
+
+.searchBox{
+margin-bottom:18px;
+}
+
+.searchBox input{
+width:100%;
+padding:14px;
+border:none;
+outline:none;
+border-radius:12px;
+font-size:16px;
+box-shadow:0 4px 10px rgba(0,0,0,.08);
 }
 
 .list{
 display:grid;
-gap:15px;
+gap:14px;
 }
 
 .card{
 background:#fff;
 padding:18px;
 border-radius:14px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
+box-shadow:0 5px 12px rgba(0,0,0,.08);
 }
 
 .name{
-font-size:18px;
-font-weight:bold;
+font-size:19px;
+font-weight:700;
 color:#111;
+margin-bottom:8px;
 }
 
 .info{
-margin-top:6px;
-color:#555;
 font-size:15px;
+color:#555;
+margin:4px 0;
+word-break:break-word;
+}
+
+.row{
+display:flex;
+gap:10px;
+margin-top:12px;
+flex-wrap:wrap;
+}
+
+.btn{
+flex:1;
+min-width:120px;
+padding:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.deleteBtn{
+background:#e53935;
+color:#fff;
+}
+
+.deleteBtn:hover{
+background:#c62828;
+}
+
+.back{
+display:block;
+margin-top:22px;
+background:#111;
+color:#fff;
+padding:14px;
+text-align:center;
+border-radius:12px;
+text-decoration:none;
+font-weight:bold;
 }
 
 .empty{
 text-align:center;
 color:#fff;
 font-size:18px;
-margin-top:30px;
+padding:25px 10px;
 }
 
-.back{
-display:block;
-margin-top:25px;
-background:#111;
-color:#fff;
-padding:12px;
+.loader{
 text-align:center;
-border-radius:10px;
-text-decoration:none;
-font-weight:bold;
+color:#fff;
+font-size:18px;
+padding:25px 10px;
+}
+
+@media(max-width:600px){
+.topbar{
+font-size:20px;
+}
+.summary{
+font-size:20px;
+}
 }
 </style>
 </head>
@@ -92,7 +156,13 @@ font-weight:bold;
 
 <div class="summary" id="countBox">Registered Candidates: 0</div>
 
-<div class="list" id="candidateList"></div>
+<div class="searchBox">
+<input type="text" id="searchInput" placeholder="Search by name / email / mobile">
+</div>
+
+<div class="list" id="candidateList">
+<div class="loader">Loading candidates...</div>
+</div>
 
 <a href="admin-panel.html" class="back">⬅ Back to Admin Panel</a>
 
@@ -108,8 +178,21 @@ onAuthStateChanged
 
 import {
 collection,
-getDocs
+getDocs,
+deleteDoc,
+doc
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+let allCandidates = [];
+
+function safe(v){
+return String(v || "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+}
 
 function waitForFirebase(){
 if(window.auth && window.db){
@@ -121,17 +204,17 @@ setTimeout(waitForFirebase,300);
 
 function checkAdmin(){
 
-onAuthStateChanged(window.auth, async (user) => {
+onAuthStateChanged(window.auth,(user)=>{
 
 if(!user){
-alert("Please login first.");
-window.location.href = "admin.html";
+alert("Please login first");
+location.href="admin.html";
 return;
 }
 
 if(user.email !== "rameshwarsahu2014bpmjarwe1694@gmail.com"){
 alert("Unauthorized Access");
-window.location.href = "login.html";
+location.href="login.html";
 return;
 }
 
@@ -143,50 +226,127 @@ loadCandidates();
 
 async function loadCandidates(){
 
-const db = window.db;
-
+const list = document.getElementById("candidateList");
 const countBox = document.getElementById("countBox");
-const candidateList = document.getElementById("candidateList");
-
-candidateList.innerHTML = "";
 
 try{
 
-const snapshot = await getDocs(collection(db,"candidates"));
+const snap = await getDocs(collection(window.db,"candidates"));
 
-let total = 0;
+allCandidates = [];
 
-snapshot.forEach((doc) => {
+snap.forEach((d)=>{
 
-total++;
-
-const data = doc.data();
-
-candidateList.innerHTML += `
-<div class="card">
-<div class="name">${data.name || "No Name"}</div>
-<div class="info">Mobile: ${data.mobile || "-"}</div>
-<div class="info">Email: ${data.email || "-"}</div>
-</div>
-`;
+allCandidates.push({
+id:d.id,
+...d.data()
+});
 
 });
 
-countBox.innerHTML = `Registered Candidates: ${total}`;
+countBox.innerHTML =
+`Registered Candidates: ${allCandidates.length}`;
 
-if(total === 0){
-candidateList.innerHTML =
-`<div class="empty">No candidates registered yet.</div>`;
-}
+renderCandidates(allCandidates);
 
 }catch(error){
 
-candidateList.innerHTML =
+list.innerHTML =
 `<div class="empty">Failed to load candidates</div>`;
 
 }
 
 }
+
+function renderCandidates(arr){
+
+const list = document.getElementById("candidateList");
+
+if(arr.length === 0){
+list.innerHTML =
+`<div class="empty">No candidates found</div>`;
+return;
+}
+
+let html = "";
+
+arr.forEach((item,index)=>{
+
+html += `
+<div class="card">
+
+<div class="name">
+${index+1}. ${safe(item.name || "No Name")}
+</div>
+
+<div class="info">
+📱 Mobile: ${safe(item.mobile || "-")}
+</div>
+
+<div class="info">
+📧 Email: ${safe(item.email || "-")}
+</div>
+
+<div class="row">
+<button class="btn deleteBtn"
+onclick="deleteCandidate('${item.id}')">
+Delete
+</button>
+</div>
+
+</div>
+`;
+
+});
+
+list.innerHTML = html;
+
+}
+
+window.deleteCandidate = async function(id){
+
+if(!confirm("Delete this candidate?")) return;
+
+try{
+
+await deleteDoc(doc(window.db,"candidates",id));
+
+allCandidates = allCandidates.filter(x=>x.id!==id);
+
+document.getElementById("countBox").innerHTML =
+`Registered Candidates: ${allCandidates.length}`;
+
+renderCandidates(allCandidates);
+
+alert("Deleted Successfully");
+
+}catch(error){
+alert("Delete Failed");
+}
+
+}
+
+document.getElementById("searchInput")
+.addEventListener("input",function(){
+
+const q = this.value.toLowerCase().trim();
+
+if(!q){
+renderCandidates(allCandidates);
+return;
+}
+
+const filtered = allCandidates.filter(item =>
+
+(item.name || "").toLowerCase().includes(q) ||
+(item.email || "").toLowerCase().includes(q) ||
+(item.mobile || "").toLowerCase().includes(q)
+
+);
+
+renderCandidates(filtered);
+
+});
 
 waitForFirebase();
 
