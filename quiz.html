@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Quiz Test</title>
+<!-- Top bar -->
+<div class="top-bar">
+  <button class="back-btn" onclick="goBack()">⬅ Back</button>
+  <h2>Mock Test</h2>
+</div>
 
 <style>
 *{
@@ -13,340 +12,196 @@ box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
 body{
-background:#f4f6f9;
+background:#f5f7fa;
 padding:15px;
 }
+.top-bar{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:15px;
+}
+.back-btn{
+background:#007bff;
+color:#fff;
+border:none;
+padding:10px 14px;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+}
 .container{
-max-width:900px;
+max-width:800px;
 margin:auto;
 background:#fff;
 padding:20px;
-border-radius:14px;
-box-shadow:0 4px 12px rgba(0,0,0,.08);
+border-radius:12px;
+box-shadow:0 4px 10px rgba(0,0,0,.08);
 }
-.topbar{
-display:flex;
-flex-wrap:wrap;
-gap:10px;
-justify-content:space-between;
-margin-bottom:20px;
-}
-.box{
-background:#eef4ff;
-padding:10px 14px;
-border-radius:10px;
+.question{
+font-size:18px;
 font-weight:bold;
-font-size:15px;
-}
-#questionNo{
-margin-bottom:10px;
-font-size:15px;
-font-weight:bold;
-color:#666;
-}
-#question{
-font-size:21px;
-font-weight:bold;
-line-height:1.5;
-margin-bottom:20px;
+margin-bottom:15px;
 }
 .option{
 display:block;
-width:100%;
-padding:14px;
-margin-bottom:12px;
+padding:12px;
+margin:8px 0;
 border:1px solid #ddd;
-border-radius:10px;
-background:#fff;
+border-radius:8px;
 cursor:pointer;
-font-size:16px;
-text-align:left;
 }
 .option:hover{
-background:#f5f9ff;
+background:#f0f7ff;
 }
-.active{
-border:2px solid #007bff;
-background:#eaf2ff;
-}
-.buttons{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-margin-top:18px;
-}
-button{
-padding:12px 18px;
+.submit-btn{
+margin-top:15px;
+padding:12px;
+width:100%;
+background:green;
+color:#fff;
 border:none;
-border-radius:10px;
+border-radius:8px;
+font-size:16px;
 font-weight:bold;
 cursor:pointer;
 }
-.prev{background:#555;color:#fff;}
-.next{background:#007bff;color:#fff;}
-.submit{background:green;color:#fff;}
-.result{
+#result{
+margin-top:15px;
+font-weight:bold;
 text-align:center;
-padding:20px;
-}
-.result h2{
-margin-bottom:15px;
-}
-@media(max-width:600px){
-#question{font-size:18px;}
-.option{font-size:15px;}
 }
 </style>
-</head>
-
-<body>
 
 <div class="container">
-
-<div class="topbar">
-<div class="box" id="nameBox">Candidate</div>
-<div class="box" id="subjectBox">Subject</div>
-<div class="box" id="timerBox">00:00</div>
-<div class="box" id="progressBox">0/0</div>
-</div>
-
-<div id="quizArea">
-<div id="questionNo"></div>
-<div id="question"></div>
+<div class="question" id="question">Loading...</div>
 <div id="options"></div>
-
-<div class="buttons">
-<button class="prev" onclick="prevQuestion()">Previous</button>
-<button class="next" onclick="nextQuestion()">Next</button>
-<button class="submit" onclick="submitQuiz()">Submit</button>
+<button class="submit-btn" onclick="submitQuiz()">Submit</button>
+<div id="result"></div>
 </div>
-</div>
-
-</div>
-
-<script type="module" src="firebase.js"></script>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
+getFirestore,
 collection,
 getDocs,
-query,
-where,
-addDoc
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+addDoc,
+serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+getAuth,
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-"use strict";
+/* Firebase Config */
+const firebaseConfig = {
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_PROJECT.firebaseapp.com",
+projectId: "YOUR_PROJECT_ID",
+storageBucket: "YOUR_PROJECT.appspot.com",
+messagingSenderId: "YOUR_ID",
+appId: "YOUR_APP_ID"
+};
 
-/* ---------- SECURITY ---------- */
-document.addEventListener("contextmenu",e=>e.preventDefault());
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-document.addEventListener("keydown",function(e){
-if(
-e.key==="F12" ||
-(e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key.toUpperCase())) ||
-(e.ctrlKey && e.key.toUpperCase()==="U")
-){
-e.preventDefault();
-}
-});
+let currentUser=null;
+let questions=[];
+let score=0;
+let selectedAnswers={};
 
-document.addEventListener("visibilitychange",function(){
-if(document.hidden){
-alert("Warning: Tab switching detected.");
-}
-});
-
-/* ---------- SESSION ---------- */
-let session = JSON.parse(localStorage.getItem("quizSession"));
-
-if(!session){
-alert("Please start test first.");
-location.href="start-quiz.html";
-}
-
-/* ---------- VARIABLES ---------- */
-let questions = [];
-let current = 0;
-let answers = [];
-let totalTime = session.time * 60;
-
-/* ---------- TOP ---------- */
-document.getElementById("nameBox").innerText = session.name;
-document.getElementById("subjectBox").innerText = session.subject;
-
-/* ---------- LOAD QUESTIONS FROM FIRESTORE ---------- */
-async function loadQuestions(){
-
-let snap;
-
-if(session.subject==="Mixed Mock Test"){
-
-snap = await getDocs(
-collection(window.db,"quizQuestions")
-);
-
+onAuthStateChanged(auth,(user)=>{
+if(user){
+currentUser=user;
+loadQuestions();
 }else{
-
-let q = query(
-collection(window.db,"quizQuestions"),
-where("subject","==",session.subject)
-);
-
-snap = await getDocs(q);
-
+window.location.href="login.html";
 }
+});
+
+async function loadQuestions(){
+const snap = await getDocs(collection(db,"quizQuestions"));
+questions=[];
 
 snap.forEach(doc=>{
-questions.push(doc.data());
+questions.push({
+id:doc.id,
+...doc.data()
+});
 });
 
-if(questions.length===0){
-alert("No Questions Found");
-location.href="start-quiz.html";
-return;
+renderQuestions();
 }
 
-questions = questions.slice(0,session.questions);
-
-answers = new Array(questions.length).fill(null);
-
-loadQuestion();
-startTimer();
-
-}
-
-/* ---------- TIMER ---------- */
-function startTimer(){
-
-let x = setInterval(function(){
-
-totalTime--;
-
-let min = Math.floor(totalTime/60);
-let sec = totalTime%60;
-
-document.getElementById("timerBox").innerText =
-String(min).padStart(2,"0")+":"+
-String(sec).padStart(2,"0");
-
-if(totalTime<=0){
-clearInterval(x);
-submitQuiz();
-}
-
-},1000);
-
-}
-
-/* ---------- LOAD QUESTION ---------- */
-window.loadQuestion = function(){
-
-let q = questions[current];
-
-document.getElementById("questionNo").innerText =
-"Question " + (current+1);
-
-document.getElementById("progressBox").innerText =
-(current+1)+"/"+questions.length;
-
-document.getElementById("question").innerText =
-q.question;
-
-let html = "";
-
-q.options.forEach(function(opt){
-
-let active = answers[current]===opt ? "active":"";
-
+function renderQuestions(){
+let html="";
+questions.forEach((q,index)=>{
 html += `
-<button class="option ${active}"
-onclick="selectOption('${safe(opt)}')">
-${opt}
-</button>
-`;
-
-});
-
-document.getElementById("options").innerHTML = html;
-
-};
-
-/* ---------- SAFE ---------- */
-function safe(t){
-return t.replace(/'/g,"&#39;");
-}
-
-/* ---------- SELECT ---------- */
-window.selectOption = function(val){
-answers[current]=val;
-loadQuestion();
-};
-
-/* ---------- NAVIGATION ---------- */
-window.nextQuestion = function(){
-if(current < questions.length-1){
-current++;
-loadQuestion();
-}
-};
-
-window.prevQuestion = function(){
-if(current > 0){
-current--;
-loadQuestion();
-}
-};
-
-/* ---------- SUBMIT ---------- */
-window.submitQuiz = async function(){
-
-let score = 0;
-
-for(let i=0;i<questions.length;i++){
-if(answers[i]===questions[i].answer){
-score++;
-}
-}
-
-let percent = Math.round((score/questions.length)*100);
-
-let user = window.auth.currentUser;
-
-await addDoc(collection(window.db,"results"),{
-uid:user ? user.uid : "",
-email:user ? user.email : "",
-name:session.name,
-subject:session.subject,
-score:score,
-total:questions.length,
-percent:percent,
-date:new Date().toLocaleString(),
-createdAt:Date.now()
-});
-
-document.querySelector(".container").innerHTML = `
-<div class="result">
-<h2>Quiz Submitted</h2>
-<p><b>Name:</b> ${session.name}</p>
-<p><b>Subject:</b> ${session.subject}</p>
-<p><b>Score:</b> ${score} / ${questions.length}</p>
-<p><b>Percentage:</b> ${percent}%</p>
-<br>
-<button class="next"
-onclick="location.href='result-history.html'">
-View Result
-</button>
+<div class="question">${index+1}. ${escapeHTML(q.question)}</div>
+<div>
+<label class="option">
+<input type="radio" name="q${index}" value="A"> ${escapeHTML(q.a)}
+</label>
+<label class="option">
+<input type="radio" name="q${index}" value="B"> ${escapeHTML(q.b)}
+</label>
+<label class="option">
+<input type="radio" name="q${index}" value="C"> ${escapeHTML(q.c)}
+</label>
+<label class="option">
+<input type="radio" name="q${index}" value="D"> ${escapeHTML(q.d)}
+</label>
 </div>
 `;
+});
+document.getElementById("question").innerHTML="";
+document.getElementById("options").innerHTML=html;
+}
 
-localStorage.removeItem("quizSession");
+async function submitQuiz(){
+score=0;
 
-};
+questions.forEach((q,index)=>{
+const ans=document.querySelector(`input[name="q${index}"]:checked`);
+if(ans && ans.value===q.correct){
+score++;
+}
+});
 
-/* ---------- START ---------- */
-loadQuestions();
+document.getElementById("result").innerHTML=
+"Your Score: "+score+" / "+questions.length;
 
+await addDoc(collection(db,"results"),{
+uid: currentUser.uid,
+email: currentUser.email,
+score: score,
+total: questions.length,
+createdAt: serverTimestamp()
+});
+}
+
+/* Secure Back Button */
+window.goBack=function(){
+if(confirm("Exit mock test and go back?")){
+if(history.length>1){
+history.back();
+}else{
+window.location.href="candidate-dashboard.html";
+}
+}
+}
+
+/* XSS Protection */
+function escapeHTML(str){
+if(!str) return "";
+return str
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+}
 </script>
-
-</body>
-</html>
