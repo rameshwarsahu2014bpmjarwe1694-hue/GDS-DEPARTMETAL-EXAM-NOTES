@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Admin Add Quiz</title>
+<title>Admin Quiz Manager</title>
 
 <style>
 *{
@@ -12,113 +12,141 @@ padding:0;
 box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
-
 body{
-background:#f4f6f9;
-padding:20px;
+background:#f4f4f4;
 }
-
-.container{
-max-width:900px;
-margin:auto;
-background:#fff;
-padding:22px;
-border-radius:14px;
-box-shadow:0 4px 12px rgba(0,0,0,.08);
-}
-
-h2{
+.topbar{
+background:#000;
+color:#fff;
+padding:15px;
 text-align:center;
-margin-bottom:20px;
-}
-
-label{
-display:block;
-margin-top:14px;
+font-size:20px;
 font-weight:bold;
 }
-
-input,select,textarea{
+.container{
+max-width:1000px;
+margin:auto;
+padding:20px;
+}
+.box{
+background:#fff;
+padding:18px;
+border-radius:14px;
+box-shadow:0 4px 10px rgba(0,0,0,.08);
+margin-bottom:18px;
+}
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:14px;
+margin-bottom:18px;
+}
+.card{
+background:#fff;
+padding:18px 10px;
+border-radius:14px;
+text-align:center;
+font-weight:bold;
+font-size:16px;
+box-shadow:0 4px 10px rgba(0,0,0,.08);
+cursor:pointer;
+transition:.3s;
+}
+.card:hover{
+transform:translateY(-3px);
+}
+input,textarea,select{
 width:100%;
-padding:12px;
-margin-top:6px;
+padding:11px;
+margin-top:8px;
 border:1px solid #ccc;
 border-radius:10px;
 font-size:15px;
-outline:none;
 }
-
 textarea{
+min-height:100px;
 resize:vertical;
-min-height:90px;
 }
-
 button{
-padding:12px 16px;
+width:100%;
+padding:12px;
 border:none;
 border-radius:10px;
-cursor:pointer;
 font-weight:bold;
-margin-top:16px;
+cursor:pointer;
+margin-top:12px;
 }
-
 .save{background:#007bff;color:#fff;}
 .bulk{background:green;color:#fff;}
-.clear{background:#b30000;color:#fff;}
-
-.list{
-margin-top:25px;
+.back{
+display:block;
+text-align:center;
+text-decoration:none;
+background:#111;
+color:#fff;
+padding:12px;
+border-radius:10px;
+font-weight:bold;
+margin-top:18px;
 }
-
+.list{
+margin-top:15px;
+}
 .item{
 background:#f8f8f8;
-padding:14px;
+padding:10px;
 border-radius:10px;
-margin-bottom:12px;
+margin-bottom:10px;
 border-left:4px solid #007bff;
 }
-
-.small{
-font-size:14px;
-color:#555;
-margin-top:4px;
-word-break:break-word;
+.hide{
+display:none;
+}
+@media(min-width:700px){
+.grid{
+grid-template-columns:repeat(3,1fr);
+}
 }
 </style>
 </head>
 
 <body>
 
+<div class="topbar">📝 Admin Quiz Manager</div>
+
 <div class="container">
 
-<h2>Admin Quiz Manager</h2>
+<div class="box">
+<b>Welcome Admin 🔐 Permanent Firestore Save</b>
+</div>
 
-<label>Select Subject</label>
-<select id="subject">
-<option value="GK">GK</option>
-<option value="Maths">Maths</option>
-<option value="Reasoning">Reasoning</option>
-<option value="English">English</option>
-<option value="Post Office Guide 1">Post Office Guide 1</option>
-<option value="Post Office Guide 2">Post Office Guide 2</option>
-<option value="PO Manual Volume 5">PO Manual Volume 5</option>
-<option value="Mixed Mock Test">Mixed Mock Test</option>
-</select>
+<div class="grid">
+<div class="card" onclick="choose('GK')">📘 GK</div>
+<div class="card" onclick="choose('Maths')">➕ Maths</div>
+<div class="card" onclick="choose('Reasoning')">🧠 Reasoning</div>
+<div class="card" onclick="choose('English')">🔤 English</div>
+<div class="card" onclick="choose('Post Office Guide 1')">📮 POG 1</div>
+<div class="card" onclick="choose('Post Office Guide 2')">📮 POG 2</div>
+</div>
+
+<div class="box hide" id="panel">
+
+<h3 id="title">Add Questions</h3>
 
 <label>Question</label>
 <textarea id="question"></textarea>
 
 <label>Option A</label>
-<input type="text" id="opt1">
+<input id="opt1">
 
 <label>Option B</label>
-<input type="text" id="opt2">
+<input id="opt2">
 
 <label>Option C</label>
-<input type="text" id="opt3">
+<input id="opt3">
 
 <label>Option D</label>
-<input type="text" id="opt4">
+<input id="opt4">
 
 <label>Correct Answer</label>
 <select id="answer">
@@ -128,10 +156,13 @@ word-break:break-word;
 <option value="D">Option D</option>
 </select>
 
-<button class="save" onclick="saveQuestion()">Save Question</button>
+<button class="save" onclick="saveSingle()">Save Single Question</button>
 
-<label style="margin-top:25px;">Bulk Import (One question per block)</label>
-<textarea id="bulkData" placeholder="Format:
+<hr style="margin:18px 0">
+
+<h3>Bulk Paste Questions</h3>
+
+<textarea id="bulkBox" placeholder="Format:
 
 Question text
 A) option
@@ -143,91 +174,111 @@ Answer: A
 (next question)..."></textarea>
 
 <button class="bulk" onclick="bulkImport()">Bulk Import</button>
-<button class="clear" onclick="clearAll()">Delete All Questions</button>
 
 <div class="list" id="listBox"></div>
 
 </div>
 
-<script>
-"use strict";
+<a href="admin-pannel.html" class="back">⬅ Back to Admin Panel</a>
 
-/* ---------- SECURITY ---------- */
-document.addEventListener("contextmenu",e=>e.preventDefault());
+</div>
 
-document.addEventListener("keydown",function(e){
-if(
-e.key==="F12" ||
-(e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key.toUpperCase())) ||
-(e.ctrlKey && e.key.toUpperCase()==="U")
-){
-e.preventDefault();
-}
+<script type="module" src="firebase.js"></script>
+
+<script type="module">
+import {
+collection,
+addDoc,
+getDocs,
+query,
+where
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+let current = "";
+
+/* ---------- CATEGORY ---------- */
+window.choose = function(cat){
+
+current = cat;
+
+document.getElementById("panel").classList.remove("hide");
+
+document.getElementById("title").innerText =
+cat + " - Add Questions";
+
+showList();
+
+window.scrollTo({
+top:500,
+behavior:"smooth"
 });
 
-/* ---------- STORAGE ---------- */
-let questions =
-JSON.parse(localStorage.getItem("quizQuestions")) || [];
+};
 
 /* ---------- SAVE SINGLE ---------- */
-function saveQuestion(){
+window.saveSingle = async function(){
 
-let subject = val("subject");
-let question = val("question");
-let o1 = val("opt1");
-let o2 = val("opt2");
-let o3 = val("opt3");
-let o4 = val("opt4");
-let ans = val("answer");
-
-if(question==="" || o1==="" || o2==="" || o3==="" || o4===""){
-alert("Fill all fields");
+if(current===""){
+alert("Select subject first.");
 return;
 }
 
-let options = [o1,o2,o3,o4];
+let q = val("question");
+let a = val("opt1");
+let b = val("opt2");
+let c = val("opt3");
+let d = val("opt4");
+let ans = val("answer");
 
-let correct = "";
-
-if(ans==="A") correct=o1;
-if(ans==="B") correct=o2;
-if(ans==="C") correct=o3;
-if(ans==="D") correct=o4;
-
-questions.push({
-subject:subject,
-question:question,
-options:options,
-answer:correct
-});
-
-saveStorage();
-clearInputs();
-showList();
-alert("Question Saved");
-
+if(q===""||a===""||b===""||c===""||d===""){
+alert("Fill all fields.");
+return;
 }
 
-/* ---------- BULK IMPORT ---------- */
-function bulkImport(){
+let correct = a;
 
-let subject = val("subject");
-let text = val("bulkData").trim();
+if(ans==="B") correct=b;
+if(ans==="C") correct=c;
+if(ans==="D") correct=d;
+
+await addDoc(collection(window.db,"quizQuestions"),{
+subject:current,
+question:q,
+options:[a,b,c,d],
+answer:correct,
+createdAt:Date.now()
+});
+
+clearSingle();
+showList();
+
+alert("Question Saved Permanently");
+
+};
+
+/* ---------- BULK IMPORT ---------- */
+window.bulkImport = async function(){
+
+if(current===""){
+alert("Select subject first.");
+return;
+}
+
+let text = val("bulkBox");
 
 if(text===""){
-alert("Paste data first");
+alert("Paste questions first.");
 return;
 }
 
 let blocks = text.split(/\n\s*\n/);
-
 let count = 0;
 
-blocks.forEach(function(block){
+for(let block of blocks){
 
 let lines = block.split("\n").map(x=>x.trim()).filter(Boolean);
 
-if(lines.length >= 6){
+if(lines.length>=6){
 
 let q = lines[0];
 let a = clean(lines[1]);
@@ -237,111 +288,91 @@ let d = clean(lines[4]);
 
 let ansLine = lines[5].toUpperCase();
 
-let answer = a;
+let correct = a;
 
-if(ansLine.includes("B")) answer=b;
-if(ansLine.includes("C")) answer=c;
-if(ansLine.includes("D")) answer=d;
+if(ansLine.includes("B")) correct=b;
+if(ansLine.includes("C")) correct=c;
+if(ansLine.includes("D")) correct=d;
 
-questions.push({
-subject:subject,
+await addDoc(collection(window.db,"quizQuestions"),{
+subject:current,
 question:q,
 options:[a,b,c,d],
-answer:answer
+answer:correct,
+createdAt:Date.now()
 });
 
 count++;
 
 }
 
+}
+
+document.getElementById("bulkBox").value="";
+showList();
+
+alert(count + " Questions Imported");
+
+};
+
+/* ---------- SHOW LIST ---------- */
+async function showList(){
+
+let box = document.getElementById("listBox");
+
+let q = query(
+collection(window.db,"quizQuestions"),
+where("subject","==",current)
+);
+
+let snap = await getDocs(q);
+
+if(snap.empty){
+box.innerHTML="<br><b>No Questions Added</b>";
+return;
+}
+
+let html="<br><b>Total Questions: "+snap.size+"</b><br><br>";
+
+let i=1;
+
+snap.forEach(doc=>{
+
+let x = doc.data();
+
+html += `
+<div class="item">
+<b>${i}. ${x.question}</b><br>
+A. ${x.options[0]}<br>
+B. ${x.options[1]}<br>
+C. ${x.options[2]}<br>
+D. ${x.options[3]}<br>
+<b>Answer:</b> ${x.answer}
+</div>
+`;
+
+i++;
+
 });
 
-saveStorage();
-showList();
-alert(count + " Questions Imported");
+box.innerHTML = html;
 
 }
 
 /* ---------- HELPERS ---------- */
-function clean(t){
-return t.replace(/^A\)|^B\)|^C\)|^D\)/i,"").trim();
-}
-
 function val(id){
 return document.getElementById(id).value.trim();
 }
 
-function saveStorage(){
-localStorage.setItem(
-"quizQuestions",
-JSON.stringify(questions)
-);
-}
-
-function clearInputs(){
+function clearSingle(){
 ["question","opt1","opt2","opt3","opt4"].forEach(id=>{
 document.getElementById(id).value="";
 });
 }
 
-/* ---------- SHOW LIST ---------- */
-function showList(){
-
-let box = document.getElementById("listBox");
-
-if(questions.length===0){
-box.innerHTML="<h3>No Questions Added</h3>";
-return;
+function clean(t){
+return t.replace(/^A\)|^B\)|^C\)|^D\)/i,"").trim();
 }
-
-let html = "<h3>Total Questions: "+questions.length+"</h3><br>";
-
-questions.forEach(function(q,i){
-
-html += `
-<div class="item">
-<b>${i+1}. ${escapeHTML(q.question)}</b>
-<div class="small">Subject: ${escapeHTML(q.subject)}</div>
-<div class="small">A. ${escapeHTML(q.options[0])}</div>
-<div class="small">B. ${escapeHTML(q.options[1])}</div>
-<div class="small">C. ${escapeHTML(q.options[2])}</div>
-<div class="small">D. ${escapeHTML(q.options[3])}</div>
-<div class="small"><b>Answer:</b> ${escapeHTML(q.answer)}</div>
-</div>
-`;
-
-});
-
-box.innerHTML = html;
-}
-
-function clearAll(){
-
-if(confirm("Delete all questions?")){
-
-questions = [];
-saveStorage();
-showList();
-
-}
-
-}
-
-function escapeHTML(str){
-return str.replace(/[&<>"']/g,function(m){
-return {
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#39;"
-}[m];
-});
-}
-
-/* ---------- START ---------- */
-showList();
-
 </script>
 
 </body>
