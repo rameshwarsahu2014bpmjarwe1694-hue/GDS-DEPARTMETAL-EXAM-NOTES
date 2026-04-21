@@ -145,19 +145,17 @@ grid-template-columns:repeat(3,1fr);
 
 <div class="container">
 
-<div class="welcome">
+<div class="welcome" id="welcomeBox">
 Welcome Admin 🔐 Manage Previous Year Questions
 </div>
 
 <div class="grid">
-
 <div class="card" onclick="selectCategory('PYQ 2021')">📘 PYQ 2021</div>
 <div class="card" onclick="selectCategory('PYQ 2022')">📘 PYQ 2022</div>
 <div class="card" onclick="selectCategory('PYQ 2023')">📘 PYQ 2023</div>
 <div class="card" onclick="selectCategory('PYQ 2024')">📘 PYQ 2024</div>
 <div class="card" onclick="selectCategory('Model Paper')">📝 Model Paper</div>
 <div class="card" onclick="selectCategory('Practice Set')">🏆 Practice Set</div>
-
 </div>
 
 <div class="formbox" id="formBox">
@@ -197,8 +195,14 @@ Welcome Admin 🔐 Manage Previous Year Questions
 
 </div>
 
-<script>
-"use strict";
+<!-- Firebase -->
+<script type="module" src="firebase.js"></script>
+<script defer src="script.js"></script>
+
+<script type="module">
+import {
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
 /* ---------- SECURITY ---------- */
 document.addEventListener("contextmenu",e=>e.preventDefault());
@@ -213,14 +217,41 @@ e.preventDefault();
 }
 });
 
-/* ---------- ADMIN CHECK ---------- */
-let adminEmail="rameshwarsahu2014bpmjarwe1694@gmail.com";
-let user=localStorage.getItem("loggedUser")||"";
-
-if(user!==adminEmail){
-alert("Unauthorized Access");
-location.href="admin.html";
+/* ---------- ADMIN AUTH ---------- */
+function waitForFirebase(){
+if(window.auth){
+checkAdmin();
+}else{
+setTimeout(waitForFirebase,300);
 }
+}
+
+function checkAdmin(){
+
+onAuthStateChanged(window.auth,(user)=>{
+
+if(!user){
+alert("Please login first.");
+location.href="admin.html";
+return;
+}
+
+if(user.email !== "rameshwarsahu2014bpmjarwe1694@gmail.com"){
+alert("Unauthorized Access");
+location.href="login.html";
+return;
+}
+
+let name = user.email.split("@")[0];
+
+document.getElementById("welcomeBox").innerText =
+"Welcome " + name + " 🔐 Manage Previous Year Questions";
+
+});
+
+}
+
+waitForFirebase();
 
 /* ---------- STORAGE ---------- */
 let allPYQ =
@@ -228,8 +259,8 @@ JSON.parse(localStorage.getItem("pyqQuestions")) || [];
 
 let currentCategory = "";
 
-/* ---------- SELECT ---------- */
-function selectCategory(cat){
+/* ---------- SELECT CATEGORY ---------- */
+window.selectCategory = function(cat){
 
 currentCategory = cat;
 
@@ -240,11 +271,15 @@ cat + " - Add Questions";
 
 showList();
 
-window.scrollTo(0,500);
+window.scrollTo({
+top:500,
+behavior:"smooth"
+});
+
 }
 
 /* ---------- SAVE ---------- */
-function savePYQ(){
+window.savePYQ = function(){
 
 let q = val("question");
 let a = val("opt1");
@@ -253,8 +288,13 @@ let c = val("opt3");
 let d = val("opt4");
 let ans = val("answer");
 
+if(currentCategory===""){
+alert("Select category first.");
+return;
+}
+
 if(q===""||a===""||b===""||c===""||d===""){
-alert("Fill all fields");
+alert("Fill all fields.");
 return;
 }
 
@@ -280,6 +320,7 @@ clearInputs();
 showList();
 
 alert("Question Saved");
+
 }
 
 /* ---------- SHOW ---------- */
@@ -287,7 +328,7 @@ function showList(){
 
 let box = document.getElementById("listBox");
 
-let data = allPYQ.filter(x=>x.category===currentCategory);
+let data = allPYQ.filter(x => x.category===currentCategory);
 
 if(data.length===0){
 box.innerHTML="<br><b>No Questions Added</b>";
@@ -311,7 +352,8 @@ D. ${x.options[3]}<br>
 
 });
 
-box.innerHTML=html;
+box.innerHTML = html;
+
 }
 
 /* ---------- HELPERS ---------- */
