@@ -1,3 +1,6 @@
+<!-- =========================
+FILE 1 : admin-syllabus.html
+========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,124 +9,39 @@
 <title>Admin Syllabus Panel</title>
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,Helvetica,sans-serif;
-}
-
-body{
-background:#f4f6f9;
-padding:20px;
-}
-
-.container{
-max-width:900px;
-margin:auto;
-background:#fff;
-padding:20px;
-border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,.08);
-}
-
-h1{
-text-align:center;
-margin-bottom:20px;
-color:#222;
-}
-
-.input-box{
-display:grid;
-gap:12px;
-margin-bottom:20px;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f4f6f9;padding:20px}
+.container{max-width:900px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08)}
+h1{text-align:center;margin-bottom:20px}
+.input-box{display:grid;gap:12px;margin-bottom:20px}
 input,select,textarea{
-padding:12px;
-border:1px solid #ccc;
-border-radius:8px;
-font-size:16px;
-outline:none;
-width:100%;
+padding:12px;border:1px solid #ccc;border-radius:8px;
+font-size:16px;width:100%;outline:none
 }
-
-input:focus,select:focus,textarea:focus{
-border-color:#007bff;
-}
-
+input:focus,select:focus,textarea:focus{border-color:#007bff}
 button{
-padding:12px;
-border:none;
-border-radius:8px;
-font-size:16px;
-cursor:pointer;
-font-weight:bold;
+padding:12px;border:none;border-radius:8px;
+font-size:16px;font-weight:bold;cursor:pointer
 }
-
-.save-btn{
-background:#007bff;
-color:#fff;
-}
-
-.save-btn:hover{
-background:#0056b3;
-}
-
-.delete-btn{
-background:#dc3545;
-color:#fff;
-padding:8px 12px;
-font-size:14px;
-}
-
-.delete-btn:hover{
-background:#b02a37;
-}
-
+.save-btn{background:#007bff;color:#fff}
+.save-btn:hover{background:#0056b3}
+.delete-btn{background:#dc3545;color:#fff;padding:8px 12px;font-size:14px}
 .card{
-background:#fafafa;
-padding:15px;
-border:1px solid #ddd;
-border-radius:10px;
-margin-bottom:12px;
+background:#fafafa;padding:15px;border:1px solid #ddd;
+border-radius:10px;margin-bottom:12px
 }
-
-.row{
-display:flex;
-justify-content:space-between;
-gap:10px;
-flex-wrap:wrap;
-}
-
-.small{
-font-size:14px;
-color:#666;
-margin-top:5px;
-word-break:break-word;
-}
-
-.secure{
-text-align:center;
-margin-top:15px;
-font-size:13px;
-color:green;
-font-weight:bold;
-}
-
-.status{
-text-align:center;
-margin-top:10px;
-font-size:14px;
-font-weight:bold;
-color:#333;
+.row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.small{font-size:14px;color:#666;margin-top:5px;word-break:break-word}
+.status{text-align:center;margin-top:10px;font-size:14px;font-weight:bold}
+.link-btn{
+display:inline-block;margin-top:8px;padding:8px 12px;
+background:#28a745;color:#fff;text-decoration:none;border-radius:6px;font-size:14px
 }
 </style>
 </head>
 <body>
 
 <div class="container">
-
 <h1>Admin Syllabus Panel</h1>
 
 <div class="input-box">
@@ -137,7 +55,9 @@ color:#333;
 <option>PA/SA</option>
 </select>
 
-<input type="file" id="pdfFile" accept="application/pdf">
+<input type="text" id="fileName" placeholder="PDF File Name (Example: mts-guide.pdf)">
+
+<input type="url" id="pdfLink" placeholder="Paste GitHub PDF Link">
 
 <textarea id="desc" rows="4" placeholder="Short Description"></textarea>
 
@@ -149,16 +69,10 @@ color:#333;
 
 <div id="list">Loading...</div>
 
-<div class="secure">
-Permanent Firestore Secure Storage Enabled
-</div>
-
 </div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
 import {
 getFirestore,
 collection,
@@ -171,184 +85,132 @@ query,
 orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-getStorage,
-ref,
-uploadBytes,
-getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
 const firebaseConfig = {
-apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-databaseURL: "https://gds-departmental-exam-studyhub-default-rtdb.asia-southeast1.firebasedatabase.app",
-projectId: "gds-departmental-exam-studyhub",
-storageBucket: "gds-departmental-exam-studyhub.appspot.com",
-messagingSenderId: "759916756080",
-appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+apiKey:"YOUR_API_KEY",
+authDomain:"YOUR_PROJECT.firebaseapp.com",
+projectId:"YOUR_PROJECT_ID",
+storageBucket:"YOUR_PROJECT.appspot.com",
+messagingSenderId:"YOUR_ID",
+appId:"YOUR_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
 const list = document.getElementById("list");
 const statusMsg = document.getElementById("statusMsg");
 
+/* SAVE */
 window.saveSyllabus = async function(){
 
-const title = document.getElementById("title").value.trim();
-const category = document.getElementById("category").value;
-const desc = document.getElementById("desc").value.trim();
-const file = document.getElementById("pdfFile").files[0];
+const title = val("title");
+const category = val("category");
+const fileName = val("fileName");
+const pdfLink = val("pdfLink");
+const desc = val("desc");
 
-if(title.length < 3){
-alert("Enter valid title");
-return;
-}
-
-if(category === ""){
-alert("Select category");
-return;
-}
-
-if(!file){
-alert("Select PDF file");
-return;
-}
-
-if(file.type !== "application/pdf"){
-alert("Only PDF allowed");
-return;
-}
+if(title.length < 3) return alert("Enter valid title");
+if(category === "") return alert("Select category");
+if(fileName.length < 3) return alert("Enter file name");
+if(!isValidURL(pdfLink)) return alert("Enter valid PDF link");
 
 try{
-
-statusMsg.innerText = "Uploading PDF...";
-statusMsg.style.color = "#333";
-
-const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
-const fileName = "syllabus/" + Date.now() + "_" + cleanName;
-
-const storageRef = ref(storage,fileName);
-
-await uploadBytes(storageRef,file);
-
-statusMsg.innerText = "Generating Link...";
-
-const pdfURL = await getDownloadURL(storageRef);
+statusMsg.innerText="Saving...";
+statusMsg.style.color="#333";
 
 await addDoc(collection(db,"syllabus"),{
-title: escapeHTML(title),
-category: escapeHTML(category),
-desc: escapeHTML(desc),
-pdfLink: pdfURL,
-createdAt: serverTimestamp()
+title:esc(title),
+category:esc(category),
+fileName:esc(fileName),
+pdfLink:pdfLink,
+desc:esc(desc),
+createdAt:serverTimestamp()
 });
 
-document.getElementById("title").value = "";
-document.getElementById("category").value = "";
-document.getElementById("desc").value = "";
-document.getElementById("pdfFile").value = "";
+["title","category","fileName","pdfLink","desc"].forEach(id=>{
+document.getElementById(id).value="";
+});
 
-statusMsg.innerText = "Upload Successful";
-statusMsg.style.color = "green";
-
-alert("Syllabus Saved Permanently");
+statusMsg.innerText="Saved Permanently";
+statusMsg.style.color="green";
 
 loadData();
 
-}catch(error){
-
-statusMsg.innerText = "Failed: " + error.message;
-statusMsg.style.color = "red";
-
-alert("Upload Failed: " + error.message);
-console.log(error);
-
+}catch(e){
+statusMsg.innerText="Failed to save";
+statusMsg.style.color="red";
+console.log(e);
 }
-
 };
 
+/* LOAD */
 async function loadData(){
 
-list.innerHTML = "Loading...";
+list.innerHTML="Loading...";
 
 try{
+const q=query(collection(db,"syllabus"),orderBy("createdAt","desc"));
+const snap=await getDocs(q);
 
-const q = query(collection(db,"syllabus"),orderBy("createdAt","desc"));
+list.innerHTML="";
 
-const snapshot = await getDocs(q);
-
-list.innerHTML = "";
-
-if(snapshot.empty){
-list.innerHTML = "<p>No syllabus added.</p>";
+if(snap.empty){
+list.innerHTML="<p>No syllabus added.</p>";
 return;
 }
 
-snapshot.forEach((item)=>{
+snap.forEach(item=>{
 
-const data = item.data();
+const d=item.data();
 
 list.innerHTML += `
 <div class="card">
 <div class="row">
-
 <div>
-<h3>${safe(data.title)}</h3>
-<p>${safe(data.category)}</p>
-<p class="small">${safe(data.desc || "")}</p>
-<p class="small">${safe(data.pdfLink)}</p>
+<h3>${safe(d.title)}</h3>
+<p>${safe(d.category)}</p>
+<p class="small">${safe(d.desc)}</p>
+<p class="small"><b>File:</b> ${safe(d.fileName)}</p>
+<a class="link-btn" href="${safe(d.pdfLink)}" target="_blank">Open PDF</a>
 </div>
 
 <div>
 <button class="delete-btn" onclick="deleteItem('${item.id}')">Delete</button>
 </div>
-
 </div>
 </div>
 `;
 
 });
 
-}catch(error){
-list.innerHTML = "Failed to load data";
-console.log(error);
+}catch(e){
+list.innerHTML="Load failed";
+console.log(e);
+}
 }
 
-}
-
+/* DELETE */
 window.deleteItem = async function(id){
-
 if(!confirm("Delete this syllabus?")) return;
-
 await deleteDoc(doc(db,"syllabus",id));
-
 loadData();
-
 };
 
-function escapeHTML(str){
-return String(str).replace(/[&<>"']/g,function(m){
-return ({
-'&':'&amp;',
-'<':'&lt;',
-'>':'&gt;',
-'"':'&quot;',
-"'":'&#39;'
-})[m];
-});
+/* HELPERS */
+function val(id){return document.getElementById(id).value.trim();}
+function esc(str){
+return String(str).replace(/[&<>"']/g,m=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[m]));
+}
+function safe(str){return str || "";}
+function isValidURL(url){
+try{ new URL(url); return true; }catch{ return false; }
 }
 
-function safe(str){
-if(!str) return "";
-return str;
-}
+document.addEventListener("contextmenu",e=>e.preventDefault());
 
 loadData();
-
 </script>
-
 </body>
 </html>
