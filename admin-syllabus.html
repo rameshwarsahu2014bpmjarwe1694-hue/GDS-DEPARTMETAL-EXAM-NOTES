@@ -1,5 +1,6 @@
 <!-- =========================
 FILE 1 : admin-syllabus.html
+Filename Only + Firestore Permanent Save
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +12,10 @@ FILE 1 : admin-syllabus.html
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#f4f6f9;padding:20px}
-.container{max-width:900px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08)}
+.container{
+max-width:900px;margin:auto;background:#fff;padding:20px;
+border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08)
+}
 h1{text-align:center;margin-bottom:20px}
 .input-box{display:grid;gap:12px;margin-bottom:20px}
 input,select,textarea{
@@ -25,23 +29,26 @@ font-size:16px;font-weight:bold;cursor:pointer
 }
 .save-btn{background:#007bff;color:#fff}
 .save-btn:hover{background:#0056b3}
-.delete-btn{background:#dc3545;color:#fff;padding:8px 12px;font-size:14px}
+.delete-btn{
+background:#dc3545;color:#fff;
+padding:8px 12px;font-size:14px
+}
 .card{
 background:#fafafa;padding:15px;border:1px solid #ddd;
 border-radius:10px;margin-bottom:12px
 }
-.row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.small{font-size:14px;color:#666;margin-top:5px;word-break:break-word}
-.status{text-align:center;margin-top:10px;font-size:14px;font-weight:bold}
-.link-btn{
-display:inline-block;margin-top:8px;padding:8px 12px;
-background:#28a745;color:#fff;text-decoration:none;border-radius:6px;font-size:14px
+.row{
+display:flex;justify-content:space-between;
+gap:10px;flex-wrap:wrap
 }
+.small{font-size:14px;color:#666;margin-top:5px}
+.status{text-align:center;margin-top:10px;font-size:14px;font-weight:bold}
 </style>
 </head>
 <body>
 
 <div class="container">
+
 <h1>Admin Syllabus Panel</h1>
 
 <div class="input-box">
@@ -55,9 +62,7 @@ background:#28a745;color:#fff;text-decoration:none;border-radius:6px;font-size:1
 <option>PA/SA</option>
 </select>
 
-<input type="text" id="fileName" placeholder="PDF File Name (Example: mts-guide.pdf)">
-
-<input type="url" id="pdfLink" placeholder="Paste GitHub PDF Link">
+<input type="text" id="fileName" placeholder="PDF File Name (Example: GDS to MTS Exam Pattern 2026.pdf)">
 
 <textarea id="desc" rows="4" placeholder="Short Description"></textarea>
 
@@ -73,6 +78,7 @@ background:#28a745;color:#fff;text-decoration:none;border-radius:6px;font-size:1
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
 getFirestore,
 collection,
@@ -85,6 +91,7 @@ query,
 orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* REAL CONFIG */
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
 authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
@@ -107,41 +114,42 @@ window.saveSyllabus = async function(){
 const title = val("title");
 const category = val("category");
 const fileName = val("fileName");
-const pdfLink = val("pdfLink");
 const desc = val("desc");
 
 if(title.length < 3) return alert("Enter valid title");
 if(category === "") return alert("Select category");
-if(fileName.length < 3) return alert("Enter file name");
-if(!isValidURL(pdfLink)) return alert("Enter valid PDF link");
+if(fileName.length < 4) return alert("Enter valid PDF file name");
 
 try{
-statusMsg.innerText="Saving...";
-statusMsg.style.color="#333";
+
+statusMsg.innerText = "Saving...";
+statusMsg.style.color = "#333";
 
 await addDoc(collection(db,"syllabus"),{
-title:esc(title),
-category:esc(category),
-fileName:esc(fileName),
-pdfLink:pdfLink,
-desc:esc(desc),
-createdAt:serverTimestamp()
+title: esc(title),
+category: esc(category),
+fileName: esc(fileName),
+desc: esc(desc),
+createdAt: serverTimestamp()
 });
 
-["title","category","fileName","pdfLink","desc"].forEach(id=>{
+["title","category","fileName","desc"].forEach(id=>{
 document.getElementById(id).value="";
 });
 
-statusMsg.innerText="Saved Permanently";
-statusMsg.style.color="green";
+statusMsg.innerText = "Saved Permanently";
+statusMsg.style.color = "green";
 
 loadData();
 
-}catch(e){
-statusMsg.innerText="Failed to save";
-statusMsg.style.color="red";
-console.log(e);
+}catch(error){
+
+statusMsg.innerText = "Failed to save";
+statusMsg.style.color = "red";
+console.log(error);
+
 }
+
 };
 
 /* LOAD */
@@ -150,6 +158,7 @@ async function loadData(){
 list.innerHTML="Loading...";
 
 try{
+
 const q=query(collection(db,"syllabus"),orderBy("createdAt","desc"));
 const snap=await getDocs(q);
 
@@ -167,27 +176,29 @@ const d=item.data();
 list.innerHTML += `
 <div class="card">
 <div class="row">
+
 <div>
 <h3>${safe(d.title)}</h3>
 <p>${safe(d.category)}</p>
 <p class="small">${safe(d.desc)}</p>
 <p class="small"><b>File:</b> ${safe(d.fileName)}</p>
-<a class="link-btn" href="${safe(d.pdfLink)}" target="_blank">Open PDF</a>
 </div>
 
 <div>
 <button class="delete-btn" onclick="deleteItem('${item.id}')">Delete</button>
 </div>
+
 </div>
 </div>
 `;
 
 });
 
-}catch(e){
+}catch(error){
 list.innerHTML="Load failed";
-console.log(e);
+console.log(error);
 }
+
 }
 
 /* DELETE */
@@ -198,20 +209,25 @@ loadData();
 };
 
 /* HELPERS */
-function val(id){return document.getElementById(id).value.trim();}
+function val(id){ return document.getElementById(id).value.trim(); }
+
 function esc(str){
 return String(str).replace(/[&<>"']/g,m=>({
-"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
 }[m]));
 }
-function safe(str){return str || "";}
-function isValidURL(url){
-try{ new URL(url); return true; }catch{ return false; }
-}
 
+function safe(str){ return str || ""; }
+
+/* SECURITY */
 document.addEventListener("contextmenu",e=>e.preventDefault());
 
 loadData();
+
 </script>
 </body>
 </html>
