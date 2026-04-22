@@ -128,7 +128,58 @@ font-weight:bold;
 <option>PA/SA</option>
 </select>
 
-<input type="url" id="pdfLink" placeholder="PDF Link">
+<input type="file" id="pdfFile" accept="application/pdf" style="width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;margin-bottom:10px;">
+
+<script type="module">
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const db = getFirestore();
+const storage = getStorage();
+
+window.saveSyllabus = async function () {
+
+const title = document.getElementById("title").value.trim();
+const category = document.getElementById("category").value;
+const desc = document.getElementById("description").value.trim();
+const file = document.getElementById("pdfFile").files[0];
+
+if (!title || !category || !file) {
+alert("Fill all required fields");
+return;
+}
+
+try {
+
+const fileName = "syllabus/" + Date.now() + "_" + file.name;
+
+const storageRef = ref(storage, fileName);
+
+await uploadBytes(storageRef, file);
+
+const pdfURL = await getDownloadURL(storageRef);
+
+await addDoc(collection(db, "syllabus"), {
+title: title,
+category: category,
+desc: desc,
+pdfLink: pdfURL,
+createdAt: serverTimestamp()
+});
+
+alert("PDF Uploaded Successfully");
+
+document.getElementById("title").value = "";
+document.getElementById("description").value = "";
+document.getElementById("pdfFile").value = "";
+
+} catch (error) {
+alert("Upload Failed");
+console.log(error);
+}
+
+}
+</script>
 
 <textarea id="desc" rows="4" placeholder="Short Description"></textarea>
 
