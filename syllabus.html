@@ -1,7 +1,6 @@
 <!-- =========================
 FILE 2 : syllabus.html
-Candidate Page
-Filename Only + Firestore Permanent Read
+Candidate Read Only Final
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -22,15 +21,12 @@ h1{text-align:center;margin-bottom:20px}
 background:#fafafa;padding:15px;border:1px solid #ddd;
 border-radius:10px;margin-bottom:12px
 }
-.row{
-display:flex;justify-content:space-between;
-gap:10px;flex-wrap:wrap;align-items:center
-}
 .small{font-size:14px;color:#666;margin-top:5px}
-.open-btn{
+.download-btn{
 display:inline-block;
+margin-top:10px;
 padding:10px 14px;
-background:#007bff;
+background:#28a745;
 color:#fff;
 text-decoration:none;
 border-radius:8px;
@@ -41,8 +37,11 @@ font-weight:bold;
 <body>
 
 <div class="container">
-<h1>Available Syllabus</h1>
+
+<h1>Candidate Syllabus</h1>
+
 <div id="list">Loading...</div>
+
 </div>
 
 <script type="module">
@@ -56,11 +55,9 @@ query,
 orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* REAL CONFIG */
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
 authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-databaseURL: "https://gds-departmental-exam-studyhub-default-rtdb.asia-southeast1.firebasedatabase.app",
 projectId: "gds-departmental-exam-studyhub",
 storageBucket: "gds-departmental-exam-studyhub.appspot.com",
 messagingSenderId: "759916756080",
@@ -70,12 +67,11 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const list = document.getElementById("list");
+const list=document.getElementById("list");
 
-/* LOAD */
+loadData();
+
 async function loadData(){
-
-list.innerHTML="Loading...";
 
 try{
 
@@ -95,35 +91,27 @@ const d=item.data();
 
 list.innerHTML += `
 <div class="card">
-<div class="row">
-
-<div>
 <h3>${safe(d.title)}</h3>
 <p>${safe(d.category)}</p>
 <p class="small">${safe(d.desc)}</p>
-<p class="small"><b>File:</b> ${safe(d.fileName)}</p>
-</div>
 
-<div>
-<a class="open-btn" href="${safe(d.fileName)}" target="_blank">Open</a>
-</div>
+<a class="download-btn" href="${safe(d.fileName)}" download>
+${safe(d.fileName)}
+</a>
 
-</div>
 </div>
 `;
 
 });
 
-}catch(error){
-list.innerHTML="Failed to load";
-console.log(error);
+}catch(err){
+list.innerHTML="Failed to Load";
+console.log(err);
 }
 
 }
 
 function safe(str){ return str || ""; }
-
-loadData();
 
 </script>
 </body>
