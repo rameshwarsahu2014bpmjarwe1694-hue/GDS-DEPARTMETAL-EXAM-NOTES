@@ -1,6 +1,6 @@
 <!-- =========================
 FILE 1 : admin-syllabus.html
-Filename Only + Firestore Permanent Save
+Firestore Rules Compatible Final Version
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -22,17 +22,12 @@ input,select,textarea{
 padding:12px;border:1px solid #ccc;border-radius:8px;
 font-size:16px;width:100%;outline:none
 }
-input:focus,select:focus,textarea:focus{border-color:#007bff}
 button{
 padding:12px;border:none;border-radius:8px;
 font-size:16px;font-weight:bold;cursor:pointer
 }
 .save-btn{background:#007bff;color:#fff}
-.save-btn:hover{background:#0056b3}
-.delete-btn{
-background:#dc3545;color:#fff;
-padding:8px 12px;font-size:14px
-}
+.delete-btn{background:#dc3545;color:#fff}
 .card{
 background:#fafafa;padding:15px;border:1px solid #ddd;
 border-radius:10px;margin-bottom:12px
@@ -42,7 +37,7 @@ display:flex;justify-content:space-between;
 gap:10px;flex-wrap:wrap
 }
 .small{font-size:14px;color:#666;margin-top:5px}
-.status{text-align:center;margin-top:10px;font-size:14px;font-weight:bold}
+.status{text-align:center;margin-top:10px;font-weight:bold}
 </style>
 </head>
 <body>
@@ -62,7 +57,7 @@ gap:10px;flex-wrap:wrap
 <option>PA/SA</option>
 </select>
 
-<input type="text" id="fileName" placeholder="PDF File Name (Example: GDS to MTS Exam Pattern 2026.pdf)">
+<input type="text" id="fileName" placeholder="PDF File Name (Example.pdf)">
 
 <textarea id="desc" rows="4" placeholder="Short Description"></textarea>
 
@@ -91,39 +86,57 @@ query,
 orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* REAL CONFIG */
+import {
+getAuth,
+signInWithEmailAndPassword,
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
 authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-databaseURL: "https://gds-departmental-exam-studyhub-default-rtdb.asia-southeast1.firebasedatabase.app",
 projectId: "gds-departmental-exam-studyhub",
 storageBucket: "gds-departmental-exam-studyhub.appspot.com",
 messagingSenderId: "759916756080",
 appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
+const ADMIN_EMAIL = "rameshwarsahu2014bpmjarwe1694@gmail.com";
+const ADMIN_PASS = "YOUR_ADMIN_PASSWORD";
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 const list = document.getElementById("list");
 const statusMsg = document.getElementById("statusMsg");
 
+/* AUTO LOGIN */
+signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASS)
+.then(()=>loadData())
+.catch(err=>{
+statusMsg.innerText="Admin Login Failed";
+statusMsg.style.color="red";
+console.log(err);
+});
+
 /* SAVE */
 window.saveSyllabus = async function(){
+
+if(!auth.currentUser) return alert("Admin not logged in");
 
 const title = val("title");
 const category = val("category");
 const fileName = val("fileName");
 const desc = val("desc");
 
-if(title.length < 3) return alert("Enter valid title");
-if(category === "") return alert("Select category");
-if(fileName.length < 4) return alert("Enter valid PDF file name");
+if(title.length < 3) return alert("Enter title");
+if(category==="") return alert("Select category");
+if(fileName.length < 4) return alert("Enter file name");
 
 try{
 
-statusMsg.innerText = "Saving...";
-statusMsg.style.color = "#333";
+statusMsg.innerText="Saving...";
 
 await addDoc(collection(db,"syllabus"),{
 title: esc(title),
@@ -133,29 +146,23 @@ desc: esc(desc),
 createdAt: serverTimestamp()
 });
 
-["title","category","fileName","desc"].forEach(id=>{
-document.getElementById(id).value="";
-});
+clearForm();
 
-statusMsg.innerText = "Saved Permanently";
-statusMsg.style.color = "green";
+statusMsg.innerText="Saved Permanently";
+statusMsg.style.color="green";
 
 loadData();
 
-}catch(error){
-
-statusMsg.innerText = "Failed to save";
-statusMsg.style.color = "red";
-console.log(error);
-
+}catch(err){
+statusMsg.innerText="Save Failed";
+statusMsg.style.color="red";
+console.log(err);
 }
 
 };
 
 /* LOAD */
 async function loadData(){
-
-list.innerHTML="Loading...";
 
 try{
 
@@ -194,22 +201,30 @@ list.innerHTML += `
 
 });
 
-}catch(error){
-list.innerHTML="Load failed";
-console.log(error);
+}catch(err){
+list.innerHTML="Load Failed";
+console.log(err);
 }
 
 }
 
 /* DELETE */
 window.deleteItem = async function(id){
+
 if(!confirm("Delete this syllabus?")) return;
+
 await deleteDoc(doc(db,"syllabus",id));
 loadData();
+
 };
 
-/* HELPERS */
 function val(id){ return document.getElementById(id).value.trim(); }
+
+function clearForm(){
+["title","category","fileName","desc"].forEach(id=>{
+document.getElementById(id).value="";
+});
+}
 
 function esc(str){
 return String(str).replace(/[&<>"']/g,m=>({
@@ -223,10 +238,7 @@ return String(str).replace(/[&<>"']/g,m=>({
 
 function safe(str){ return str || ""; }
 
-/* SECURITY */
 document.addEventListener("contextmenu",e=>e.preventDefault());
-
-loadData();
 
 </script>
 </body>
