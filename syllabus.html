@@ -1,3 +1,6 @@
+<!-- =========================
+FILE 2 : syllabus.html
+========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,162 +9,42 @@
 <title>Syllabus</title>
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,Helvetica,sans-serif;
-}
-
-body{
-background:#f4f6f9;
-padding:20px;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f4f6f9;padding:20px}
 .container{
-max-width:950px;
-margin:auto;
-background:#fff;
-padding:20px;
-border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,.08);
+max-width:900px;margin:auto;background:#fff;padding:20px;
+border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08)
 }
-
-h1{
-text-align:center;
-margin-bottom:20px;
-color:#222;
-}
-
-.top-bar{
-display:grid;
-grid-template-columns:1fr 220px;
-gap:12px;
-margin-bottom:18px;
-}
-
-input,select{
-padding:12px;
-border:1px solid #ccc;
-border-radius:8px;
-font-size:16px;
-outline:none;
-}
-
-input:focus,select:focus{
-border-color:#007bff;
-}
-
+h1{text-align:center;margin-bottom:20px}
 .card{
-background:#fafafa;
-border:1px solid #ddd;
-border-radius:10px;
-padding:16px;
-margin-bottom:14px;
+background:#fafafa;padding:15px;border:1px solid #ddd;
+border-radius:10px;margin-bottom:12px
 }
-
 .row{
-display:flex;
-justify-content:space-between;
-gap:12px;
-align-items:flex-start;
-flex-wrap:wrap;
+display:flex;justify-content:space-between;
+gap:10px;flex-wrap:wrap;align-items:center
 }
-
-h3{
-color:#111;
-margin-bottom:8px;
-}
-
-.badge{
-display:inline-block;
-padding:5px 10px;
-border-radius:30px;
-font-size:13px;
-background:#e9f2ff;
-color:#0056b3;
-margin-bottom:8px;
-font-weight:bold;
-}
-
-.desc{
-font-size:14px;
-color:#555;
-margin-top:6px;
-line-height:1.5;
-white-space:pre-wrap;
-}
-
-.small{
-font-size:13px;
-color:#777;
-margin-top:8px;
-word-break:break-word;
-}
-
-.btn{
+.small{font-size:14px;color:#666;margin-top:5px}
+.open-btn{
 display:inline-block;
 padding:10px 14px;
 background:#007bff;
 color:#fff;
 text-decoration:none;
 border-radius:8px;
-font-size:14px;
 font-weight:bold;
-}
-
-.btn:hover{
-background:#0056b3;
-}
-
-.center{
-text-align:center;
-padding:20px;
-color:#666;
-}
-
-.secure{
-text-align:center;
-margin-top:14px;
-font-size:13px;
-color:green;
-font-weight:bold;
-}
-
-@media(max-width:700px){
-.top-bar{
-grid-template-columns:1fr;
-}
 }
 </style>
 </head>
 <body>
 
 <div class="container">
-
-<h1>Latest Syllabus</h1>
-
-<div class="top-bar">
-<input type="text" id="searchBox" placeholder="Search syllabus..." oninput="renderData()">
-
-<select id="categoryFilter" onchange="renderData()">
-<option value="">All Categories</option>
-<option>MTS</option>
-<option>Postman</option>
-<option>PA/SA</option>
-</select>
-</div>
-
-<div id="list" class="center">Loading...</div>
-
-
-
+<h1>Available Syllabus</h1>
+<div id="list">Loading...</div>
 </div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
 import {
 getFirestore,
 collection,
@@ -171,95 +54,52 @@ orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-  authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-  databaseURL: "https://gds-departmental-exam-studyhub-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "gds-departmental-exam-studyhub",
-  storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
-  messagingSenderId: "759916756080",
-  appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+apiKey:"YOUR_API_KEY",
+authDomain:"YOUR_PROJECT.firebaseapp.com",
+projectId:"YOUR_PROJECT_ID",
+storageBucket:"YOUR_PROJECT.appspot.com",
+messagingSenderId:"YOUR_ID",
+appId:"YOUR_APP_ID"
 };
-/* =============================== */
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const list = document.getElementById("list");
-
-let allData = [];
+const list=document.getElementById("list");
 
 async function loadData(){
 
+list.innerHTML="Loading...";
+
 try{
 
-const q = query(collection(db,"syllabus"),orderBy("createdAt","desc"));
+const q=query(collection(db,"syllabus"),orderBy("createdAt","desc"));
+const snap=await getDocs(q);
 
-const snap = await getDocs(q);
+list.innerHTML="";
 
-allData = [];
-
-snap.forEach(docItem=>{
-allData.push({
-id: docItem.id,
-...docItem.data()
-});
-});
-
-renderData();
-
-}catch(error){
-
-list.innerHTML = "Failed to load data";
-console.log(error);
-
-}
-
-}
-
-window.renderData = function(){
-
-const search = document.getElementById("searchBox").value.toLowerCase().trim();
-const cat = document.getElementById("categoryFilter").value;
-
-let filtered = allData.filter(item=>{
-
-let title = (item.title || "").toLowerCase();
-let desc = (item.desc || "").toLowerCase();
-let category = item.category || "";
-
-let matchSearch =
-title.includes(search) ||
-desc.includes(search);
-
-let matchCat =
-cat === "" || category === cat;
-
-return matchSearch && matchCat;
-
-});
-
-if(filtered.length === 0){
-list.innerHTML = `<div class="center">No syllabus found</div>`;
+if(snap.empty){
+list.innerHTML="<p>No syllabus available.</p>";
 return;
 }
 
-list.innerHTML = "";
+snap.forEach(item=>{
 
-filtered.forEach(item=>{
+const d=item.data();
 
 list.innerHTML += `
 <div class="card">
 <div class="row">
 
-<div style="flex:1;">
-<div class="badge">${safe(item.category)}</div>
-<h3>${safe(item.title)}</h3>
-<div class="desc">${safe(item.desc || "")}</div>
-<div class="small">${safe(item.pdfLink)}</div>
+<div>
+<h3>${safe(d.title)}</h3>
+<p>${safe(d.category)}</p>
+<p class="small">${safe(d.desc)}</p>
+<p class="small"><b>File:</b> ${safe(d.fileName)}</p>
 </div>
 
 <div>
-<a class="btn" href="${safeLink(item.pdfLink)}" target="_blank">Open PDF</a>
+<a class="open-btn" href="${safe(d.pdfLink)}" target="_blank">Open</a>
 </div>
 
 </div>
@@ -268,33 +108,16 @@ list.innerHTML += `
 
 });
 
-};
-
-function safe(str){
-if(!str) return "";
-return String(str)
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#39;");
+}catch(e){
+list.innerHTML="Failed to load";
+console.log(e);
 }
 
-function safeLink(url){
-if(!url) return "#";
-
-if(
-url.startsWith("https://") ||
-url.startsWith("http://")
-){
-return url;
 }
 
-return "#";
-}
+function safe(str){ return str || ""; }
 
 loadData();
-
 </script>
 
 </body>
