@@ -1,5 +1,7 @@
 <!-- =========================
 FILE 2 : syllabus.html
+Candidate Page
+Filename Only + Firestore Permanent Read
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -45,6 +47,7 @@ font-weight:bold;
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
 getFirestore,
 collection,
@@ -53,6 +56,7 @@ query,
 orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* REAL CONFIG */
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
 authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
@@ -66,8 +70,9 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const list=document.getElementById("list");
+const list = document.getElementById("list");
 
+/* LOAD */
 async function loadData(){
 
 list.innerHTML="Loading...";
@@ -100,7 +105,7 @@ list.innerHTML += `
 </div>
 
 <div>
-<a class="open-btn" href="${safe(d.pdfLink)}" target="_blank">Open</a>
+<a class="open-btn" href="${safe(d.fileName)}" target="_blank">Open</a>
 </div>
 
 </div>
@@ -109,9 +114,9 @@ list.innerHTML += `
 
 });
 
-}catch(e){
+}catch(error){
 list.innerHTML="Failed to load";
-console.log(e);
+console.log(error);
 }
 
 }
@@ -119,7 +124,7 @@ console.log(e);
 function safe(str){ return str || ""; }
 
 loadData();
-</script>
 
+</script>
 </body>
 </html>
