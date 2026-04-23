@@ -115,7 +115,7 @@ const statusMsg = document.getElementById("statusMsg");
 signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASS)
 .then(()=>loadData())
 .catch(err=>{
-statusMsg.innerText="Admin Login Failed";
+
 statusMsg.style.color="red";
 console.log(err);
 });
