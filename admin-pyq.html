@@ -44,10 +44,13 @@ button{width:100%;padding:12px;border:none;border-radius:10px;font-weight:bold;c
 </div>
 
 <div class="grid">
+<div class="card" onclick="choose('PYQ 2020')">📘 PYQ 2020</div>
 <div class="card" onclick="choose('PYQ 2021')">📘 PYQ 2021</div>
 <div class="card" onclick="choose('PYQ 2022')">📘 PYQ 2022</div>
 <div class="card" onclick="choose('PYQ 2023')">📘 PYQ 2023</div>
 <div class="card" onclick="choose('PYQ 2024')">📘 PYQ 2024</div>
+<div class="card" onclick="choose('PYQ 2025')">📘 PYQ 2025</div>
+<div class="card" onclick="choose('PYQ 2026')">📘 PYQ 2026</div>
 <div class="card" onclick="choose('Model Paper')">📝 Model Paper</div>
 <div class="card" onclick="choose('Practice Set')">🏆 Practice Set</div>
 </div>
@@ -130,7 +133,7 @@ where
 let current = "";
 
 /* PASTE TOKEN HERE */
-const GITHUB_TOKEN = "PASTE_YOUR_TOKEN_HERE";
+const const GITHUB_TOKEN = prompt("Enter GitHub PAT Token");
 
 const USERNAME = "rameshwarsahu2014bpmjarwe1694-hue";
 const REPO = "GDS-DEPARTMETAL-EXAM-NOTES";
