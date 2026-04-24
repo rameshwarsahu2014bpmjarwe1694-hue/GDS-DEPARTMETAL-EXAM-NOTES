@@ -18,6 +18,7 @@ body{background:#f4f4f4}
 .back{display:block;text-align:center;text-decoration:none;background:#111;color:#fff;padding:12px;border-radius:10px;font-weight:bold;margin-top:18px}
 .list{margin-top:15px}
 .item{background:#f8f8f8;padding:12px;border-radius:10px;margin-bottom:10px;border-left:4px solid #007bff}
+.btn{display:block;text-decoration:none;text-align:center;background:#007bff;color:#fff;padding:10px;border-radius:8px;margin-top:10px;font-weight:bold}
 .hide{display:none}
 @media(min-width:700px){.grid{grid-template-columns:repeat(3,1fr)}}
 </style>
@@ -66,11 +67,14 @@ where
 
 let current="";
 
+const USERNAME="rameshwarsahu2014bpmjarwe1694-hue";
+const REPO="GDS-DEPARTMETAL-EXAM-NOTES";
+
 window.choose = async function(cat){
 current=cat;
 
 document.getElementById("panel").classList.remove("hide");
-document.getElementById("title").innerText=cat+" - Questions";
+document.getElementById("title").innerText=cat+" - Content";
 
 showList();
 
@@ -83,7 +87,36 @@ behavior:"smooth"
 async function showList(){
 
 const box=document.getElementById("listBox");
+let html="";
 
+/* Files */
+let f1=query(
+collection(window.db,"pyqFiles"),
+where("category","==",current)
+);
+
+let fileSnap=await getDocs(f1);
+
+if(!fileSnap.empty){
+
+html+="<br><b>Uploaded Files</b><br><br>";
+
+fileSnap.forEach(docSnap=>{
+let x=docSnap.data();
+
+let url=`https://raw.githubusercontent.com/${USERNAME}/${REPO}/main/${x.path}`;
+
+html+=`
+<div class="item">
+<b>${x.title}</b><br>
+${x.description || ""}<br>
+<a class="btn" href="${url}" target="_blank">Open File</a>
+</div>
+`;
+});
+}
+
+/* Questions */
 let q1=query(
 collection(window.db,"pyqQuestions"),
 where("category","==",current)
@@ -91,12 +124,10 @@ where("category","==",current)
 
 let snap=await getDocs(q1);
 
-if(snap.empty){
-box.innerHTML="<br><b>No Questions Available</b>";
-return;
-}
+if(!snap.empty){
 
-let html="<br><b>Total Questions: "+snap.size+"</b><br><br>";
+html+="<br><b>Questions</b><br><br>";
+
 let i=1;
 
 snap.forEach(docSnap=>{
@@ -114,6 +145,11 @@ D. ${x.options[3]}<br><br>
 `;
 i++;
 });
+}
+
+if(html===""){
+html="<br><b>No Content Available</b>";
+}
 
 box.innerHTML=html;
 }
