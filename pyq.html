@@ -1,153 +1,122 @@
-
+<!-- STRICT WORKING FINAL pyq.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PYQ - Previous Year Questions</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PYQ</title>
 
 <style>
-body{
-margin:0;
-font-family:Arial,sans-serif;
-background:#f4f6f8;
-}
-
-.topbar{
-background:#111;
-color:#fff;
-padding:15px;
-text-align:center;
-font-size:22px;
-font-weight:bold;
-}
-
-.container{
-padding:20px;
-max-width:900px;
-margin:auto;
-}
-
-.welcome{
-background:#fff;
-padding:16px;
-border-radius:12px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
-margin-bottom:18px;
-font-size:18px;
-font-weight:bold;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:14px;
-}
-
-.card{
-background:#fff;
-padding:18px;
-border-radius:14px;
-text-align:center;
-font-weight:bold;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
-text-decoration:none;
-color:#111;
-cursor:pointer;
-}
-
-.card:hover{
-transform:translateY(-2px);
-transition:0.2s;
-}
-
-.back{
-display:block;
-margin-top:22px;
-background:#111;
-color:#fff;
-padding:12px;
-text-align:center;
-border-radius:10px;
-text-decoration:none;
-font-weight:bold;
-}
-
-@media(min-width:700px){
-.grid{
-grid-template-columns:repeat(3,1fr);
-}
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f4f4f4}
+.topbar{background:#000;color:#fff;padding:15px;text-align:center;font-size:20px;font-weight:bold}
+.container{max-width:1000px;margin:auto;padding:20px}
+.box{background:#fff;padding:18px;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.08);margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}
+.card{background:#fff;padding:18px 10px;border-radius:14px;text-align:center;font-weight:bold;font-size:16px;box-shadow:0 4px 10px rgba(0,0,0,.08);cursor:pointer}
+.card:hover{transform:translateY(-3px)}
+.back{display:block;text-align:center;text-decoration:none;background:#111;color:#fff;padding:12px;border-radius:10px;font-weight:bold;margin-top:18px}
+.list{margin-top:15px}
+.item{background:#f8f8f8;padding:12px;border-radius:10px;margin-bottom:10px;border-left:4px solid #007bff}
+.hide{display:none}
+@media(min-width:700px){.grid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 
 <body>
 
-<div class="topbar">📄 Previous Year Questions</div>
+<div class="topbar">📘 Previous Year Questions</div>
 
 <div class="container">
 
-<div class="welcome" id="welcomeBox">
-Loading...
+<div class="box">
+<b>Select Category</b>
 </div>
 
 <div class="grid">
-
-<a href="pdf/pyq-2021.pdf" target="_blank" class="card">📘 PYQ 2021</a>
-
-<a href="pdf/pyq-2022.pdf" target="_blank" class="card">📘 PYQ 2022</a>
-
-<a href="pdf/pyq-2023.pdf" target="_blank" class="card">📘 PYQ 2023</a>
-
-<a href="pdf/pyq-2024.pdf" target="_blank" class="card">📘 PYQ 2024</a>
-
-<a href="pdf/model-paper.pdf" target="_blank" class="card">📝 Model Paper</a>
-
-<a href="pdf/practice-set.pdf" target="_blank" class="card">🏆 Practice Set</a>
-
+<div class="card" onclick="choose('PYQ 2020')">📘 PYQ 2020</div>
+<div class="card" onclick="choose('PYQ 2021')">📘 PYQ 2021</div>
+<div class="card" onclick="choose('PYQ 2022')">📘 PYQ 2022</div>
+<div class="card" onclick="choose('PYQ 2023')">📘 PYQ 2023</div>
+<div class="card" onclick="choose('PYQ 2024')">📘 PYQ 2024</div>
+<div class="card" onclick="choose('PYQ 2025')">📘 PYQ 2025</div>
+<div class="card" onclick="choose('PYQ 2026')">📘 PYQ 2026</div>
+<div class="card" onclick="choose('Model Paper')">📝 Model Paper</div>
+<div class="card" onclick="choose('Practice Set')">🏆 Practice Set</div>
 </div>
 
-<a href="dashboard.html" class="back">⬅ Back to Dashboard</a>
+<div class="box hide" id="panel">
+<h3 id="title">Questions</h3>
+<div class="list" id="listBox"></div>
+</div>
+
+<a href="candidate-dashboard.html" class="back">⬅ Back</a>
 
 </div>
 
 <script type="module" src="firebase.js"></script>
 
 <script type="module">
-
 import {
-onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+collection,
+getDocs,
+query,
+where
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-function waitForFirebase(){
-if(window.auth){
-checkLogin();
-}else{
-setTimeout(waitForFirebase,300);
-}
-}
+let current="";
 
-function checkLogin(){
+window.choose = async function(cat){
+current=cat;
 
-onAuthStateChanged(window.auth,(user)=>{
+document.getElementById("panel").classList.remove("hide");
+document.getElementById("title").innerText=cat+" - Questions";
 
-if(!user){
-alert("Please login first.");
-window.location.href="login.html";
+showList();
+
+window.scrollTo({
+top:500,
+behavior:"smooth"
+});
+};
+
+async function showList(){
+
+const box=document.getElementById("listBox");
+
+let q1=query(
+collection(window.db,"pyqQuestions"),
+where("category","==",current)
+);
+
+let snap=await getDocs(q1);
+
+if(snap.empty){
+box.innerHTML="<br><b>No Questions Available</b>";
 return;
 }
 
-let name = user.email.split("@")[0];
+let html="<br><b>Total Questions: "+snap.size+"</b><br><br>";
+let i=1;
 
-document.getElementById("welcomeBox").innerHTML =
-"Welcome " + name + " 👋";
+snap.forEach(docSnap=>{
+let x=docSnap.data();
 
+html+=`
+<div class="item">
+<b>${i}. ${x.question}</b><br><br>
+A. ${x.options[0]}<br>
+B. ${x.options[1]}<br>
+C. ${x.options[2]}<br>
+D. ${x.options[3]}<br><br>
+<b>Answer:</b> ${x.answer}
+</div>
+`;
+i++;
 });
 
+box.innerHTML=html;
 }
-
-waitForFirebase();
-
 </script>
 
 </body>
