@@ -150,18 +150,36 @@ behavior:"smooth"
 /* Upload File */
 window.uploadFile = async function(){
 
-if(current===""){alert("Select category first");return;}
+if(window.uploading) return;
+window.uploading = true;
+
+if(current===""){
+window.uploading = false;
+alert("Select category first");
+return;
+}
 
 const file = document.getElementById("fileInput").files[0];
 const title = document.getElementById("fileTitle").value.trim();
 const desc = document.getElementById("fileDesc").value.trim();
 
-if(!file){alert("Choose file");return;}
-if(title===""){alert("Enter file title");return;}
+if(!file){
+window.uploading = false;
+alert("Choose file");
+return;
+}
+
+if(title===""){
+window.uploading = false;
+alert("Enter file title");
+return;
+}
 
 const reader = new FileReader();
 
 reader.onload = async function(){
+
+try{
 
 const base64 = reader.result.split(",")[1];
 const path = "uploads/" + Date.now() + "_" + file.name;
@@ -179,9 +197,36 @@ content:base64
 });
 
 if(!res.ok){
+window.uploading = false;
 alert("Upload failed");
 return;
 }
+
+await addDoc(collection(window.db,"pyqFiles"),{
+category:current,
+title:title,
+description:desc,
+fileName:file.name,
+path:path,
+createdAt:Date.now()
+});
+
+document.getElementById("fileInput").value="";
+document.getElementById("fileTitle").value="";
+document.getElementById("fileDesc").value="";
+
+window.uploading = false;
+alert("File Uploaded + Saved");
+
+}catch(e){
+window.uploading = false;
+alert("Upload failed");
+}
+
+};
+
+reader.readAsDataURL(file);
+};
 
 await addDoc(collection(window.db,"pyqFiles"),{
 category:current,
