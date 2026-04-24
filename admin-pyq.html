@@ -1,47 +1,76 @@
-<!-- STRICT WORKING FINAL admin-pyq.html -->  <!DOCTYPE html>  <html lang="en">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width,initial-scale=1.0">  
-<title>Admin PYQ Manager</title>  <style>  
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}  
-body{background:#f4f4f4}  
-.topbar{background:#000;color:#fff;padding:15px;text-align:center;font-size:20px;font-weight:bold}  
-.container{max-width:1000px;margin:auto;padding:20px}  
-.box{background:#fff;padding:18px;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.08);margin-bottom:18px}  
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}  
-.card{background:#fff;padding:18px 10px;border-radius:14px;text-align:center;font-weight:bold;font-size:16px;box-shadow:0 4px 10px rgba(0,0,0,.08);cursor:pointer}  
-.card:hover{transform:translateY(-3px)}  
-input,textarea,select{width:100%;padding:11px;margin-top:8px;border:1px solid #ccc;border-radius:10px;font-size:15px}  
-textarea{min-height:100px;resize:vertical}  
-button{width:100%;padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;margin-top:12px}  
-.save{background:#007bff;color:#fff}  
-.bulk{background:green;color:#fff}  
-.upload{background:#6f42c1;color:#fff}  
-.back{display:block;text-align:center;text-decoration:none;background:#111;color:#fff;padding:12px;border-radius:10px;font-weight:bold;margin-top:18px}  
-.list{margin-top:15px}  
-.item{background:#f8f8f8;padding:10px;border-radius:10px;margin-bottom:10px;border-left:4px solid #007bff}  
-.hide{display:none}  
-@media(min-width:700px){.grid{grid-template-columns:repeat(3,1fr)}}  
-</style>  </head>  <body>  <div class="topbar">📄 Admin PYQ Manager</div>  <div class="container">  <div class="box">  
-<b>Welcome Admin 🔐 Permanent Firestore Save</b>  
-</div>  <div class="grid">  
-<div class="card" onclick="choose('PYQ 2020')">📘 PYQ 2020</div>  
-<div class="card" onclick="choose('PYQ 2021')">📘 PYQ 2021</div>  
-<div class="card" onclick="choose('PYQ 2022')">📘 PYQ 2022</div>  
-<div class="card" onclick="choose('PYQ 2023')">📘 PYQ 2023</div>  
-<div class="card" onclick="choose('PYQ 2024')">📘 PYQ 2024</div>  
-<div class="card" onclick="choose('PYQ 2025')">📘 PYQ 2025</div>  
-<div class="card" onclick="choose('PYQ 2026')">📘 PYQ 2026</div>  
-<div class="card" onclick="choose('Model Paper')">📝 Model Paper</div>  
-<div class="card" onclick="choose('Practice Set')">🏆 Practice Set</div>  
-</div>  <div class="box hide" id="panel">  <h3 id="title">Add Questions</h3>  <hr style="margin:15px 0">  
-<h3>Upload File</h3>  <input type="text" id="fileTitle" placeholder="File Title">  
-<input type="text" id="fileDesc" placeholder="Description">  
-<input type="file" id="fileInput">  <button class="upload" onclick="uploadFile()">Upload File</button>
+<!-- STRICT WORKING FINAL admin-pyq.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin PYQ Manager</title>
 
-<hr style="margin:18px 0">  <label>Question</label>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f4f4f4}
+.topbar{background:#000;color:#fff;padding:15px;text-align:center;font-size:20px;font-weight:bold}
+.container{max-width:1000px;margin:auto;padding:20px}
+.box{background:#fff;padding:18px;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.08);margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}
+.card{background:#fff;padding:18px 10px;border-radius:14px;text-align:center;font-weight:bold;font-size:16px;box-shadow:0 4px 10px rgba(0,0,0,.08);cursor:pointer}
+.card:hover{transform:translateY(-3px)}
+input,textarea,select{width:100%;padding:11px;margin-top:8px;border:1px solid #ccc;border-radius:10px;font-size:15px}
+textarea{min-height:100px;resize:vertical}
+button{width:100%;padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;margin-top:12px}
+.save{background:#007bff;color:#fff}
+.bulk{background:green;color:#fff}
+.upload{background:#6f42c1;color:#fff}
+.del{background:red;color:#fff}
+.back{display:block;text-align:center;text-decoration:none;background:#111;color:#fff;padding:12px;border-radius:10px;font-weight:bold;margin-top:18px}
+.list{margin-top:15px}
+.item{background:#f8f8f8;padding:10px;border-radius:10px;margin-bottom:10px;border-left:4px solid #007bff}
+.hide{display:none}
+@media(min-width:700px){.grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
 
-<textarea id="question"></textarea>  <label>Option A</label>
+<body>
+
+<div class="topbar">📄 Admin PYQ Manager</div>
+
+<div class="container">
+
+<div class="box">
+<b>Welcome Admin 🔐 Permanent Firestore Save</b>
+</div>
+
+<div class="grid">
+<div class="card" onclick="choose('PYQ 2020')">📘 PYQ 2020</div>
+<div class="card" onclick="choose('PYQ 2021')">📘 PYQ 2021</div>
+<div class="card" onclick="choose('PYQ 2022')">📘 PYQ 2022</div>
+<div class="card" onclick="choose('PYQ 2023')">📘 PYQ 2023</div>
+<div class="card" onclick="choose('PYQ 2024')">📘 PYQ 2024</div>
+<div class="card" onclick="choose('PYQ 2025')">📘 PYQ 2025</div>
+<div class="card" onclick="choose('PYQ 2026')">📘 PYQ 2026</div>
+<div class="card" onclick="choose('Model Paper')">📝 Model Paper</div>
+<div class="card" onclick="choose('Practice Set')">🏆 Practice Set</div>
+</div>
+
+<div class="box hide" id="panel">
+
+<h3 id="title">Add Questions</h3>
+
+<hr style="margin:15px 0">
+<h3>Upload File</h3>
+
+<input type="text" id="fileTitle" placeholder="File Title">
+<input type="text" id="fileDesc" placeholder="Description">
+<input type="file" id="fileInput">
+
+<button class="upload" onclick="uploadFile()">Upload File</button>
+
+<hr style="margin:18px 0">
+
+<label>Question</label>
+<textarea id="question"></textarea>
+
+<label>Option A</label>
 <input type="text" id="opt1">
 
 <label>Option B</label>
@@ -55,241 +84,275 @@ button{width:100%;padding:12px;border:none;border-radius:10px;font-weight:bold;c
 
 <label>Correct Answer</label>
 <select id="answer">
+<option value="A">Option A</option>
+<option value="B">Option B</option>
+<option value="C">Option C</option>
+<option value="D">Option D</option>
+</select>
 
-<option value="A">Option A</option>  
-<option value="B">Option B</option>  
-<option value="C">Option C</option>  
-<option value="D">Option D</option>  
-</select>  <button class="save" onclick="saveSingle()">Save Single Question</button>
+<button class="save" onclick="saveSingle()">Save Single Question</button>
 
-<hr style="margin:18px 0">  <h3>Bulk Paste Questions</h3>  <textarea id="bulkBox" placeholder="Format:  
-  
-Question text  
-A) option  
-B) option  
-C) option  
-D) option  
-Answer: A"></textarea>  <button class="bulk" onclick="bulkImport()">Bulk Import</button>
+<hr style="margin:18px 0">
 
-<div class="list" id="listBox"></div>  </div>  <a href="admin-pannel.html" class="back">⬅ Back to Admin Panel</a>
+<h3>Bulk Paste Questions</h3>
 
-</div>  <script type="module" src="firebase.js"></script>  <script type="module">  
-import {  
-collection,  
-addDoc,  
-getDocs,  
-query,  
-where  
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";  
-  
-let current = "";  
-  
-/* Token Prompt */  
-const GITHUB_TOKEN = prompt("Enter GitHub PAT Token");  
-const USERNAME = "rameshwarsahu2014bpmjarwe1694-hue";  
-const REPO = "GDS-DEPARTMETAL-EXAM-NOTES";  
-  
-/* Choose Category */  
-window.choose = function(cat){  
-current = cat;  
-  
-document.getElementById("panel").classList.remove("hide");  
-document.getElementById("title").innerText = cat + " - Add Questions";  
-  
-showList();  
-  
-window.scrollTo({  
-top:500,  
-behavior:"smooth"  
-});  
-};  
-  
-/* Upload File */  
-window.uploadFile = async function(){  
-  
-if(current===""){alert("Select category first");return;}  
-  
-const file = document.getElementById("fileInput").files[0];  
-const title = document.getElementById("fileTitle").value.trim();  
-const desc = document.getElementById("fileDesc").value.trim();  
-  
-if(!file){alert("Choose file");return;}  
-if(title===""){alert("Enter file title");return;}  
-  
-const reader = new FileReader();  
-  
-reader.onload = async function(){  
-  
-const base64 = reader.result.split(",")[1];  
-const path = "uploads/" + Date.now() + "_" + file.name;  
-  
-const res = await fetch(`https://api.github.com/repos/${USERNAME}/${REPO}/contents/${path}`,{  
-method:"PUT",  
-headers:{  
-Authorization:"token " + GITHUB_TOKEN,  
-"Content-Type":"application/json"  
-},  
-body:JSON.stringify({  
-message:"upload file",  
-content:base64  
-})  
-});  
-  
-if(!res.ok){  
-alert("Upload failed");  
-return;  
-}  
-  
-await addDoc(collection(window.db,"pyqFiles"),{  
-category:current,  
-title:title,  
-description:desc,  
-fileName:file.name,  
-path:path,  
-createdAt:Date.now()  
-});  
-  
-document.getElementById("fileInput").value="";  
-document.getElementById("fileTitle").value="";  
-document.getElementById("fileDesc").value="";  
-  
-alert("File Uploaded + Saved");  
-};  
-  
-reader.readAsDataURL(file);  
-};  
-  
-/* Save Single */  
-window.saveSingle = async function(){  
-  
-if(current===""){alert("Select category first");return;}  
-  
-let q = document.getElementById("question").value.trim();  
-let a = document.getElementById("opt1").value.trim();  
-let b = document.getElementById("opt2").value.trim();  
-let c = document.getElementById("opt3").value.trim();  
-let d = document.getElementById("opt4").value.trim();  
-let ans = document.getElementById("answer").value;  
-  
-if(!q || !a || !b || !c || !d){  
-alert("Fill all fields");  
-return;  
-}  
-  
-let correct = a;  
-if(ans==="B") correct=b;  
-if(ans==="C") correct=c;  
-if(ans==="D") correct=d;  
-  
-await addDoc(collection(window.db,"pyqQuestions"),{  
-category:current,  
-question:q,  
-options:[a,b,c,d],  
-answer:correct,  
-createdAt:Date.now()  
-});  
-  
-document.getElementById("question").value="";  
-document.getElementById("opt1").value="";  
-document.getElementById("opt2").value="";  
-document.getElementById("opt3").value="";  
-document.getElementById("opt4").value="";  
-  
-showList();  
-alert("Question Saved");  
-};  
-  
-/* Bulk Import */  
-window.bulkImport = async function(){  
-  
-if(current===""){alert("Select category first");return;}  
-  
-let text = document.getElementById("bulkBox").value.trim();  
-  
-if(text===""){  
-alert("Paste questions first");  
-return;  
-}  
-  
-let blocks = text.split(/\n\s*\n/);  
-let count = 0;  
-  
-for(let block of blocks){  
-  
-let lines = block.split("\n").map(x=>x.trim()).filter(Boolean);  
-  
-if(lines.length>=6){  
-  
-let q = lines[0];  
-let a = clean(lines[1]);  
-let b = clean(lines[2]);  
-let c = clean(lines[3]);  
-let d = clean(lines[4]);  
-let ans = lines[5].toUpperCase();  
-  
-let correct = a;  
-if(ans.includes("B")) correct=b;  
-if(ans.includes("C")) correct=c;  
-if(ans.includes("D")) correct=d;  
-  
-await addDoc(collection(window.db,"pyqQuestions"),{  
-category:current,  
-question:q,  
-options:[a,b,c,d],  
-answer:correct,  
-createdAt:Date.now()  
-});  
-  
-count++;  
-}  
-}  
-  
-document.getElementById("bulkBox").value="";  
-showList();  
-alert(count + " Questions Imported");  
-};  
-  
-/* Show List */  
-async function showList(){  
-  
-const box = document.getElementById("listBox");  
-  
-let q1 = query(  
-collection(window.db,"pyqQuestions"),  
-where("category","==",current)  
-);  
-  
-let snap = await getDocs(q1);  
-  
-if(snap.empty){  
-box.innerHTML="<br><b>No Questions Added</b>";  
-return;  
-}  
-  
-let html="<br><b>Total Questions: "+snap.size+"</b><br><br>";  
-let i=1;  
-  
-snap.forEach(doc=>{  
-let x = doc.data();  
-  
-html += `  
-<div class="item">  
-<b>${i}. ${x.question}</b><br>  
-A. ${x.options[0]}<br>  
-B. ${x.options[1]}<br>  
-C. ${x.options[2]}<br>  
-D. ${x.options[3]}<br>  
-<b>Answer:</b> ${x.answer}  
-</div>  
-`;  
-i++;  
-});  
-  
-box.innerHTML = html;  
-}  
-  
-function clean(t){  
-return t.replace(/^A\)|^B\)|^C\)|^D\)/i,"").trim();  
-}  
-</script>  </body>  
+<textarea id="bulkBox"></textarea>
+
+<button class="bulk" onclick="bulkImport()">Bulk Import</button>
+
+<div class="list" id="listBox"></div>
+
+</div>
+
+<a href="admin-pannel.html" class="back">⬅ Back to Admin Panel</a>
+
+</div>
+
+<script type="module" src="firebase.js"></script>
+
+<script type="module">
+import {
+collection,
+addDoc,
+getDocs,
+query,
+where,
+deleteDoc,
+doc
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+let current = "";
+
+/* Token Prompt */
+const GITHUB_TOKEN = prompt("Enter GitHub PAT Token");
+const USERNAME = "rameshwarsahu2014bpmjarwe1694-hue";
+const REPO = "GDS-DEPARTMETAL-EXAM-NOTES";
+
+/* Choose Category */
+window.choose = function(cat){
+current = cat;
+
+document.getElementById("panel").classList.remove("hide");
+document.getElementById("title").innerText = cat + " - Add Questions";
+
+showList();
+
+window.scrollTo({
+top:500,
+behavior:"smooth"
+});
+};
+
+/* Delete */
+window.deleteQuestion = async function(id){
+if(!confirm("Delete this question?")) return;
+await deleteDoc(doc(window.db,"pyqQuestions",id));
+showList();
+};
+
+/* Upload File */
+window.uploadFile = async function(){
+
+if(window.uploading) return;
+window.uploading = true;
+
+if(current===""){
+window.uploading=false;
+alert("Select category first");
+return;
+}
+
+const file = document.getElementById("fileInput").files[0];
+const title = document.getElementById("fileTitle").value.trim();
+const desc = document.getElementById("fileDesc").value.trim();
+
+if(!file){
+window.uploading=false;
+alert("Choose file");
+return;
+}
+
+if(title===""){
+window.uploading=false;
+alert("Enter file title");
+return;
+}
+
+const reader = new FileReader();
+
+reader.onload = async function(){
+
+const base64 = reader.result.split(",")[1];
+const path = "uploads/" + Date.now() + "_" + file.name;
+
+const res = await fetch(`https://api.github.com/repos/${USERNAME}/${REPO}/contents/${path}`,{
+method:"PUT",
+headers:{
+Authorization:"token " + GITHUB_TOKEN,
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+message:"upload file",
+content:base64
+})
+});
+
+if(!res.ok){
+window.uploading=false;
+alert("Upload failed");
+return;
+}
+
+await addDoc(collection(window.db,"pyqFiles"),{
+category:current,
+title:title,
+description:desc,
+fileName:file.name,
+path:path,
+createdAt:Date.now()
+});
+
+document.getElementById("fileInput").value="";
+document.getElementById("fileTitle").value="";
+document.getElementById("fileDesc").value="";
+
+window.uploading=false;
+alert("File Uploaded + Saved");
+};
+
+reader.readAsDataURL(file);
+};
+
+/* Save Single */
+window.saveSingle = async function(){
+
+if(current===""){alert("Select category first");return;}
+
+let q = document.getElementById("question").value.trim();
+let a = document.getElementById("opt1").value.trim();
+let b = document.getElementById("opt2").value.trim();
+let c = document.getElementById("opt3").value.trim();
+let d = document.getElementById("opt4").value.trim();
+let ans = document.getElementById("answer").value;
+
+if(!q || !a || !b || !c || !d){
+alert("Fill all fields");
+return;
+}
+
+let correct = a;
+if(ans==="B") correct=b;
+if(ans==="C") correct=c;
+if(ans==="D") correct=d;
+
+await addDoc(collection(window.db,"pyqQuestions"),{
+category:current,
+question:q,
+options:[a,b,c,d],
+answer:correct,
+createdAt:Date.now()
+});
+
+document.getElementById("question").value="";
+document.getElementById("opt1").value="";
+document.getElementById("opt2").value="";
+document.getElementById("opt3").value="";
+document.getElementById("opt4").value="";
+
+showList();
+alert("Question Saved");
+};
+
+/* Bulk Import */
+window.bulkImport = async function(){
+
+if(current===""){alert("Select category first");return;}
+
+let text=document.getElementById("bulkBox").value.trim();
+if(text===""){alert("Paste questions first");return;}
+
+let blocks=text.split(/\n\s*\n/);
+let count=0;
+
+for(let block of blocks){
+
+let lines=block.split("\n").map(x=>x.trim()).filter(Boolean);
+
+if(lines.length>=6){
+
+let q=lines[0];
+let a=clean(lines[1]);
+let b=clean(lines[2]);
+let c=clean(lines[3]);
+let d=clean(lines[4]);
+let ans=lines[5].toUpperCase();
+
+let correct=a;
+if(ans.includes("B")) correct=b;
+if(ans.includes("C")) correct=c;
+if(ans.includes("D")) correct=d;
+
+await addDoc(collection(window.db,"pyqQuestions"),{
+category:current,
+question:q,
+options:[a,b,c,d],
+answer:correct,
+createdAt:Date.now()
+});
+
+count++;
+}
+}
+
+document.getElementById("bulkBox").value="";
+showList();
+alert(count+" Questions Imported");
+};
+
+/* Show List */
+async function showList(){
+
+const box=document.getElementById("listBox");
+
+let q1=query(
+collection(window.db,"pyqQuestions"),
+where("category","==",current)
+);
+
+let snap=await getDocs(q1);
+
+if(snap.empty){
+box.innerHTML="<br><b>No Questions Added</b>";
+return;
+}
+
+let html="<br><b>Total Questions: "+snap.size+"</b><br><br>";
+let i=1;
+
+snap.forEach(docSnap=>{
+let x=docSnap.data();
+
+html+=`
+<div class="item">
+<b>${i}. ${x.question}</b><br>
+A. ${x.options[0]}<br>
+B. ${x.options[1]}<br>
+C. ${x.options[2]}<br>
+D. ${x.options[3]}<br>
+<b>Answer:</b> ${x.answer}<br><br>
+<button class="del" onclick="deleteQuestion('${docSnap.id}')">Delete</button>
+</div>
+`;
+i++;
+});
+
+box.innerHTML=html;
+}
+
+function clean(t){
+return t.replace(/^A\)|^B\)|^C\)|^D\)/i,"").trim();
+}
+</script>
+
+</body>
 </html>
