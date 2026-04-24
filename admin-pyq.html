@@ -59,11 +59,11 @@ button{width:100%;padding:12px;border:none;border-radius:10px;font-weight:bold;c
 <hr style="margin:15px 0">
 <h3>Upload File</h3>
 
+<input type="text" id="fileName" placeholder="File Name">
 <input type="text" id="fileTitle" placeholder="File Title">
 <input type="text" id="fileDesc" placeholder="Description">
-<input type="file" id="fileInput">
 
-<button class="upload" onclick="uploadFile()">Upload File</button>
+<button class="upload" onclick="uploadFile()">Save File Details</button>
 
 <hr style="margin:18px 0">
 
@@ -123,11 +123,6 @@ doc
 
 let current = "";
 
-/* Token Prompt */
-const GITHUB_TOKEN = prompt("Enter GitHub PAT Token");
-const USERNAME = "rameshwarsahu2014bpmjarwe1694-hue";
-const REPO = "GDS-DEPARTMETAL-EXAM-NOTES";
-
 /* Choose Category */
 window.choose = function(cat){
 current = cat;
@@ -150,77 +145,41 @@ await deleteDoc(doc(window.db,"pyqQuestions",id));
 showList();
 };
 
-/* Upload File */
+/* Save File Details Only */
 window.uploadFile = async function(){
 
-if(window.uploading) return;
-window.uploading = true;
-
 if(current===""){
-window.uploading=false;
 alert("Select category first");
 return;
 }
 
-const file = document.getElementById("fileInput").files[0];
+const fileName = document.getElementById("fileName").value.trim();
 const title = document.getElementById("fileTitle").value.trim();
 const desc = document.getElementById("fileDesc").value.trim();
 
-if(!file){
-window.uploading=false;
-alert("Choose file");
+if(fileName===""){
+alert("Enter file name");
 return;
 }
 
 if(title===""){
-window.uploading=false;
 alert("Enter file title");
-return;
-}
-
-const reader = new FileReader();
-
-reader.onload = async function(){
-
-const base64 = reader.result.split(",")[1];
-const path = "uploads/" + Date.now() + "_" + file.name;
-
-const res = await fetch(`https://api.github.com/repos/${USERNAME}/${REPO}/contents/${path}`,{
-method:"PUT",
-headers:{
-Authorization:"token " + GITHUB_TOKEN,
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-message:"upload file",
-content:base64
-})
-});
-
-if(!res.ok){
-window.uploading=false;
-alert("Upload failed");
 return;
 }
 
 await addDoc(collection(window.db,"pyqFiles"),{
 category:current,
+fileName:fileName,
 title:title,
 description:desc,
-fileName:file.name,
-path:path,
 createdAt:Date.now()
 });
 
-document.getElementById("fileInput").value="";
+document.getElementById("fileName").value="";
 document.getElementById("fileTitle").value="";
 document.getElementById("fileDesc").value="";
 
-window.uploading=false;
-alert("File Uploaded + Saved");
-};
-
-reader.readAsDataURL(file);
+alert("File Details Saved Permanently");
 };
 
 /* Save Single */
