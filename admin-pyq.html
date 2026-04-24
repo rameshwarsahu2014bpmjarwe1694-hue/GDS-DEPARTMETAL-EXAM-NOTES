@@ -1,4 +1,4 @@
-<!-- STRICT WORKING FINAL admin-pyq.html -->
+<!-- STRICT FINAL UPDATED admin-pyq.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,8 +13,20 @@ body{background:#f4f4f4}
 .container{max-width:1000px;margin:auto;padding:20px}
 .box{background:#fff;padding:18px;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.08);margin-bottom:18px}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}
-.card{background:#fff;padding:18px 10px;border-radius:14px;text-align:center;font-weight:bold;font-size:16px;box-shadow:0 4px 10px rgba(0,0,0,.08);cursor:pointer}
-.card:hover{transform:translateY(-3px)}
+.card,.subbtn{
+background:#fff;
+padding:18px 10px;
+border-radius:14px;
+text-align:center;
+font-weight:bold;
+font-size:16px;
+box-shadow:0 4px 10px rgba(0,0,0,.08);
+cursor:pointer;
+border:none;
+width:100%;
+}
+.card:hover,.subbtn:hover{transform:translateY(-3px)}
+.subgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:15px 0}
 input,textarea,select{width:100%;padding:11px;margin-top:8px;border:1px solid #ccc;border-radius:10px;font-size:15px}
 textarea{min-height:100px;resize:vertical}
 button{width:100%;padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;margin-top:12px}
@@ -50,6 +62,15 @@ button{width:100%;padding:12px;border:none;border-radius:10px;font-weight:bold;c
 <div class="card" onclick="choose('PYQ 2026')">📘 PYQ 2026</div>
 <div class="card" onclick="choose('Model Paper')">📝 Model Paper</div>
 <div class="card" onclick="choose('Practice Set')">🏆 Practice Set</div>
+</div>
+
+<div class="box hide" id="subPanel">
+<h3>Select Category</h3>
+<div class="subgrid">
+<button class="subbtn" onclick="setPost('MTS')">MTS</button>
+<button class="subbtn" onclick="setPost('POSTMAN')">POSTMAN</button>
+<button class="subbtn" onclick="setPost('PA-SA')">PA-SA</button>
+</div>
 </div>
 
 <div class="box hide" id="panel">
@@ -95,9 +116,7 @@ button{width:100%;padding:12px;border:none;border-radius:10px;font-weight:bold;c
 <hr style="margin:18px 0">
 
 <h3>Bulk Paste Questions</h3>
-
 <textarea id="bulkBox"></textarea>
-
 <button class="bulk" onclick="bulkImport()">Bulk Import</button>
 
 <div class="list" id="listBox"></div>
@@ -121,54 +140,51 @@ deleteDoc,
 doc
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-let current = "";
+let current="";
+let currentPost="";
 
-/* Choose Category */
-window.choose = function(cat){
-current = cat;
+/* Select Year */
+window.choose=function(cat){
+current=cat;
+currentPost="";
+document.getElementById("subPanel").classList.remove("hide");
+document.getElementById("panel").classList.add("hide");
+
+window.scrollTo({top:500,behavior:"smooth"});
+};
+
+/* Select Post */
+window.setPost=function(post){
+currentPost=post;
 
 document.getElementById("panel").classList.remove("hide");
-document.getElementById("title").innerText = cat + " - Add Questions";
+document.getElementById("title").innerText=current+" - "+post;
 
 showList();
 
-window.scrollTo({
-top:500,
-behavior:"smooth"
-});
+window.scrollTo({top:700,behavior:"smooth"});
 };
 
-/* Delete */
-window.deleteQuestion = async function(id){
-if(!confirm("Delete this question?")) return;
-await deleteDoc(doc(window.db,"pyqQuestions",id));
-showList();
-};
+/* File Save */
+window.uploadFile=async function(){
 
-/* Save File Details Only */
-window.uploadFile = async function(){
-
-if(current===""){
+if(current==="" || currentPost===""){
 alert("Select category first");
 return;
 }
 
-const fileName = document.getElementById("fileName").value.trim();
-const title = document.getElementById("fileTitle").value.trim();
-const desc = document.getElementById("fileDesc").value.trim();
+let fileName=document.getElementById("fileName").value.trim();
+let title=document.getElementById("fileTitle").value.trim();
+let desc=document.getElementById("fileDesc").value.trim();
 
-if(fileName===""){
-alert("Enter file name");
-return;
-}
-
-if(title===""){
-alert("Enter file title");
+if(fileName==="" || title===""){
+alert("Fill all fields");
 return;
 }
 
 await addDoc(collection(window.db,"pyqFiles"),{
 category:current,
+post:currentPost,
 fileName:fileName,
 title:title,
 description:desc,
@@ -179,33 +195,32 @@ document.getElementById("fileName").value="";
 document.getElementById("fileTitle").value="";
 document.getElementById("fileDesc").value="";
 
-alert("File Details Saved Permanently");
+alert("Saved Permanently");
 };
 
-/* Save Single */
-window.saveSingle = async function(){
+/* Save Question */
+window.saveSingle=async function(){
 
-if(current===""){alert("Select category first");return;}
+let q=document.getElementById("question").value.trim();
+let a=document.getElementById("opt1").value.trim();
+let b=document.getElementById("opt2").value.trim();
+let c=document.getElementById("opt3").value.trim();
+let d=document.getElementById("opt4").value.trim();
+let ans=document.getElementById("answer").value;
 
-let q = document.getElementById("question").value.trim();
-let a = document.getElementById("opt1").value.trim();
-let b = document.getElementById("opt2").value.trim();
-let c = document.getElementById("opt3").value.trim();
-let d = document.getElementById("opt4").value.trim();
-let ans = document.getElementById("answer").value;
-
-if(!q || !a || !b || !c || !d){
+if(!q||!a||!b||!c||!d){
 alert("Fill all fields");
 return;
 }
 
-let correct = a;
+let correct=a;
 if(ans==="B") correct=b;
 if(ans==="C") correct=c;
 if(ans==="D") correct=d;
 
 await addDoc(collection(window.db,"pyqQuestions"),{
 category:current,
+post:currentPost,
 question:q,
 options:[a,b,c,d],
 answer:correct,
@@ -223,12 +238,13 @@ alert("Question Saved");
 };
 
 /* Bulk Import */
-window.bulkImport = async function(){
-
-if(current===""){alert("Select category first");return;}
+window.bulkImport=async function(){
 
 let text=document.getElementById("bulkBox").value.trim();
-if(text===""){alert("Paste questions first");return;}
+if(text===""){
+alert("Paste questions first");
+return;
+}
 
 let blocks=text.split(/\n\s*\n/);
 let count=0;
@@ -253,6 +269,7 @@ if(ans.includes("D")) correct=d;
 
 await addDoc(collection(window.db,"pyqQuestions"),{
 category:current,
+post:currentPost,
 question:q,
 options:[a,b,c,d],
 answer:correct,
@@ -268,6 +285,13 @@ showList();
 alert(count+" Questions Imported");
 };
 
+/* Delete */
+window.deleteQuestion=async function(id){
+if(!confirm("Delete this question?")) return;
+await deleteDoc(doc(window.db,"pyqQuestions",id));
+showList();
+};
+
 /* Show List */
 async function showList(){
 
@@ -275,7 +299,8 @@ const box=document.getElementById("listBox");
 
 let q1=query(
 collection(window.db,"pyqQuestions"),
-where("category","==",current)
+where("category","==",current),
+where("post","==",currentPost)
 );
 
 let snap=await getDocs(q1);
