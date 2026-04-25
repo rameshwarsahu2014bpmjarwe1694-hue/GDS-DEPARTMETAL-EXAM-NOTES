@@ -1,6 +1,7 @@
 <!-- =========================
 STRICT FINAL UPDATED pyq.html
-PDF + Text Questions Show
+admin-syllabus Pattern Based
+Firestore Rules Compatible Final Version
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -8,34 +9,57 @@ PDF + Text Questions Show
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>PYQ Section</title>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#f4f4f4;padding:20px}
-.wrap{max-width:1000px;margin:auto}
-.box,.card{
-background:#fff;padding:15px;border-radius:12px;
-margin-bottom:14px
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f4f6f9;padding:20px}
+.container{
+max-width:1000px;margin:auto;background:#fff;
+padding:20px;border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,.08)
+}
+h1{text-align:center;margin-bottom:20px}
+.filter-box{
+display:grid;gap:12px;margin-bottom:20px
 }
 select{
-width:100%;padding:12px;margin-top:10px;
-border:1px solid #ccc;border-radius:10px
+padding:12px;border:1px solid #ccc;
+border-radius:8px;font-size:16px;width:100%
 }
-a{
-display:inline-block;
-padding:10px 14px;
-background:#007bff;color:#fff;
-text-decoration:none;border-radius:8px;
-margin-top:10px;margin-right:8px
+.card{
+background:#fafafa;padding:15px;
+border:1px solid #ddd;border-radius:10px;
+margin-bottom:12px
+}
+.q{
+font-size:17px;font-weight:bold;
+margin-bottom:10px
+}
+.opt{
+margin:5px 0;
+font-size:15px
+}
+.small{
+font-size:14px;color:#666;
+margin-top:8px
+}
+.empty{
+text-align:center;
+padding:20px;
+font-weight:bold;
+color:#666
 }
 </style>
 </head>
 <body>
 
-<div class="wrap">
+<div class="container">
 
-<div class="box">
+<h1>Previous Year Questions</h1>
 
-<select id="category" onchange="loadAll()">
+<div class="filter-box">
+
+<select id="category" onchange="loadPYQ()">
 <option>PYQ 2020</option>
 <option>PYQ 2021</option>
 <option>PYQ 2022</option>
@@ -47,7 +71,7 @@ margin-top:10px;margin-right:8px
 <option>Practice Set</option>
 </select>
 
-<select id="post" onchange="loadAll()">
+<select id="post" onchange="loadPYQ()">
 <option>MTS</option>
 <option>POSTMAN</option>
 <option>PA-SA</option>
@@ -55,83 +79,110 @@ margin-top:10px;margin-right:8px
 
 </div>
 
-<div id="pdfBox"></div>
-<div id="questionBox"></div>
+<div id="list">Loading...</div>
 
 </div>
-
-<script type="module" src="firebase.js"></script>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
-collection,getDocs,query,where
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+getFirestore,
+collection,
+getDocs,
+query,
+where,
+orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-window.loadAll=async function(){
-
-const category=document.getElementById("category").value;
-const post=document.getElementById("post").value;
-
-/* PDF */
-let q1=query(
-collection(window.db,"pyqFiles"),
-where("category","==",category)
-);
-
-let snap1=await getDocs(q1);
-
-let html1="";
-
-snap1.forEach(doc=>{
-let x=doc.data();
-
-if(x.post && x.post!==post) return;
-
-html1+=`
-<div class="card">
-<h3>${x.title}</h3>
-<p>${x.description||""}</p>
-<a href="${x.fileUrl}" target="_blank">📖 Open PDF</a>
-<a href="${x.fileUrl}" download>⬇ Download</a>
-</div>
-`;
-});
-
-document.getElementById("pdfBox").innerHTML=html1 || "<div class='box'>No PDF Found</div>";
-
-/* Questions */
-let q2=query(
-collection(window.db,"pyqQuestions"),
-where("category","==",category)
-);
-
-let snap2=await getDocs(q2);
-
-let html2="";
-let i=1;
-
-snap2.forEach(doc=>{
-let x=doc.data();
-
-if(x.post && x.post!==post) return;
-
-html2+=`
-<div class="card">
-<b>${i}. ${x.question}</b><br><br>
-A. ${x.options[0]}<br>
-B. ${x.options[1]}<br>
-C. ${x.options[2]}<br>
-D. ${x.options[3]}<br><br>
-<b>Answer:</b> ${x.answer}
-</div>
-`;
-i++;
-});
-
-document.getElementById("questionBox").innerHTML=html2 || "<div class='box'>No Questions Found</div>";
+const firebaseConfig = {
+apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+projectId: "gds-departmental-exam-studyhub",
+storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+messagingSenderId: "759916756080",
+appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
-loadAll();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const list = document.getElementById("list");
+
+/* LOAD DATA */
+window.loadPYQ = async function(){
+
+const category = val("category");
+const post = val("post");
+
+try{
+
+list.innerHTML="Loading...";
+
+const q = query(
+collection(db,"pyqQuestions"),
+where("category","==",category),
+where("post","==",post),
+orderBy("createdAt","desc")
+);
+
+const snap = await getDocs(q);
+
+list.innerHTML="";
+
+if(snap.empty){
+list.innerHTML="<div class='empty'>No Questions Found</div>";
+return;
+}
+
+let i=1;
+
+snap.forEach(item=>{
+
+const d=item.data();
+
+list.innerHTML += `
+<div class="card">
+
+<div class="q">
+${i}. ${safe(d.question)}
+</div>
+
+<div class="opt">A. ${safe(d.options?.[0])}</div>
+<div class="opt">B. ${safe(d.options?.[1])}</div>
+<div class="opt">C. ${safe(d.options?.[2])}</div>
+<div class="opt">D. ${safe(d.options?.[3])}</div>
+
+<div class="small">
+<b>Answer:</b> ${safe(d.answer)}
+</div>
+
+</div>
+`;
+
+i++;
+
+});
+
+}catch(err){
+
+console.log(err);
+list.innerHTML="<div class='empty'>Load Failed</div>";
+
+}
+
+};
+
+function val(id){
+return document.getElementById(id).value.trim();
+}
+
+function safe(str){
+return str || "";
+}
+
+loadPYQ();
+
 </script>
 </body>
 </html>
