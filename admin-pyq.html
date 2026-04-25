@@ -1,39 +1,59 @@
 <!-- =========================
 STRICT FINAL UPDATED admin-pyq.html
-PDF Upload + Single Question + Bulk Import
-GitHub Upload + Firestore Save
+admin-syllabus.html Pattern Based
+Firestore Rules Compatible Final Version
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Admin PYQ Manager</title>
+<title>Admin PYQ Panel</title>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#f4f4f4;padding:20px}
-.wrap{max-width:1000px;margin:auto}
-.box{background:#fff;padding:18px;border-radius:14px;margin-bottom:18px}
-input,select,textarea,button{
-width:100%;padding:12px;margin-top:10px;
-border:1px solid #ccc;border-radius:10px
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f4f6f9;padding:20px}
+.container{
+max-width:1000px;margin:auto;background:#fff;
+padding:20px;border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,.08)
 }
-button{background:#007bff;color:#fff;font-weight:bold;border:none}
+h1{text-align:center;margin-bottom:20px}
+.grid{display:grid;gap:12px;margin-bottom:20px}
+input,select,textarea{
+padding:12px;border:1px solid #ccc;
+border-radius:8px;font-size:16px;width:100%
+}
 textarea{min-height:100px}
-.item{
-background:#f8f8f8;padding:12px;border-radius:12px;
-margin-top:10px;border-left:4px solid #007bff
+button{
+padding:12px;border:none;border-radius:8px;
+font-size:16px;font-weight:bold;cursor:pointer
 }
+.save-btn{background:#007bff;color:#fff}
+.del-btn{background:#dc3545;color:#fff}
+.card{
+background:#fafafa;padding:15px;
+border:1px solid #ddd;border-radius:10px;
+margin-bottom:12px
+}
+.row{
+display:flex;justify-content:space-between;
+gap:10px;flex-wrap:wrap
+}
+.small{font-size:14px;color:#666;margin-top:6px}
+.status{text-align:center;font-weight:bold;margin-bottom:15px}
 </style>
 </head>
 <body>
 
-<div class="wrap">
+<div class="container">
 
-<div class="box">
-<h2>📄 Admin PYQ Manager</h2>
+<h1>Admin PYQ Panel</h1>
+
+<div class="grid">
 
 <select id="category">
+<option value="">Select Year</option>
 <option>PYQ 2020</option>
 <option>PYQ 2021</option>
 <option>PYQ 2022</option>
@@ -46,188 +66,223 @@ margin-top:10px;border-left:4px solid #007bff
 </select>
 
 <select id="post">
+<option value="">Select Post</option>
 <option>MTS</option>
 <option>POSTMAN</option>
 <option>PA-SA</option>
 </select>
-</div>
-
-<div class="box">
-<h3>Upload PDF</h3>
-
-<input type="file" id="pdfFile" accept="application/pdf">
-<input type="text" id="title" placeholder="Title">
-<textarea id="desc" placeholder="Description"></textarea>
-
-<button onclick="uploadPdf()">Upload PDF + Save</button>
-</div>
-
-<div class="box">
-<h3>Add Single Question</h3>
 
 <textarea id="question" placeholder="Question"></textarea>
+
 <input type="text" id="a" placeholder="Option A">
 <input type="text" id="b" placeholder="Option B">
 <input type="text" id="c" placeholder="Option C">
 <input type="text" id="d" placeholder="Option D">
 
 <select id="ans">
+<option value="">Select Answer</option>
 <option>A</option>
 <option>B</option>
 <option>C</option>
 <option>D</option>
 </select>
 
-<button onclick="saveSingle()">Save Question</button>
-</div>
+<button class="save-btn" onclick="savePYQ()">Save Question</button>
 
-<div class="box">
-<h3>Bulk Import</h3>
-
-<textarea id="bulk" placeholder="Question&#10;A) Opt1&#10;B) Opt2&#10;C) Opt3&#10;D) Opt4&#10;Answer: A"></textarea>
-
-<button onclick="bulkImport()">Bulk Save</button>
-</div>
-
-<div class="box">
-<div id="msg"></div>
-</div>
+<div id="statusMsg" class="status"></div>
 
 </div>
 
-<script type="module" src="firebase.js"></script>
+<div id="list">Loading...</div>
+
+</div>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
-collection,addDoc
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+getFirestore,
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+doc,
+serverTimestamp,
+query,
+orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-function vals(){
-return {
-category:document.getElementById("category").value,
-post:document.getElementById("post").value
-};
-}
+import {
+getAuth,
+signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* PDF Upload */
-window.uploadPdf=async function(){
-
-const file=document.getElementById("pdfFile").files[0];
-const title=document.getElementById("title").value.trim();
-const desc=document.getElementById("desc").value.trim();
-
-if(!file||!title) return alert("Fill fields");
-
-const token=prompt("Enter GitHub PAT");
-if(!token) return;
-
-const {category,post}=vals();
-
-document.getElementById("msg").innerText="Uploading...";
-
-const fileName=Date.now()+"_"+file.name;
-const path="pdfs/"+fileName;
-
-const buffer=await file.arrayBuffer();
-const bytes=new Uint8Array(buffer);
-
-let binary="";
-bytes.forEach(b=>binary+=String.fromCharCode(b));
-
-const base64=btoa(binary);
-
-const api=`https://api.github.com/repos/rameshwarsahu2014bpmjarwe1694-hue/GDS-DEPARTMETAL-EXAM-NOTES/contents/${path}`;
-
-await fetch(api,{
-method:"PUT",
-headers:{
-Authorization:"token "+token,
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-message:"Upload "+fileName,
-content:base64
-})
-});
-
-const fileUrl=`https://rameshwarsahu2014bpmjarwe1694-hue.github.io/GDS-DEPARTMETAL-EXAM-NOTES/${path}`;
-
-await addDoc(collection(window.db,"pyqFiles"),{
-category,post,title,description:desc,fileName,fileUrl,createdAt:Date.now()
-});
-
-document.getElementById("msg").innerText="PDF Uploaded + Saved";
+const firebaseConfig = {
+apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+projectId: "gds-departmental-exam-studyhub",
+storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+messagingSenderId: "759916756080",
+appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
-/* Single Question */
-window.saveSingle=async function(){
+const ADMIN_EMAIL="rameshwarsahu2014bpmjarwe1694@gmail.com";
+const ADMIN_PASS="YOUR_ADMIN_PASSWORD";
 
-const {category,post}=vals();
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const auth=getAuth(app);
 
-let q=document.getElementById("question").value.trim();
-let a=document.getElementById("a").value.trim();
-let b=document.getElementById("b").value.trim();
-let c=document.getElementById("c").value.trim();
-let d=document.getElementById("d").value.trim();
-let ans=document.getElementById("ans").value;
+const list=document.getElementById("list");
+const statusMsg=document.getElementById("statusMsg");
+
+/* AUTO LOGIN */
+signInWithEmailAndPassword(auth,ADMIN_EMAIL,ADMIN_PASS)
+.then(()=>loadData())
+.catch(err=>{
+statusMsg.innerText="Admin Login Failed";
+statusMsg.style.color="red";
+console.log(err);
+});
+
+/* SAVE */
+window.savePYQ=async function(){
+
+if(!auth.currentUser) return alert("Admin not logged in");
+
+const category=val("category");
+const post=val("post");
+const question=val("question");
+const a=val("a");
+const b=val("b");
+const c=val("c");
+const d=val("d");
+const ans=val("ans");
+
+if(category==="") return alert("Select year");
+if(post==="") return alert("Select post");
+if(question.length<3) return alert("Enter question");
+if(a===""||b===""||c===""||d==="") return alert("Fill all options");
+if(ans==="") return alert("Select answer");
 
 let correct=a;
 if(ans==="B") correct=b;
 if(ans==="C") correct=c;
 if(ans==="D") correct=d;
 
-await addDoc(collection(window.db,"pyqQuestions"),{
-category,post,
-question:q,
-options:[a,b,c,d],
-answer:correct,
-createdAt:Date.now()
+try{
+
+statusMsg.innerText="Saving...";
+
+await addDoc(collection(db,"pyqQuestions"),{
+category:esc(category),
+post:esc(post),
+question:esc(question),
+options:[esc(a),esc(b),esc(c),esc(d)],
+answer:esc(correct),
+createdAt:serverTimestamp()
 });
 
-document.getElementById("msg").innerText="Question Saved";
+clearForm();
+
+statusMsg.innerText="Saved Permanently";
+statusMsg.style.color="green";
+
+loadData();
+
+}catch(err){
+statusMsg.innerText="Save Failed";
+statusMsg.style.color="red";
+console.log(err);
+}
+
 };
 
-/* Bulk */
-window.bulkImport=async function(){
+/* LOAD */
+async function loadData(){
 
-const {category,post}=vals();
+try{
 
-let text=document.getElementById("bulk").value.trim();
+const q=query(collection(db,"pyqQuestions"),orderBy("createdAt","desc"));
+const snap=await getDocs(q);
 
-if(!text) return;
+list.innerHTML="";
 
-let blocks=text.split(/\n\s*\n/);
+if(snap.empty){
+list.innerHTML="<p>No questions added.</p>";
+return;
+}
 
-for(let block of blocks){
+let i=1;
 
-let lines=block.split("\n").map(x=>x.trim()).filter(Boolean);
+snap.forEach(item=>{
 
-if(lines.length>=6){
+const d=item.data();
 
-let q=lines[0];
-let a=lines[1].replace(/^A\)/i,"").trim();
-let b=lines[2].replace(/^B\)/i,"").trim();
-let c=lines[3].replace(/^C\)/i,"").trim();
-let d=lines[4].replace(/^D\)/i,"").trim();
-let ans=lines[5].toUpperCase();
+list.innerHTML+=`
+<div class="card">
+<div class="row">
+<div>
+<h3>${i}. ${safe(d.question)}</h3>
+<p>${safe(d.category)} | ${safe(d.post)}</p>
+<p class="small">
+A. ${safe(d.options?.[0])}<br>
+B. ${safe(d.options?.[1])}<br>
+C. ${safe(d.options?.[2])}<br>
+D. ${safe(d.options?.[3])}
+</p>
+<p class="small"><b>Answer:</b> ${safe(d.answer)}</p>
+</div>
 
-let correct=a;
-if(ans.includes("B")) correct=b;
-if(ans.includes("C")) correct=c;
-if(ans.includes("D")) correct=d;
+<div>
+<button class="del-btn" onclick="deleteItem('${item.id}')">Delete</button>
+</div>
+</div>
+</div>
+`;
+i++;
 
-await addDoc(collection(window.db,"pyqQuestions"),{
-category,post,
-question:q,
-options:[a,b,c,d],
-answer:correct,
-createdAt:Date.now()
+});
+
+}catch(err){
+list.innerHTML="Load Failed";
+console.log(err);
+}
+
+}
+
+/* DELETE */
+window.deleteItem=async function(id){
+
+if(!confirm("Delete this question?")) return;
+
+await deleteDoc(doc(db,"pyqQuestions",id));
+loadData();
+
+};
+
+function val(id){
+return document.getElementById(id).value.trim();
+}
+
+function clearForm(){
+["category","post","question","a","b","c","d","ans"].forEach(id=>{
+document.getElementById(id).value="";
 });
 }
+
+function esc(str){
+return String(str).replace(/[&<>"']/g,m=>({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
+}[m]));
 }
 
-document.getElementById("msg").innerText="Bulk Questions Saved";
-};
+function safe(str){ return str || ""; }
+
 </script>
 </body>
 </html>
