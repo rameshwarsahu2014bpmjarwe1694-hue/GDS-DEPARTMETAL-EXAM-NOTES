@@ -1,4 +1,8 @@
-<!-- STRICT FINAL UPDATED admin-pyq.html -->
+<!-- =========================
+STRICT FINAL UPDATED admin-pyq.html
+GitHub Direct PDF Upload + Firestore Permanent Save
+All Years Included
+========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,36 +16,30 @@ body{background:#f4f4f4}
 .topbar{background:#000;color:#fff;padding:15px;text-align:center;font-size:20px;font-weight:bold}
 .container{max-width:1000px;margin:auto;padding:20px}
 .box{background:#fff;padding:18px;border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.08);margin-bottom:18px}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}
-.card,.subbtn{
-background:#fff;
-padding:18px 10px;
-border-radius:14px;
-text-align:center;
-font-weight:bold;
-font-size:16px;
-box-shadow:0 4px 10px rgba(0,0,0,.08);
-cursor:pointer;
-border:none;
-width:100%;
+input,select,textarea{
+width:100%;padding:12px;margin-top:10px;
+border:1px solid #ccc;border-radius:10px;font-size:15px
 }
-.card:hover,.subbtn:hover{transform:translateY(-3px)}
-.subgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:15px 0}
-input,textarea,select{width:100%;padding:11px;margin-top:8px;border:1px solid #ccc;border-radius:10px;font-size:15px}
-textarea{min-height:100px;resize:vertical}
-button{width:100%;padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;margin-top:12px}
-.save{background:#007bff;color:#fff}
-.bulk{background:green;color:#fff}
-.upload{background:#6f42c1;color:#fff}
-.del{background:red;color:#fff}
-.back{display:block;text-align:center;text-decoration:none;background:#111;color:#fff;padding:12px;border-radius:10px;font-weight:bold;margin-top:18px}
+textarea{min-height:100px}
+button{
+width:100%;padding:12px;margin-top:12px;
+border:none;border-radius:10px;
+background:#007bff;color:#fff;
+font-weight:bold;cursor:pointer
+}
 .list{margin-top:15px}
-.item{background:#f8f8f8;padding:10px;border-radius:10px;margin-bottom:10px;border-left:4px solid #007bff}
-.hide{display:none}
-@media(min-width:700px){.grid{grid-template-columns:repeat(3,1fr)}}
+.item{
+background:#f8f8f8;padding:12px;border-radius:12px;
+margin-bottom:10px;border-left:4px solid #007bff
+}
+.back{
+display:block;text-align:center;text-decoration:none;
+background:#111;color:#fff;padding:12px;border-radius:10px;
+font-weight:bold;margin-top:18px
+}
+.status{margin-top:10px;font-weight:bold}
 </style>
 </head>
-
 <body>
 
 <div class="topbar">📄 Admin PYQ Manager</div>
@@ -49,81 +47,43 @@ button{width:100%;padding:12px;border:none;border-radius:10px;font-weight:bold;c
 <div class="container">
 
 <div class="box">
-<b>Welcome Admin 🔐 Permanent Firestore Save</b>
-</div>
 
-<div class="grid">
-<div class="card" onclick="choose('PYQ 2020')">📘 PYQ 2020</div>
-<div class="card" onclick="choose('PYQ 2021')">📘 PYQ 2021</div>
-<div class="card" onclick="choose('PYQ 2022')">📘 PYQ 2022</div>
-<div class="card" onclick="choose('PYQ 2023')">📘 PYQ 2023</div>
-<div class="card" onclick="choose('PYQ 2024')">📘 PYQ 2024</div>
-<div class="card" onclick="choose('PYQ 2025')">📘 PYQ 2025</div>
-<div class="card" onclick="choose('PYQ 2026')">📘 PYQ 2026</div>
-<div class="card" onclick="choose('Model Paper')">📝 Model Paper</div>
-<div class="card" onclick="choose('Practice Set')">🏆 Practice Set</div>
-</div>
-
-<div class="box hide" id="subPanel">
-<h3>Select Category</h3>
-<div class="subgrid">
-<button class="subbtn" onclick="setPost('MTS')">MTS</button>
-<button class="subbtn" onclick="setPost('POSTMAN')">POSTMAN</button>
-<button class="subbtn" onclick="setPost('PA-SA')">PA-SA</button>
-</div>
-</div>
-
-<div class="box hide" id="panel">
-
-<h3 id="title">Add Questions</h3>
-
-<hr style="margin:15px 0">
-<h3>Upload File</h3>
-
-<input type="text" id="fileName" placeholder="File Name">
-<input type="text" id="fileTitle" placeholder="File Title">
-<input type="text" id="fileDesc" placeholder="Description">
-
-<button class="upload" onclick="uploadFile()">Save File Details</button>
-
-<hr style="margin:18px 0">
-
-<label>Question</label>
-<textarea id="question"></textarea>
-
-<label>Option A</label>
-<input type="text" id="opt1">
-
-<label>Option B</label>
-<input type="text" id="opt2">
-
-<label>Option C</label>
-<input type="text" id="opt3">
-
-<label>Option D</label>
-<input type="text" id="opt4">
-
-<label>Correct Answer</label>
-<select id="answer">
-<option value="A">Option A</option>
-<option value="B">Option B</option>
-<option value="C">Option C</option>
-<option value="D">Option D</option>
+<select id="category">
+<option>PYQ 2020</option>
+<option>PYQ 2021</option>
+<option>PYQ 2022</option>
+<option>PYQ 2023</option>
+<option>PYQ 2024</option>
+<option>PYQ 2025</option>
+<option>PYQ 2026</option>
+<option>Model Paper</option>
+<option>Practice Set</option>
 </select>
 
-<button class="save" onclick="saveSingle()">Save Single Question</button>
+<select id="post">
+<option>MTS</option>
+<option>POSTMAN</option>
+<option>PA-SA</option>
+</select>
 
-<hr style="margin:18px 0">
+<input type="file" id="pdfFile" accept="application/pdf">
 
-<h3>Bulk Paste Questions</h3>
-<textarea id="bulkBox"></textarea>
-<button class="bulk" onclick="bulkImport()">Bulk Import</button>
+<input type="text" id="title" placeholder="File Title">
 
-<div class="list" id="listBox"></div>
+<textarea id="desc" placeholder="Description"></textarea>
+
+<button onclick="uploadNow()">Upload PDF + Save</button>
+
+<div class="status" id="msg"></div>
 
 </div>
 
-<a href="admin-panel.html" class="back">⬅ Back to Admin Panel</a>
+<div class="box">
+<h3>Saved Files</h3>
+<div id="listBox">Loading...</div>
+</div>
+
+<a href="admin-panel.html" class="back">⬅ Back</a>
 
 </div>
 
@@ -131,211 +91,114 @@ button{width:100%;padding:12px;border:none;border-radius:10px;font-weight:bold;c
 
 <script type="module">
 import {
-collection,
-addDoc,
-getDocs,
-query,
-where,
-deleteDoc,
-doc
+collection,addDoc,getDocs,query,orderBy
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-let current="";
-let currentPost="";
+window.uploadNow = async function(){
 
-/* Select Year */
-window.choose=function(cat){
-current=cat;
-currentPost="";
-document.getElementById("subPanel").classList.remove("hide");
-document.getElementById("panel").classList.add("hide");
+const file=document.getElementById("pdfFile").files[0];
+const title=document.getElementById("title").value.trim();
+const desc=document.getElementById("desc").value.trim();
+const category=document.getElementById("category").value;
+const post=document.getElementById("post").value;
+const msg=document.getElementById("msg");
 
-window.scrollTo({top:500,behavior:"smooth"});
-};
+if(!file) return alert("Choose PDF");
+if(!title) return alert("Enter Title");
 
-/* Select Post */
-window.setPost=function(post){
-currentPost=post;
+const token=prompt("Enter GitHub PAT Token");
+if(!token) return;
 
-document.getElementById("panel").classList.remove("hide");
-document.getElementById("title").innerText=current+" - "+post;
+msg.innerText="Uploading...";
 
-showList();
+const fileName=Date.now()+"_"+file.name;
+const path="pdfs/"+fileName;
 
-window.scrollTo({top:700,behavior:"smooth"});
-};
+const buffer=await file.arrayBuffer();
+const bytes=new Uint8Array(buffer);
 
-/* File Save */
-window.uploadFile=async function(){
+let binary="";
+bytes.forEach(b=>binary+=String.fromCharCode(b));
 
-if(current==="" || currentPost===""){
-alert("Select category first");
+const base64=btoa(binary);
+
+const api=`https://api.github.com/repos/rameshwarsahu2014bpmjarwe1694-hue/GDS-DEPARTMETAL-EXAM-NOTES/contents/${path}`;
+
+const res=await fetch(api,{
+method:"PUT",
+headers:{
+Authorization:"token "+token,
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+message:"Upload "+fileName,
+content:base64
+})
+});
+
+const data=await res.json();
+
+if(!res.ok){
+msg.innerText="Upload Failed";
+console.log(data);
 return;
 }
 
-let fileName=document.getElementById("fileName").value.trim();
-let title=document.getElementById("fileTitle").value.trim();
-let desc=document.getElementById("fileDesc").value.trim();
-
-if(fileName==="" || title===""){
-alert("Fill all fields");
-return;
-}
+const fileUrl=`https://rameshwarsahu2014bpmjarwe1694-hue.github.io/GDS-DEPARTMETAL-EXAM-NOTES/${path}`;
 
 await addDoc(collection(window.db,"pyqFiles"),{
-category:current,
-post:currentPost,
-fileName:fileName,
-title:title,
+category,
+post,
+title,
 description:desc,
+fileName,
+fileUrl,
 createdAt:Date.now()
 });
 
-document.getElementById("fileName").value="";
-document.getElementById("fileTitle").value="";
-document.getElementById("fileDesc").value="";
+msg.innerText="Uploaded + Saved Successfully";
 
-alert("Saved Permanently");
+document.getElementById("pdfFile").value="";
+document.getElementById("title").value="";
+document.getElementById("desc").value="";
+
+loadList();
 };
 
-/* Save Question */
-window.saveSingle=async function(){
-
-let q=document.getElementById("question").value.trim();
-let a=document.getElementById("opt1").value.trim();
-let b=document.getElementById("opt2").value.trim();
-let c=document.getElementById("opt3").value.trim();
-let d=document.getElementById("opt4").value.trim();
-let ans=document.getElementById("answer").value;
-
-if(!q||!a||!b||!c||!d){
-alert("Fill all fields");
-return;
-}
-
-let correct=a;
-if(ans==="B") correct=b;
-if(ans==="C") correct=c;
-if(ans==="D") correct=d;
-
-await addDoc(collection(window.db,"pyqQuestions"),{
-category:current,
-post:currentPost,
-question:q,
-options:[a,b,c,d],
-answer:correct,
-createdAt:Date.now()
-});
-
-document.getElementById("question").value="";
-document.getElementById("opt1").value="";
-document.getElementById("opt2").value="";
-document.getElementById("opt3").value="";
-document.getElementById("opt4").value="";
-
-showList();
-alert("Question Saved");
-};
-
-/* Bulk Import */
-window.bulkImport=async function(){
-
-let text=document.getElementById("bulkBox").value.trim();
-if(text===""){
-alert("Paste questions first");
-return;
-}
-
-let blocks=text.split(/\n\s*\n/);
-let count=0;
-
-for(let block of blocks){
-
-let lines=block.split("\n").map(x=>x.trim()).filter(Boolean);
-
-if(lines.length>=6){
-
-let q=lines[0];
-let a=clean(lines[1]);
-let b=clean(lines[2]);
-let c=clean(lines[3]);
-let d=clean(lines[4]);
-let ans=lines[5].toUpperCase();
-
-let correct=a;
-if(ans.includes("B")) correct=b;
-if(ans.includes("C")) correct=c;
-if(ans.includes("D")) correct=d;
-
-await addDoc(collection(window.db,"pyqQuestions"),{
-category:current,
-post:currentPost,
-question:q,
-options:[a,b,c,d],
-answer:correct,
-createdAt:Date.now()
-});
-
-count++;
-}
-}
-
-document.getElementById("bulkBox").value="";
-showList();
-alert(count+" Questions Imported");
-};
-
-/* Delete */
-window.deleteQuestion=async function(id){
-if(!confirm("Delete this question?")) return;
-await deleteDoc(doc(window.db,"pyqQuestions",id));
-showList();
-};
-
-/* Show List */
-async function showList(){
+async function loadList(){
 
 const box=document.getElementById("listBox");
 
-let q1=query(
-collection(window.db,"pyqQuestions"),
-where("category","==",current),
-where("post","==",currentPost)
+const q=query(
+collection(window.db,"pyqFiles"),
+orderBy("createdAt","desc")
 );
 
-let snap=await getDocs(q1);
+const snap=await getDocs(q);
 
 if(snap.empty){
-box.innerHTML="<br><b>No Questions Added</b>";
+box.innerHTML="No files saved";
 return;
 }
 
-let html="<br><b>Total Questions: "+snap.size+"</b><br><br>";
-let i=1;
+let html="";
 
-snap.forEach(docSnap=>{
-let x=docSnap.data();
+snap.forEach(doc=>{
+const x=doc.data();
 
 html+=`
 <div class="item">
-<b>${i}. ${x.question}</b><br>
-A. ${x.options[0]}<br>
-B. ${x.options[1]}<br>
-C. ${x.options[2]}<br>
-D. ${x.options[3]}<br>
-<b>Answer:</b> ${x.answer}<br><br>
-<button class="del" onclick="deleteQuestion('${docSnap.id}')">Delete</button>
+<b>${x.title}</b><br>
+${x.category} | ${x.post}<br>
+${x.fileName}
 </div>
 `;
-i++;
 });
 
 box.innerHTML=html;
 }
 
-function clean(t){
-return t.replace(/^A\)|^B\)|^C\)|^D\)/i,"").trim();
-}
+loadList();
 </script>
 
 </body>
