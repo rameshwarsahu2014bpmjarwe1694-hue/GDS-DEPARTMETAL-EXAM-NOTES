@@ -1,7 +1,8 @@
 <!-- =========================
-STRICT FINAL UPDATED admin-pyq.html
-admin-syllabus.html Pattern Based
-Firestore Rules Compatible Final Version
+FILE 1 : admin-pyq.html
+STRICT FINAL CLEAN VERSION
+Same Pattern as admin-syllabus.html
+PDF + Questions + Bulk + Delete
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -24,13 +25,13 @@ input,select,textarea{
 padding:12px;border:1px solid #ccc;
 border-radius:8px;font-size:16px;width:100%
 }
-textarea{min-height:100px}
+textarea{min-height:110px}
 button{
 padding:12px;border:none;border-radius:8px;
 font-size:16px;font-weight:bold;cursor:pointer
 }
 .save-btn{background:#007bff;color:#fff}
-.del-btn{background:#dc3545;color:#fff}
+.delete-btn{background:#dc3545;color:#fff}
 .card{
 background:#fafafa;padding:15px;
 border:1px solid #ddd;border-radius:10px;
@@ -41,7 +42,8 @@ display:flex;justify-content:space-between;
 gap:10px;flex-wrap:wrap
 }
 .small{font-size:14px;color:#666;margin-top:6px}
-.status{text-align:center;font-weight:bold;margin-bottom:15px}
+.status{text-align:center;margin:10px 0;font-weight:bold}
+hr{margin:20px 0;border:none;border-top:1px solid #ddd}
 </style>
 </head>
 <body>
@@ -53,7 +55,7 @@ gap:10px;flex-wrap:wrap
 <div class="grid">
 
 <select id="category">
-<option value="">Select Year</option>
+<option value="">Select Category</option>
 <option>PYQ 2020</option>
 <option>PYQ 2021</option>
 <option>PYQ 2022</option>
@@ -72,8 +74,25 @@ gap:10px;flex-wrap:wrap
 <option>PA-SA</option>
 </select>
 
-<textarea id="question" placeholder="Question"></textarea>
+</div>
 
+<!-- PDF SECTION -->
+<h3>Save PDF</h3>
+
+<div class="grid">
+<input type="text" id="title" placeholder="PDF Title">
+<input type="text" id="fileName" placeholder="Full PDF URL or File Name">
+<textarea id="desc" placeholder="Description"></textarea>
+<button class="save-btn" onclick="savePdf()">Save PDF</button>
+</div>
+
+<hr>
+
+<!-- SINGLE QUESTION -->
+<h3>Add Question</h3>
+
+<div class="grid">
+<textarea id="question" placeholder="Question"></textarea>
 <input type="text" id="a" placeholder="Option A">
 <input type="text" id="b" placeholder="Option B">
 <input type="text" id="c" placeholder="Option C">
@@ -87,13 +106,36 @@ gap:10px;flex-wrap:wrap
 <option>D</option>
 </select>
 
-<button class="save-btn" onclick="savePYQ()">Save Question</button>
+<button class="save-btn" onclick="saveQuestion()">Save Question</button>
+</div>
+
+<hr>
+
+<!-- BULK -->
+<h3>Bulk Import</h3>
+
+<div class="grid">
+<textarea id="bulk" placeholder="Question
+A) Option A
+B) Option B
+C) Option C
+D) Option D
+Answer: A"></textarea>
+
+<button class="save-btn" onclick="bulkSave()">Bulk Save</button>
+</div>
 
 <div id="statusMsg" class="status"></div>
 
-</div>
+<hr>
 
-<div id="list">Loading...</div>
+<h3>Saved PDFs</h3>
+<div id="pdfList">Loading...</div>
+
+<hr>
+
+<h3>Saved Questions</h3>
+<div id="questionList">Loading...</div>
 
 </div>
 
@@ -112,43 +154,46 @@ query,
 orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-getAuth,
-signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
 const firebaseConfig = {
-apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-projectId: "gds-departmental-exam-studyhub",
-storageBucket: "gds-departmental-exam-studyhub.appspot.com",
-messagingSenderId: "759916756080",
-appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+apiKey:"YOUR_API_KEY",
+authDomain:"YOUR_AUTH_DOMAIN",
+projectId:"YOUR_PROJECT_ID",
+storageBucket:"YOUR_STORAGE_BUCKET",
+messagingSenderId:"YOUR_SENDER_ID",
+appId:"YOUR_APP_ID"
 };
-
-const ADMIN_EMAIL="rameshwarsahu2014bpmjarwe1694@gmail.com";
-const ADMIN_PASS="YOUR_ADMIN_PASSWORD";
 
 const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
-const auth=getAuth(app);
 
-const list=document.getElementById("list");
 const statusMsg=document.getElementById("statusMsg");
 
-/* AUTO LOGIN */
-signInWithEmailAndPassword(auth,ADMIN_EMAIL,ADMIN_PASS)
-.then(()=>loadData())
-.catch(err=>{
-statusMsg.innerText="Admin Login Failed";
-statusMsg.style.color="red";
-console.log(err);
+/* SAVE PDF */
+window.savePdf=async function(){
+
+const category=val("category");
+const post=val("post");
+const title=val("title");
+const fileName=val("fileName");
+const desc=val("desc");
+
+if(category===""||post===""||title===""||fileName===""){
+alert("Fill all PDF fields");
+return;
+}
+
+await addDoc(collection(db,"pyqFiles"),{
+category,post,title,fileName,desc,
+createdAt:serverTimestamp()
 });
 
-/* SAVE */
-window.savePYQ=async function(){
+status("PDF Saved");
+clearPdf();
+loadAll();
+};
 
-if(!auth.currentUser) return alert("Admin not logged in");
+/* SAVE QUESTION */
+window.saveQuestion=async function(){
 
 const category=val("category");
 const post=val("post");
@@ -159,130 +204,181 @@ const c=val("c");
 const d=val("d");
 const ans=val("ans");
 
-if(category==="") return alert("Select year");
-if(post==="") return alert("Select post");
-if(question.length<3) return alert("Enter question");
-if(a===""||b===""||c===""||d==="") return alert("Fill all options");
-if(ans==="") return alert("Select answer");
-
-let correct=a;
-if(ans==="B") correct=b;
-if(ans==="C") correct=c;
-if(ans==="D") correct=d;
-
-try{
-
-statusMsg.innerText="Saving...";
-
-await addDoc(collection(db,"pyqQuestions"),{
-category:esc(category),
-post:esc(post),
-question:esc(question),
-options:[esc(a),esc(b),esc(c),esc(d)],
-answer:esc(correct),
-createdAt:serverTimestamp()
-});
-
-clearForm();
-
-statusMsg.innerText="Saved Permanently";
-statusMsg.style.color="green";
-
-loadData();
-
-}catch(err){
-statusMsg.innerText="Save Failed";
-statusMsg.style.color="red";
-console.log(err);
-}
-
-};
-
-/* LOAD */
-async function loadData(){
-
-try{
-
-const q=query(collection(db,"pyqQuestions"),orderBy("createdAt","desc"));
-const snap=await getDocs(q);
-
-list.innerHTML="";
-
-if(snap.empty){
-list.innerHTML="<p>No questions added.</p>";
+if(category===""||post===""||question===""||a===""||b===""||c===""||d===""||ans===""){
+alert("Fill all question fields");
 return;
 }
 
-let i=1;
+let answer=a;
+if(ans==="B") answer=b;
+if(ans==="C") answer=c;
+if(ans==="D") answer=d;
 
-snap.forEach(item=>{
+await addDoc(collection(db,"pyqQuestions"),{
+category,post,question,
+options:[a,b,c,d],
+answer,
+createdAt:serverTimestamp()
+});
 
-const d=item.data();
+status("Question Saved");
+clearQ();
+loadAll();
+};
 
-list.innerHTML+=`
+/* BULK SAVE */
+window.bulkSave=async function(){
+
+const category=val("category");
+const post=val("post");
+const bulk=val("bulk");
+
+if(category===""||post===""||bulk===""){
+alert("Select category/post and paste text");
+return;
+}
+
+let blocks=bulk.split(/\n\s*\n/);
+
+for(let block of blocks){
+
+let lines=block.split("\n").map(x=>x.trim()).filter(Boolean);
+
+if(lines.length>=6){
+
+let q=lines[0];
+let a=lines[1].replace(/^A\)/i,"").trim();
+let b=lines[2].replace(/^B\)/i,"").trim();
+let c=lines[3].replace(/^C\)/i,"").trim();
+let d=lines[4].replace(/^D\)/i,"").trim();
+let ans=lines[5].toUpperCase();
+
+let answer=a;
+if(ans.includes("B")) answer=b;
+if(ans.includes("C")) answer=c;
+if(ans.includes("D")) answer=d;
+
+await addDoc(collection(db,"pyqQuestions"),{
+category,post,question:q,
+options:[a,b,c,d],
+answer,
+createdAt:serverTimestamp()
+});
+
+}
+
+}
+
+status("Bulk Questions Saved");
+document.getElementById("bulk").value="";
+loadAll();
+};
+
+/* LOAD ALL */
+async function loadAll(){
+
+/* PDF LIST */
+const pdfSnap=await getDocs(query(
+collection(db,"pyqFiles"),
+orderBy("createdAt","desc")
+));
+
+let pdfHtml="";
+
+pdfSnap.forEach(item=>{
+let d=item.data();
+
+pdfHtml+=`
 <div class="card">
 <div class="row">
 <div>
-<h3>${i}. ${safe(d.question)}</h3>
-<p>${safe(d.category)} | ${safe(d.post)}</p>
-<p class="small">
-A. ${safe(d.options?.[0])}<br>
-B. ${safe(d.options?.[1])}<br>
-C. ${safe(d.options?.[2])}<br>
-D. ${safe(d.options?.[3])}
-</p>
-<p class="small"><b>Answer:</b> ${safe(d.answer)}</p>
+<b>${d.title}</b>
+<div class="small">${d.category} | ${d.post}</div>
+<div class="small">${d.fileName}</div>
+<div class="small">${d.desc||""}</div>
 </div>
-
 <div>
-<button class="del-btn" onclick="deleteItem('${item.id}')">Delete</button>
+<button class="delete-btn" onclick="deletePdf('${item.id}')">Delete</button>
 </div>
 </div>
 </div>
 `;
-i++;
-
 });
 
-}catch(err){
-list.innerHTML="Load Failed";
-console.log(err);
-}
+document.getElementById("pdfList").innerHTML=pdfHtml||"No PDF Saved";
 
+/* QUESTION LIST */
+const qSnap=await getDocs(query(
+collection(db,"pyqQuestions"),
+orderBy("createdAt","desc")
+));
+
+let qHtml="";
+let i=1;
+
+qSnap.forEach(item=>{
+let d=item.data();
+
+qHtml+=`
+<div class="card">
+<div class="row">
+<div>
+<b>${i}. ${d.question}</b>
+<div class="small">${d.category} | ${d.post}</div>
+<div class="small">
+A. ${d.options[0]}<br>
+B. ${d.options[1]}<br>
+C. ${d.options[2]}<br>
+D. ${d.options[3]}
+</div>
+<div class="small"><b>Answer:</b> ${d.answer}</div>
+</div>
+
+<div>
+<button class="delete-btn" onclick="deleteQ('${item.id}')">Delete</button>
+</div>
+</div>
+</div>
+`;
+
+i++;
+});
+
+document.getElementById("questionList").innerHTML=qHtml||"No Questions Saved";
 }
 
 /* DELETE */
-window.deleteItem=async function(id){
+window.deletePdf=async function(id){
+await deleteDoc(doc(db,"pyqFiles",id));
+loadAll();
+};
 
-if(!confirm("Delete this question?")) return;
-
+window.deleteQ=async function(id){
 await deleteDoc(doc(db,"pyqQuestions",id));
-loadData();
-
+loadAll();
 };
 
 function val(id){
 return document.getElementById(id).value.trim();
 }
 
-function clearForm(){
-["category","post","question","a","b","c","d","ans"].forEach(id=>{
+function clearPdf(){
+["title","fileName","desc"].forEach(id=>{
 document.getElementById(id).value="";
 });
 }
 
-function esc(str){
-return String(str).replace(/[&<>"']/g,m=>({
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#39;"
-}[m]));
+function clearQ(){
+["question","a","b","c","d","ans"].forEach(id=>{
+document.getElementById(id).value="";
+});
 }
 
-function safe(str){ return str || ""; }
+function status(t){
+statusMsg.innerText=t;
+}
 
+loadAll();
 </script>
 </body>
 </html>
