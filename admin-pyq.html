@@ -1,7 +1,7 @@
 <!-- =========================
 FILE : admin-pyq.html
-STRICT FINAL WORKING VERSION
-PDF + Question + Bulk + Delete
+STRICT FINAL RULES COMPATIBLE VERSION
+AUTO LOGIN + PDF + QUESTION + BULK + DELETE
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +12,7 @@ PDF + Question + Bulk + Delete
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#f4f6f9;padding:15px}
+body{background:#f4f6f9;padding:20px}
 .container{
 max-width:1000px;
 margin:auto;
@@ -29,12 +29,13 @@ width:100%;
 padding:12px;
 border:1px solid #ccc;
 border-radius:8px;
-font-size:16px
+font-size:16px;
+outline:none
 }
 textarea{min-height:110px}
 button{
-border:none;
 padding:12px;
+border:none;
 border-radius:8px;
 font-size:16px;
 font-weight:bold;
@@ -44,8 +45,8 @@ cursor:pointer
 .delete-btn{background:#dc3545;color:#fff}
 .card{
 background:#fafafa;
-border:1px solid #ddd;
 padding:15px;
+border:1px solid #ddd;
 border-radius:10px;
 margin-bottom:12px
 }
@@ -56,7 +57,7 @@ gap:10px;
 flex-wrap:wrap
 }
 .small{font-size:14px;color:#666;margin-top:5px}
-.status{text-align:center;font-weight:bold;margin:12px 0;color:green}
+.status{text-align:center;font-weight:bold;margin:12px 0}
 hr{margin:20px 0;border:none;border-top:1px solid #ddd}
 </style>
 </head>
@@ -67,6 +68,7 @@ hr{margin:20px 0;border:none;border-top:1px solid #ddd}
 <h1>Admin PYQ Panel</h1>
 
 <div class="grid">
+
 <select id="category">
 <option value="">Select Category</option>
 <option>PYQ 2020</option>
@@ -86,7 +88,10 @@ hr{margin:20px 0;border:none;border-top:1px solid #ddd}
 <option>POSTMAN</option>
 <option>PA-SA</option>
 </select>
+
 </div>
+
+<div id="statusMsg" class="status">Loading...</div>
 
 <hr>
 
@@ -94,9 +99,9 @@ hr{margin:20px 0;border:none;border-top:1px solid #ddd}
 
 <div class="grid">
 <input type="text" id="title" placeholder="PDF Title">
-<input type="text" id="fileName" placeholder="Full PDF URL or File Name">
+<input type="text" id="fileName" placeholder="PDF File Name or URL">
 <textarea id="desc" placeholder="Description"></textarea>
-<button type="button" class="save-btn" onclick="savePdf()">Save PDF</button>
+<button class="save-btn" onclick="savePdf()">Save PDF</button>
 </div>
 
 <hr>
@@ -118,7 +123,7 @@ hr{margin:20px 0;border:none;border-top:1px solid #ddd}
 <option>D</option>
 </select>
 
-<button type="button" class="save-btn" onclick="saveQuestion()">Save Question</button>
+<button class="save-btn" onclick="saveQuestion()">Save Question</button>
 </div>
 
 <hr>
@@ -133,10 +138,8 @@ C) Option C
 D) Option D
 Answer: A"></textarea>
 
-<button type="button" class="save-btn" onclick="bulkSave()">Bulk Save</button>
+<button class="save-btn" onclick="bulkSave()">Bulk Save</button>
 </div>
-
-<div id="statusMsg" class="status"></div>
 
 <hr>
 
@@ -160,31 +163,55 @@ collection,
 addDoc,
 getDocs,
 deleteDoc,
-doc
+doc,
+serverTimestamp,
+query,
+orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+getAuth,
+signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
 authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-databaseURL: "https://gds-departmental-exam-studyhub-default-rtdb.asia-southeast1.firebasedatabase.app",
 projectId: "gds-departmental-exam-studyhub",
-storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
+storageBucket: "gds-departmental-exam-studyhub.appspot.com",
 messagingSenderId: "759916756080",
 appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
+const ADMIN_EMAIL = "rameshwarsahu2014bpmjarwe1694@gmail.com";
+const ADMIN_PASS = "YOUR_ADMIN_PASSWORD";
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 const statusMsg = document.getElementById("statusMsg");
 
+/* AUTO LOGIN */
+signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASS)
+.then(()=>{
+status("Admin Logged In");
+loadAll();
+})
+.catch(err=>{
+statusMsg.style.color="red";
+statusMsg.innerText="Admin Login Failed";
+console.log(err);
+});
+
+/* HELPERS */
 function val(id){
 return document.getElementById(id).value.trim();
 }
 
-function status(t){
+function status(t,color="green"){
 statusMsg.innerText=t;
-setTimeout(()=>statusMsg.innerText="",3000);
+statusMsg.style.color=color;
 }
 
 function clearPdf(){
@@ -199,43 +226,61 @@ document.getElementById(id).value="";
 });
 }
 
-/* SAVE PDF */
-window.savePdf = async function(){
-try{
-
-const category = val("category");
-const post = val("post");
-const title = val("title");
-const fileName = val("fileName");
-const desc = val("desc");
-
-if(!category || !post || !title || !fileName){
-alert("Fill all PDF fields");
-return;
+function esc(str){
+return String(str).replace(/[&<>"']/g,m=>({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
+}[m]));
 }
 
+function safe(v){ return v || ""; }
+
+/* SAVE PDF */
+window.savePdf = async function(){
+
+if(!auth.currentUser) return alert("Admin not logged in");
+
+const category=val("category");
+const post=val("post");
+const title=val("title");
+const fileName=val("fileName");
+const desc=val("desc");
+
+if(!category || !post || !title || !fileName){
+return alert("Fill all PDF fields");
+}
+
+try{
+
+status("Saving...","blue");
+
 await addDoc(collection(db,"pyqFiles"),{
-category,
-post,
-title,
-fileName,
-desc,
-createdAt: Date.now()
+category:esc(category),
+post:esc(post),
+title:esc(title),
+fileName:esc(fileName),
+desc:esc(desc),
+createdAt:serverTimestamp()
 });
 
 clearPdf();
-status("PDF Saved Successfully");
+status("PDF Saved");
 loadAll();
 
 }catch(err){
-alert(err.message);
+status("Save Failed","red");
 console.log(err);
 }
+
 };
 
 /* SAVE QUESTION */
 window.saveQuestion = async function(){
-try{
+
+if(!auth.currentUser) return alert("Admin not logged in");
 
 const category=val("category");
 const post=val("post");
@@ -247,8 +292,7 @@ const d=val("d");
 const ans=val("ans");
 
 if(!category||!post||!question||!a||!b||!c||!d||!ans){
-alert("Fill all question fields");
-return;
+return alert("Fill all question fields");
 }
 
 let answer=a;
@@ -256,37 +300,44 @@ if(ans==="B") answer=b;
 if(ans==="C") answer=c;
 if(ans==="D") answer=d;
 
+try{
+
+status("Saving...","blue");
+
 await addDoc(collection(db,"pyqQuestions"),{
-category,
-post,
-question,
-options:[a,b,c,d],
-answer,
-createdAt: Date.now()
+category:esc(category),
+post:esc(post),
+question:esc(question),
+options:[esc(a),esc(b),esc(c),esc(d)],
+answer:esc(answer),
+createdAt:serverTimestamp()
 });
 
 clearQ();
-status("Question Saved Successfully");
+status("Question Saved");
 loadAll();
 
 }catch(err){
-alert(err.message);
+status("Save Failed","red");
 console.log(err);
 }
+
 };
 
 /* BULK SAVE */
 window.bulkSave = async function(){
-try{
+
+if(!auth.currentUser) return alert("Admin not logged in");
 
 const category=val("category");
 const post=val("post");
 const bulk=val("bulk");
 
-if(!category||!post||!bulk){
-alert("Select category/post and paste text");
-return;
+if(!category || !post || !bulk){
+return alert("Select category/post and paste data");
 }
+
+try{
 
 let blocks = bulk.split(/\n\s*\n/);
 
@@ -309,12 +360,12 @@ if(ans.includes("C")) answer=c;
 if(ans.includes("D")) answer=d;
 
 await addDoc(collection(db,"pyqQuestions"),{
-category,
-post,
-question:q,
-options:[a,b,c,d],
-answer,
-createdAt: Date.now()
+category:esc(category),
+post:esc(post),
+question:esc(q),
+options:[esc(a),esc(b),esc(c),esc(d)],
+answer:esc(answer),
+createdAt:serverTimestamp()
 });
 
 }
@@ -326,16 +377,21 @@ status("Bulk Questions Saved");
 loadAll();
 
 }catch(err){
-alert(err.message);
+status("Bulk Save Failed","red");
 console.log(err);
 }
+
 };
 
-/* LOAD DATA */
+/* LOAD ALL */
 async function loadAll(){
 
 /* PDFs */
-const pdfSnap = await getDocs(collection(db,"pyqFiles"));
+try{
+
+const pdfSnap = await getDocs(
+query(collection(db,"pyqFiles"),orderBy("createdAt","desc"))
+);
 
 let pdfHtml="";
 
@@ -346,10 +402,10 @@ pdfHtml += `
 <div class="card">
 <div class="row">
 <div>
-<b>${d.title}</b>
-<div class="small">${d.category} | ${d.post}</div>
-<div class="small">${d.fileName}</div>
-<div class="small">${d.desc || ""}</div>
+<b>${safe(d.title)}</b>
+<div class="small">${safe(d.category)} | ${safe(d.post)}</div>
+<div class="small">${safe(d.fileName)}</div>
+<div class="small">${safe(d.desc)}</div>
 </div>
 <div>
 <button class="delete-btn" onclick="deletePdf('${item.id}')">Delete</button>
@@ -361,8 +417,16 @@ pdfHtml += `
 
 document.getElementById("pdfList").innerHTML = pdfHtml || "No PDF Saved";
 
+}catch(err){
+document.getElementById("pdfList").innerHTML="Load Failed";
+}
+
 /* Questions */
-const qSnap = await getDocs(collection(db,"pyqQuestions"));
+try{
+
+const qSnap = await getDocs(
+query(collection(db,"pyqQuestions"),orderBy("createdAt","desc"))
+);
 
 let qHtml="";
 let i=1;
@@ -375,15 +439,15 @@ qHtml += `
 <div class="card">
 <div class="row">
 <div>
-<b>${i}. ${d.question}</b>
-<div class="small">${d.category} | ${d.post}</div>
+<b>${i}. ${safe(d.question)}</b>
+<div class="small">${safe(d.category)} | ${safe(d.post)}</div>
 <div class="small">
-A. ${d.options[0]}<br>
-B. ${d.options[1]}<br>
-C. ${d.options[2]}<br>
-D. ${d.options[3]}
+A. ${safe(d.options[0])}<br>
+B. ${safe(d.options[1])}<br>
+C. ${safe(d.options[2])}<br>
+D. ${safe(d.options[3])}
 </div>
-<div class="small"><b>Answer:</b> ${d.answer}</div>
+<div class="small"><b>Answer:</b> ${safe(d.answer)}</div>
 </div>
 
 <div>
@@ -396,21 +460,34 @@ D. ${d.options[3]}
 i++;
 });
 
-document.getElementById("questionList").innerHTML = qHtml || "No Questions Saved";
+document.getElementById("questionList").innerHTML=qHtml || "No Questions Saved";
+
+}catch(err){
+document.getElementById("questionList").innerHTML="Load Failed";
+}
+
 }
 
 /* DELETE */
 window.deletePdf = async function(id){
+
+if(!confirm("Delete PDF?")) return;
+
 await deleteDoc(doc(db,"pyqFiles",id));
 loadAll();
+
 };
 
 window.deleteQ = async function(id){
+
+if(!confirm("Delete Question?")) return;
+
 await deleteDoc(doc(db,"pyqQuestions",id));
 loadAll();
+
 };
 
-loadAll();
+document.addEventListener("contextmenu",e=>e.preventDefault());
 
 </script>
 
