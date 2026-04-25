@@ -1,7 +1,6 @@
 <!-- =========================
 STRICT FINAL UPDATED pyq.html
-Candidate Read / Open / Download PDF
-All Years Included
+PDF + Text Questions Show
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -9,23 +8,17 @@ All Years Included
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>PYQ Section</title>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#f4f4f4}
-.topbar{background:#000;color:#fff;padding:15px;text-align:center;font-size:20px;font-weight:bold}
-.container{max-width:1000px;margin:auto;padding:20px}
-.box{
-background:#fff;padding:18px;border-radius:14px;
-box-shadow:0 4px 10px rgba(0,0,0,.08);margin-bottom:18px
+body{background:#f4f4f4;padding:20px}
+.wrap{max-width:1000px;margin:auto}
+.box,.card{
+background:#fff;padding:15px;border-radius:12px;
+margin-bottom:14px
 }
 select{
 width:100%;padding:12px;margin-top:10px;
 border:1px solid #ccc;border-radius:10px
-}
-.card{
-background:#fff;padding:15px;border-radius:12px;
-margin-bottom:14px;box-shadow:0 4px 10px rgba(0,0,0,.08)
 }
 a{
 display:inline-block;
@@ -34,22 +27,15 @@ background:#007bff;color:#fff;
 text-decoration:none;border-radius:8px;
 margin-top:10px;margin-right:8px
 }
-.back{
-display:block;text-align:center;text-decoration:none;
-background:#111;color:#fff;padding:12px;border-radius:10px;
-font-weight:bold;margin-top:18px
-}
 </style>
 </head>
 <body>
 
-<div class="topbar">📘 Previous Year Questions</div>
-
-<div class="container">
+<div class="wrap">
 
 <div class="box">
 
-<select id="category" onchange="loadData()">
+<select id="category" onchange="loadAll()">
 <option>PYQ 2020</option>
 <option>PYQ 2021</option>
 <option>PYQ 2022</option>
@@ -61,7 +47,7 @@ font-weight:bold;margin-top:18px
 <option>Practice Set</option>
 </select>
 
-<select id="post" onchange="loadData()">
+<select id="post" onchange="loadAll()">
 <option>MTS</option>
 <option>POSTMAN</option>
 <option>PA-SA</option>
@@ -69,9 +55,8 @@ font-weight:bold;margin-top:18px
 
 </div>
 
-<div id="list">Loading...</div>
-
-<a href="dashboard.html" class="back">⬅ Back</a>
+<div id="pdfBox"></div>
+<div id="questionBox"></div>
 
 </div>
 
@@ -82,49 +67,71 @@ import {
 collection,getDocs,query,where
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-window.loadData=async function(){
+window.loadAll=async function(){
 
 const category=document.getElementById("category").value;
 const post=document.getElementById("post").value;
-const list=document.getElementById("list");
 
-list.innerHTML="Loading...";
-
-const q=query(
+/* PDF */
+let q1=query(
 collection(window.db,"pyqFiles"),
-where("category","==",category),
-where("post","==",post)
+where("category","==",category)
 );
 
-const snap=await getDocs(q);
+let snap1=await getDocs(q1);
 
-if(snap.empty){
-list.innerHTML="<div class='box'>No PDF Found</div>";
-return;
-}
+let html1="";
 
-let html="";
+snap1.forEach(doc=>{
+let x=doc.data();
 
-snap.forEach(doc=>{
-const x=doc.data();
+if(x.post && x.post!==post) return;
 
-html+=`
+html1+=`
 <div class="card">
 <h3>${x.title}</h3>
 <p>${x.description||""}</p>
-<p><b>${x.fileName}</b></p>
-
 <a href="${x.fileUrl}" target="_blank">📖 Open PDF</a>
 <a href="${x.fileUrl}" download>⬇ Download</a>
 </div>
 `;
 });
 
-list.innerHTML=html;
+document.getElementById("pdfBox").innerHTML=html1 || "<div class='box'>No PDF Found</div>";
+
+/* Questions */
+let q2=query(
+collection(window.db,"pyqQuestions"),
+where("category","==",category)
+);
+
+let snap2=await getDocs(q2);
+
+let html2="";
+let i=1;
+
+snap2.forEach(doc=>{
+let x=doc.data();
+
+if(x.post && x.post!==post) return;
+
+html2+=`
+<div class="card">
+<b>${i}. ${x.question}</b><br><br>
+A. ${x.options[0]}<br>
+B. ${x.options[1]}<br>
+C. ${x.options[2]}<br>
+D. ${x.options[3]}<br><br>
+<b>Answer:</b> ${x.answer}
+</div>
+`;
+i++;
+});
+
+document.getElementById("questionBox").innerHTML=html2 || "<div class='box'>No Questions Found</div>";
 };
 
-loadData();
+loadAll();
 </script>
-
 </body>
 </html>
