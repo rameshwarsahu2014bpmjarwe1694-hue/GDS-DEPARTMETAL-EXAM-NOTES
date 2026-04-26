@@ -1,9 +1,7 @@
 <!-- =========================
 FILE : pyq.html
-STRICT FINAL EXAM MODE VERSION
-Same Firebase Config
-Candidate Side
-PDF + Quiz Mode + Final Result
+CLEAN REBUILD FINAL VERSION
+PDF + Quiz + Same Firebase Config
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -22,52 +20,70 @@ font-family:Arial,sans-serif;
 
 body{
 background:#f4f6f9;
-padding:20px;
+padding:15px;
 }
 
 .container{
 max-width:1000px;
 margin:auto;
 background:#fff;
-padding:20px;
+padding:18px;
 border-radius:12px;
 box-shadow:0 5px 15px rgba(0,0,0,.08);
 }
 
 h1{
 text-align:center;
-margin-bottom:20px;
+margin-bottom:18px;
+font-size:28px;
+}
+
+h3{
+margin:18px 0 10px;
 }
 
 .grid{
 display:grid;
 gap:12px;
-margin-bottom:20px;
 }
 
 select{
+width:100%;
 padding:12px;
 border:1px solid #ccc;
 border-radius:8px;
 font-size:16px;
-width:100%;
 }
 
 .card{
 background:#fafafa;
-padding:15px;
 border:1px solid #ddd;
 border-radius:10px;
+padding:15px;
 margin-bottom:12px;
 }
 
-button{
-padding:10px 15px;
+.small{
+font-size:14px;
+color:#666;
+margin-top:6px;
+line-height:1.5;
+}
+
+a,button{
+display:inline-block;
+padding:10px 14px;
 border:none;
 border-radius:8px;
 cursor:pointer;
+text-decoration:none;
 font-weight:bold;
-margin:5px;
+margin-top:10px;
+}
+
+a{
+background:#007bff;
+color:#fff;
 }
 
 .start-btn{background:#28a745;color:#fff;}
@@ -78,9 +94,9 @@ margin:5px;
 display:block;
 width:100%;
 text-align:left;
-margin:8px 0;
 background:#eee;
 color:#000;
+margin:8px 0;
 }
 
 .selected{
@@ -88,26 +104,9 @@ background:#007bff;
 color:#fff;
 }
 
-.correct{
-background:#28a745 !important;
-color:#fff;
-}
-
-.wrong{
-background:#dc3545 !important;
-color:#fff;
-}
-
-.small{
-font-size:14px;
-color:#666;
-margin-top:6px;
-line-height:1.6;
-}
-
 .empty{
-text-align:center;
 padding:20px;
+text-align:center;
 font-weight:bold;
 color:#666;
 }
@@ -120,7 +119,8 @@ color:#666;
 <h1>Previous Year Questions</h1>
 
 <div class="grid">
-<select id="category" onchange="loadAll()">
+
+<select id="category">
 <option>PYQ 2020</option>
 <option>PYQ 2021</option>
 <option>PYQ 2022</option>
@@ -132,27 +132,27 @@ color:#666;
 <option>Practice Set</option>
 </select>
 
-<select id="post" onchange="loadAll()">
+<select id="post">
 <option>MTS</option>
 <option>POSTMAN</option>
 <option>PA-SA</option>
 </select>
+
 </div>
 
 <h3>PDF Files</h3>
 <div id="pdfBox">Loading...</div>
 
-<h3 style="margin-top:20px">Quiz</h3>
-
+<h3>Quiz</h3>
 <button class="start-btn" id="startBtn">Start Quiz</button>
 
-<div id="quizBox" style="display:none;margin-top:15px;"></div>
-
-<div id="resultBox" style="display:none;margin-top:15px;"></div>
+<div id="quizBox" style="display:none;"></div>
+<div id="resultBox" style="display:none;"></div>
 
 </div>
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
@@ -176,29 +176,44 @@ const db = getFirestore(app);
 
 let questions = [];
 let current = 0;
-let selectedAnswers = [];
+let answers = [];
+
+/* HELPERS */
+function val(id){
+return document.getElementById(id).value.trim();
+}
+
+function safe(v){
+return v || "";
+}
+
+function esc(v){
+return String(v || "").replace(/'/g,"\\'");
+}
 
 /* LOAD DATA */
-window.loadAll = async function(){
+async function loadAll(){
 
-questions = [];
-current = 0;
-selectedAnswers = [];
-
+document.getElementById("pdfBox").innerHTML = "Loading...";
 document.getElementById("quizBox").style.display = "none";
 document.getElementById("resultBox").style.display = "none";
 document.getElementById("startBtn").style.display = "inline-block";
+
+questions = [];
+current = 0;
+answers = [];
 
 const category = val("category");
 const post = val("post");
 
 /* PDF */
-const pdfSnap = await getDocs(collection(db,"pyqFiles"));
-
 let pdfHtml = "";
 
-pdfSnap.forEach(doc=>{
-let d = doc.data();
+const pdfSnap = await getDocs(collection(db,"pyqFiles"));
+
+pdfSnap.forEach(doc => {
+
+const d = doc.data();
 
 if(d.category !== category) return;
 if(d.post !== post) return;
@@ -211,20 +226,13 @@ pdfHtml += `
 
 <div class="small">${safe(d.fileName)}</div>
 
-<a href="${safe(d.fileName)}" target="_blank" style="
-display:inline-block;
-padding:10px 14px;
-background:#007bff;
-color:#fff;
-text-decoration:none;
-border-radius:8px;
-margin-top:10px;
-">
+<a href="${safe(d.fileName)}" target="_blank">
 Open PDF
 </a>
-
 </div>
 `;
+
+});
 
 document.getElementById("pdfBox").innerHTML =
 pdfHtml || "<div class='empty'>No PDF Found</div>";
@@ -232,92 +240,96 @@ pdfHtml || "<div class='empty'>No PDF Found</div>";
 /* QUESTIONS */
 const qSnap = await getDocs(collection(db,"pyqQuestions"));
 
-qSnap.forEach(doc=>{
-let d = doc.data();
+qSnap.forEach(doc => {
+
+const d = doc.data();
 
 if(d.category !== category) return;
 if(d.post !== post) return;
 
 questions.push(d);
+
 });
-};
+
+}
 
 /* START QUIZ */
-window.startQuiz = function(){
+function startQuiz(){
 
-if(questions.length===0){
+if(questions.length === 0){
 alert("No Questions Found");
 return;
 }
 
-document.getElementById("startBtn").style.display="none";
-document.getElementById("quizBox").style.display="block";
+document.getElementById("startBtn").style.display = "none";
+document.getElementById("quizBox").style.display = "block";
 
 showQuestion();
-};
+}
 
 /* SHOW QUESTION */
 function showQuestion(){
 
-let q = questions[current];
+const q = questions[current];
 
 let html = `
 <div class="card">
 <h3>Question ${current+1} / ${questions.length}</h3>
+
 <p style="margin:15px 0;"><b>${safe(q.question)}</b></p>
 `;
 
 for(let i=0;i<4;i++){
 
-let option = safe(q.options?.[i]);
-let active = selectedAnswers[current]===option ? "selected" : "";
+const op = safe(q.options?.[i]);
+const active = answers[current] === op ? "selected" : "";
 
 html += `
-<button class="option ${active}" onclick="selectOption('${escapeQuote(option)}')">
-${String.fromCharCode(65+i)}. ${option}
+<button class="option ${active}" onclick="selectAns('${esc(op)}')">
+${String.fromCharCode(65+i)}. ${op}
 </button>
 `;
+
 }
 
-html += `<br>`;
+html += "<br>";
 
-if(current>0){
-html += `<button class="nav-btn" onclick="prevQuestion()">Previous</button>`;
+if(current > 0){
+html += `<button class="nav-btn" onclick="prevQ()">Previous</button>`;
 }
 
 if(current < questions.length-1){
-html += `<button class="nav-btn" onclick="nextQuestion()">Next</button>`;
+html += `<button class="nav-btn" onclick="nextQ()">Next</button>`;
 }else{
 html += `<button class="submit-btn" onclick="submitQuiz()">Submit</button>`;
 }
 
-html += `</div>`;
+html += "</div>";
 
 document.getElementById("quizBox").innerHTML = html;
+
 }
 
-/* SELECT */
-window.selectOption = function(value){
-selectedAnswers[current] = value;
+/* ACTIONS */
+window.selectAns = function(v){
+answers[current] = v;
 showQuestion();
 };
 
-/* NAV */
-window.nextQuestion = function(){
+window.nextQ = function(){
 if(current < questions.length-1){
 current++;
 showQuestion();
 }
 };
 
-window.prevQuestion = function(){
-if(current>0){
+window.prevQ = function(){
+if(current > 0){
 current--;
 showQuestion();
 }
 };
 
-/* SUBMIT */
 window.submitQuiz = function(){
 
 let score = 0;
@@ -325,31 +337,34 @@ let review = "";
 
 for(let i=0;i<questions.length;i++){
 
-let q = questions[i];
-let user = selectedAnswers[i] || "Not Answered";
-let ans = safe(q.answer);
+const q = questions[i];
+const user = answers[i] || "Not Answered";
+const ans = safe(q.answer);
 
-let correct = user === ans;
+const ok = user === ans;
 
-if(correct) score++;
+if(ok) score++;
 
 review += `
 <div class="card">
 <b>Q${i+1}. ${safe(q.question)}</b>
 
-<div class="small">Your Answer:
-<span style="color:${correct?'green':'red'}">${user}</span>
+<div class="small">
+Your Answer:
+<span style="color:${ok?'green':'red'}">${user}</span>
 </div>
 
-<div class="small">Correct Answer:
+<div class="small">
+Correct Answer:
 <span style="color:green">${ans}</span>
 </div>
 </div>
 `;
+
 }
 
-document.getElementById("quizBox").style.display="none";
-document.getElementById("resultBox").style.display="block";
+document.getElementById("quizBox").style.display = "none";
+document.getElementById("resultBox").style.display = "block";
 
 document.getElementById("resultBox").innerHTML = `
 <div class="card">
@@ -358,22 +373,15 @@ document.getElementById("resultBox").innerHTML = `
 </div>
 ${review}
 `;
+
 };
 
-function val(id){
-return document.getElementById(id).value.trim();
-}
-
-function safe(str){
-return str || "";
-}
-
-function escapeQuote(str){
-return (str || "").replace(/'/g,"\\'");
-}
-
+/* EVENTS */
+document.getElementById("category").addEventListener("change", loadAll);
+document.getElementById("post").addEventListener("change", loadAll);
 document.getElementById("startBtn").addEventListener("click", startQuiz);
 
+/* FIRST LOAD */
 loadAll();
 
 </script>
