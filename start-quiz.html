@@ -3,318 +3,500 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Start Quiz</title>
+
+<!-- NO CACHE -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<title>Start Quiz Ultra Final</title>
 
 <style>
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial, sans-serif;
+font-family:Arial,sans-serif;
 }
 
 body{
-background:#f4f6f9;
-padding:20px;
+background:#f5f7fa;
+padding:15px;
 }
 
-.container{
-max-width:500px;
+.top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+margin-bottom:15px;
+}
+
+.btn{
+border:none;
+padding:10px 14px;
+border-radius:8px;
+font-weight:bold;
+color:#fff;
+cursor:pointer;
+}
+
+.back{background:#111;}
+.timer{background:#dc3545;}
+
+.wrap{
+max-width:900px;
 margin:auto;
 background:#fff;
-padding:25px;
-border-radius:12px;
-box-shadow:0 4px 10px rgba(0,0,0,.08);
-position:relative;
+padding:20px;
+border-radius:14px;
+box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
 
-/* NEW BACK BUTTON */
-.back-btn{
-width:auto;
-padding:10px 14px;
-margin-top:0;
-margin-bottom:15px;
-background:#6c757d;
-font-size:15px;
-border-radius:8px;
-}
-
-.back-btn:hover{
-background:#545b62;
-}
-
-h2{
-text-align:center;
-margin-bottom:20px;
-color:#222;
-}
-
-label{
-display:block;
-margin-top:15px;
-font-weight:bold;
-color:#333;
-}
-
-input,select{
-width:100%;
+.loader,.ok,.err{
 padding:12px;
-margin-top:6px;
-border:1px solid #ccc;
-border-radius:8px;
-font-size:16px;
-outline:none;
-}
-
-input:focus,select:focus{
-border-color:#007bff;
-}
-
-button{
-width:100%;
-padding:14px;
-margin-top:22px;
-border:none;
-background:#007bff;
-color:#fff;
-font-size:17px;
+border-radius:10px;
 font-weight:bold;
-border-radius:8px;
+margin-bottom:12px;
+text-align:center;
+}
+
+.loader{color:#007bff;}
+.ok{background:#e8fff0;color:green;}
+.err{background:#ffe8e8;color:#c00000;}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+}
+
+@media(min-width:700px){
+.grid{grid-template-columns:repeat(3,1fr);}
+}
+
+.card{
+background:#fff;
+padding:16px;
+border-radius:14px;
+text-align:center;
+font-weight:bold;
 cursor:pointer;
-transition:.3s;
+box-shadow:0 4px 10px rgba(0,0,0,.08);
+transition:.25s;
 }
 
-button:hover{
-background:#0056b3;
+.card:hover{
+transform:translateY(-3px);
 }
 
-.info{
-margin-top:18px;
-background:#eef5ff;
+.hide{display:none;}
+
+.small{
+margin-bottom:12px;
+font-weight:bold;
+color:#555;
+}
+
+.q{
+font-size:19px;
+font-weight:bold;
+line-height:1.5;
+margin-bottom:15px;
+}
+
+.opt{
+display:block;
 padding:12px;
-border-radius:8px;
-font-size:14px;
-color:#333;
-line-height:1.6;
+margin:10px 0;
+border:1px solid #ddd;
+border-radius:10px;
+cursor:pointer;
 }
 
-.error{
-color:red;
-margin-top:10px;
-font-size:14px;
-text-align:center;
+.opt:hover{background:#f0f7ff;}
+
+.correct{
+background:#d4edda !important;
+border-color:green !important;
 }
 
-.success{
-color:green;
-margin-top:10px;
-font-size:14px;
+.wrong{
+background:#f8d7da !important;
+border-color:red !important;
+}
+
+.nav{
+display:flex;
+gap:10px;
+margin-top:15px;
+}
+
+.nav button{
+flex:1;
+padding:12px;
+border:none;
+border-radius:10px;
+font-weight:bold;
+color:#fff;
+cursor:pointer;
+}
+
+.prev{background:#6c757d;}
+.next{background:#007bff;}
+.submit{background:green;}
+
+.result{
+font-size:22px;
+font-weight:bold;
 text-align:center;
+margin-top:18px;
 }
 </style>
 </head>
-
 <body>
 
-<div class="container">
-
-<button type="button" class="back-btn" onclick="goBack()">⬅ Go Back</button>
-
-<h2>Start Quiz</h2>
-
-<form id="quizForm">
-
-<label>Candidate Name</label>
-<input type="text" id="name" maxlength="40" required>
-
-<label>Select Subject</label>
-<select id="subject" required>
-<option value="">Choose Subject</option>
-<option value="Post Office Guide 1">Post Office Guide 1</option>
-<option value="Post Office Guide 2">Post Office Guide 2</option>
-<option value="PO Manual Volume 5">PO Manual Volume 5</option>
-<option value="Math">Math</option>
-<option value="Reasoning">Reasoning</option>
-<option value="GK">GK</option>
-<option value="English">English</option>
-<option value="Mixed Mock Test">Mixed Mock Test</option>
-</select>
-
-<label>Select Questions</label>
-<select id="questions" required>
-<option value="">Choose</option>
-<option value="25">25 Questions</option>
-<option value="50">50 Questions</option>
-<option value="100">100 Questions</option>
-</select>
-
-<button type="submit">Start Test</button>
-
-<div id="msg"></div>
-
-</form>
-
-<div class="info">
-<b>Rules:</b><br>
-• Full screen recommended<br>
-• Refresh = Auto submit risk<br>
-• Timer starts immediately<br>
-• Result auto save permanently
+<div class="top">
+<button class="btn back" onclick="goBack()">⬅ Back</button>
+<div class="btn timer" id="timer">30:00</div>
 </div>
+
+<div class="wrap">
+
+<div id="statusBox" class="loader">Loading Latest Version...</div>
+
+<!-- SUBJECT -->
+<div id="subjectBox" class="hide">
+<h2 style="text-align:center;margin-bottom:15px;">Select Subject</h2>
+<div class="grid" id="subjectGrid"></div>
+</div>
+
+<!-- QUIZ -->
+<div id="quizBox" class="hide">
+<div class="small" id="progress"></div>
+<div class="q" id="question"></div>
+<div id="options"></div>
+
+<div class="nav">
+<button class="prev" onclick="prevQ()">Previous</button>
+<button class="next" onclick="nextQ()">Next</button>
+<button class="submit" onclick="submitQuiz()">Submit</button>
+</div>
+
+<div class="result" id="result"></div>
+</div>
+
+<div id="debug"></div>
 
 </div>
 
 <script type="module">
-"use strict";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+/* FORCE LATEST FILE */
+if(location.search.indexOf("v=")===-1){
+location.replace(location.pathname+"?v="+Date.now());
+}
+
+/* FIREBASE */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js?v=1";
+
 import {
 getFirestore,
-doc,
-setDoc,
+collection,
+getDocs,
+query,
+where,
+addDoc,
 serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js?v=1";
 
-/* FIREBASE CONFIG */
-const firebaseConfig = {
-apiKey: "YOUR_API_KEY",
-authDomain: "YOUR_PROJECT.firebaseapp.com",
-projectId: "YOUR_PROJECT_ID",
-storageBucket: "YOUR_PROJECT.appspot.com",
-messagingSenderId: "YOUR_ID",
-appId: "YOUR_APP_ID"
+import {
+getAuth,
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js?v=1";
+
+const firebaseConfig={
+apiKey:"AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+authDomain:"gds-departmental-exam-studyhub.firebaseapp.com",
+projectId:"gds-departmental-exam-studyhub",
+storageBucket:"gds-departmental-exam-studyhub.appspot.com",
+messagingSenderId:"759916756080",
+appId:"1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const auth=getAuth(app);
 
-/* ========= SECURITY ========= */
+/* VARIABLES */
+let user=null;
+let subject="";
+let questions=[];
+let current=0;
+let answers={};
+let submitted=false;
+let sec=1800;
+let timerInt=null;
 
-// Disable right click
-document.addEventListener("contextmenu", e => e.preventDefault());
+/* LOGIN CHECK */
+onAuthStateChanged(auth,async(u)=>{
 
-// Disable inspect shortcuts
-document.addEventListener("keydown", function(e){
-if(
-e.key === "F12" ||
-(e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key.toUpperCase())) ||
-(e.ctrlKey && e.key.toUpperCase() === "U")
-){
-e.preventDefault();
-}
-});
-
-// Tab switch warning
-document.addEventListener("visibilitychange", function(){
-if(document.hidden){
-alert("Warning: Tab switching detected.");
-}
-});
-
-/* ========= BACK BUTTON ========= */
-window.goBack = function(){
-if(history.length > 1){
-history.back();
+if(u){
+user=u;
+msg("Login Success | Loading Subjects...",1);
+await loadSubjects();
 }else{
-window.location.href="candidate-dashboard.html";
-}
-};
-
-/* ========= FORM ========= */
-
-const form = document.getElementById("quizForm");
-const msg = document.getElementById("msg");
-
-form.addEventListener("submit", async function(e){
-e.preventDefault();
-
-msg.innerHTML = "";
-
-let name = document.getElementById("name").value.trim();
-let subject = document.getElementById("subject").value;
-let questions = document.getElementById("questions").value;
-
-/* Validation */
-if(name.length < 3){
-showError("Enter valid name");
-return;
+msg("Please Login First");
+setTimeout(()=>{
+location.href="login.html?v="+Date.now();
+},1200);
 }
 
-if(!/^[a-zA-Z ]+$/.test(name)){
-showError("Only letters allowed in name");
-return;
-}
+});
 
-if(subject === ""){
-showError("Select subject");
-return;
-}
-
-if(questions === ""){
-showError("Select question limit");
-return;
-}
-
-/* Timer */
-let totalMinutes = Math.ceil(parseInt(questions) * 1.2);
-
-/* Secure Session Data */
-const quizData = {
-name: escapeHTML(name),
-subject: subject,
-questions: parseInt(questions),
-time: totalMinutes,
-startTime: Date.now()
-};
+/* AUTO SUBJECT LOAD */
+async function loadSubjects(){
 
 try{
 
-/* Permanent Firestore Save */
-await setDoc(doc(db,"quizSessions",Date.now().toString()),{
-name: quizData.name,
-subject: quizData.subject,
-questions: quizData.questions,
-time: quizData.time,
-startTime: quizData.startTime,
-createdAt: serverTimestamp()
+const snap=await getDocs(collection(db,"quizQuestions"));
+
+let set=new Set();
+
+snap.forEach(doc=>{
+let d=doc.data();
+if(d.subject) set.add(d.subject);
 });
 
-/* Temporary session for quiz.html */
-sessionStorage.setItem("quizSession", JSON.stringify(quizData));
+let arr=[...set].sort();
 
-showSuccess("Redirecting to test...");
-
-setTimeout(()=>{
-window.location.href = "quiz.html";
-},1200);
-
-}catch(error){
-showError("Server error. Try again.");
+if(arr.length===0){
+msg("No Subjects Found");
+return;
 }
+
+let html="";
+
+arr.forEach(sub=>{
+html+=`
+<div class="card" onclick="startQuiz('${esc(sub)}')">
+📘 ${sub}
+</div>
+`;
+});
+
+document.getElementById("subjectGrid").innerHTML=html;
+document.getElementById("subjectBox").classList.remove("hide");
+
+msg("Select Subject",1);
+debug("Subjects Found: "+arr.length);
+
+}catch(e){
+msg("Subject Load Error");
+debug(e.message);
+}
+
+}
+
+/* START QUIZ */
+window.startQuiz=async function(sub){
+
+subject=sub;
+msg("Loading "+sub+" Questions...");
+
+try{
+
+const qy=query(
+collection(db,"quizQuestions"),
+where("subject","==",sub)
+);
+
+const snap=await getDocs(qy);
+
+questions=[];
+
+snap.forEach(doc=>{
+questions.push(doc.data());
+});
+
+if(questions.length===0){
+msg("No Questions Found");
+debug("Subject="+sub);
+return;
+}
+
+document.getElementById("subjectBox").classList.add("hide");
+document.getElementById("quizBox").classList.remove("hide");
+
+current=0;
+answers={};
+submitted=false;
+sec=1800;
+
+startTimer();
+render();
+
+debug("Loaded Subject: "+sub+" | Questions: "+questions.length);
+
+}catch(e){
+msg("Load Error");
+debug(e.message);
+}
+
+}
+
+/* TIMER */
+function startTimer(){
+
+clearInterval(timerInt);
+
+timerInt=setInterval(()=>{
+
+sec--;
+
+let m=Math.floor(sec/60);
+let s=sec%60;
+
+document.getElementById("timer").innerText=
+String(m).padStart(2,"0")+":"+
+String(s).padStart(2,"0");
+
+if(sec<=0){
+clearInterval(timerInt);
+submitQuiz();
+}
+
+},1000);
+
+}
+
+/* RENDER QUESTION */
+function render(){
+
+let q=questions[current];
+
+document.getElementById("progress").innerText=
+"Question "+(current+1)+" / "+questions.length;
+
+document.getElementById("question").innerText=
+(current+1)+". "+q.question;
+
+let html="";
+
+q.options.forEach(op=>{
+
+let checked=answers[current]===op?"checked":"";
+let cls="opt";
+
+if(submitted){
+if(op===q.answer) cls+=" correct";
+else if(answers[current]===op && op!==q.answer) cls+=" wrong";
+}
+
+html+=`
+<label class="${cls}">
+<input type="radio"
+name="x"
+${checked}
+${submitted?"disabled":""}
+onclick="saveAns('${esc(op)}')">
+${op}
+</label>
+`;
 
 });
 
-/* ========= FUNCTIONS ========= */
+document.getElementById("options").innerHTML=html;
 
-function showError(text){
-msg.innerHTML = `<div class="error">${text}</div>`;
 }
 
-function showSuccess(text){
-msg.innerHTML = `<div class="success">${text}</div>`;
+/* SAVE ANSWER */
+window.saveAns=function(v){
+answers[current]=v;
 }
 
-function escapeHTML(str){
-return str.replace(/[&<>"']/g,function(m){
-return {
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#39;"
-}[m];
+/* NAVIGATION */
+window.nextQ=function(){
+if(current<questions.length-1){
+current++;
+render();
+}
+}
+
+window.prevQ=function(){
+if(current>0){
+current--;
+render();
+}
+}
+
+/* SUBMIT */
+window.submitQuiz=async function(){
+
+if(submitted) return;
+
+submitted=true;
+clearInterval(timerInt);
+
+let score=0;
+
+questions.forEach((q,i)=>{
+if(answers[i]===q.answer) score++;
 });
+
+render();
+
+document.getElementById("result").innerText=
+"Score: "+score+" / "+questions.length;
+
+if(user){
+
+await addDoc(collection(db,"results"),{
+uid:user.uid,
+email:user.email,
+subject:subject,
+score:score,
+total:questions.length,
+createdAt:serverTimestamp()
+});
+
 }
+
+msg("Result Saved",1);
+
+}
+
+/* BACK */
+window.goBack=function(){
+
+if(confirm("Exit Test?")){
+
+if(history.length>1){
+history.back();
+}else{
+location.href="dashboard.html?v="+Date.now();
+}
+
+}
+
+}
+
+/* HELPERS */
+function msg(t,ok=0){
+document.getElementById("statusBox").className=
+ok?"ok":"loader";
+document.getElementById("statusBox").innerText=t;
+}
+
+function debug(t){
+document.getElementById("debug").innerHTML=
+'<div class="err">'+t+'</div>';
+}
+
+function esc(str){
+return String(str).replace(/'/g,"\\'");
+}
+
 </script>
 
 </body>
