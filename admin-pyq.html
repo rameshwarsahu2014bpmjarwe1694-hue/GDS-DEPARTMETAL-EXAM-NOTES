@@ -290,7 +290,11 @@ if(!auth.currentUser) return alert("Admin not logged in");
 
 const category=val("category");
 const post=val("post");
-const question=val("question");
+const question = val("question")
+.replace(/^\d+\./,"")
+.replace(/^\d+\)/,"")
+.replace(/^\d+\-/,"")
+.trim();
 const a=val("a");
 const b=val("b");
 const c=val("c");
@@ -400,8 +404,12 @@ for(let block of blocks){
 let lines = block.split("\n").map(x=>x.trim()).filter(Boolean);
 
 if(lines.length>=6){
-
-let q=lines[0];
+let q = lines[0]
+.replace(/^\d+\./,"")
+.replace(/^\d+\)/,"")
+.replace(/^\d+\-/,"")
+.replace(/^\s+/,"")
+.trim();
 let a=lines[1].replace(/^A\)/i,"").trim();
 let b=lines[2].replace(/^B\)/i,"").trim();
 let c=lines[3].replace(/^C\)/i,"").trim();
@@ -492,21 +500,36 @@ let d=item.data();
 qHtml += `
 <div class="card">
 <div class="row">
-<div>
-<b>${i}. ${safe(d.question)}</b>
-<div class="small">${safe(d.category)} | ${safe(d.post)}</div>
-<div class="small">
+
+<div style="flex:1">
+
+<b style="font-size:17px;color:#111;line-height:1.6">
+${i}. ${safe(d.question)}
+</b>
+
+<div class="small" style="margin-top:8px;font-weight:bold;color:#444">
+${safe(d.category)} | ${safe(d.post)}
+</div>
+
+<div class="small" style="margin-top:10px;line-height:1.8;font-size:15px">
 A. ${safe(d.options[0])}<br>
 B. ${safe(d.options[1])}<br>
 C. ${safe(d.options[2])}<br>
 D. ${safe(d.options[3])}
 </div>
-<div class="small"><b>Answer:</b> ${safe(d.answer)}</div>
+
+<div class="small" style="margin-top:10px;font-weight:bold;color:green;font-size:15px;">
+Answer: ${safe(d.answer)}
+</div>
+
 </div>
 
 <div>
-<button class="delete-btn" onclick="deleteQ('${item.id}')">Delete</button>
+<button class="delete-btn" onclick="deleteQ('${item.id}')">
+Delete
+</button>
 </div>
+
 </div>
 </div>
 `;
