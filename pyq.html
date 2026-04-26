@@ -1,6 +1,6 @@
 <!-- =========================
 FILE : pyq.html
-CLEAN REBUILD FINAL VERSION
+ULTRA STRICT FINAL VERSION
 PDF + Quiz + Same Firebase Config
 ========================= -->
 <!DOCTYPE html>
@@ -86,30 +86,17 @@ background:#007bff;
 color:#fff;
 }
 
-/* Previous / Next / Submit button spacing fix */
-
-/* OLD nav-btn & submit-btn replace karo */
-
-.nav-btn,
-.submit-btn,
-.start-btn{
-display:inline-block;
-margin-top:14px;
+.start-btn,.nav-btn,.submit-btn{
 margin-right:10px;
 padding:10px 16px;
-border:none;
 border-radius:10px;
-font-weight:bold;
-cursor:pointer;
 }
 
-/* last button right gap remove */
-.nav-btn:last-child,
-.submit-btn:last-child{
-margin-right:0;
+.start-btn{
+background:#28a745;
+color:#fff;
 }
 
-/* colors */
 .nav-btn{
 background:#007bff;
 color:#fff;
@@ -120,18 +107,13 @@ background:#dc3545;
 color:#fff;
 }
 
-.start-btn{
-background:#28a745;
-color:#fff;
-}
-
 .option{
 display:flex;
 align-items:center;
 gap:12px;
 width:100%;
 text-align:left;
-background:#ffffff;
+background:#fff;
 color:#111;
 margin:10px 0;
 padding:14px 16px;
@@ -139,59 +121,34 @@ border:2px solid #dfe3e8;
 border-radius:14px;
 font-size:15px;
 font-weight:600;
-line-height:1.4;
 cursor:pointer;
-transition:all .18s ease;
-box-shadow:0 2px 6px rgba(0,0,0,.04);
+transition:.18s;
 }
 
-/* LEFT SELECT CIRCLE */
 .option::before{
 content:"";
 width:20px;
 height:20px;
-min-width:20px;
 border:2px solid #9aa0a6;
 border-radius:50%;
 background:#fff;
-transition:all .18s ease;
 }
 
-/* PRESS / HOVER */
 .option:hover{
 border-color:#0d6efd;
 background:#f5f9ff;
-transform:translateY(-1px);
-box-shadow:0 6px 14px rgba(13,110,253,.10);
 }
 
-/* TAP EFFECT */
-.option:active{
-transform:scale(.99);
-}
-
-/* SELECTED OPTION */
 .selected{
 background:#eaf3ff !important;
 border-color:#0d6efd !important;
 color:#0d6efd !important;
-box-shadow:0 8px 18px rgba(13,110,253,.14) !important;
 }
 
-/* SELECTED CIRCLE */
 .selected::before{
 border-color:#0d6efd;
 background:#0d6efd;
 box-shadow:inset 0 0 0 4px #fff;
-}
-
-/* MOBILE */
-@media(max-width:600px){
-.option{
-font-size:14px;
-padding:13px 14px;
-border-radius:12px;
-}
 }
 
 .empty{
@@ -209,7 +166,6 @@ color:#666;
 <h1>Previous Year Questions</h1>
 
 <div class="grid">
-
 <select id="category">
 <option>PYQ 2020</option>
 <option>PYQ 2021</option>
@@ -227,7 +183,6 @@ color:#666;
 <option>POSTMAN</option>
 <option>PA-SA</option>
 </select>
-
 </div>
 
 <h3>PDF Files</h3>
@@ -251,7 +206,6 @@ collection,
 getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* FIREBASE CONFIG */
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
 authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
@@ -268,7 +222,6 @@ let questions = [];
 let current = 0;
 let answers = [];
 
-/* HELPERS */
 function val(id){
 return document.getElementById(id).value.trim();
 }
@@ -284,102 +237,87 @@ return String(v || "").replace(/'/g,"\\'");
 /* LOAD DATA */
 async function loadAll(){
 
-document.getElementById("pdfBox").innerHTML = "Loading...";
-document.getElementById("quizBox").style.display = "none";
-document.getElementById("resultBox").style.display = "none";
-document.getElementById("startBtn").style.display = "inline-block";
+document.getElementById("pdfBox").innerHTML="Loading...";
+document.getElementById("quizBox").style.display="none";
+document.getElementById("resultBox").style.display="none";
+document.getElementById("startBtn").style.display="inline-block";
 
-questions = [];
-current = 0;
-answers = [];
+questions=[];
+current=0;
+answers=[];
 
-const category = val("category");
-const post = val("post");
+const category=val("category");
+const post=val("post");
 
 /* PDF */
-let pdfHtml = "";
+let pdfHtml="";
 
-const pdfSnap = await getDocs(collection(db,"pyqFiles"));
+const pdfSnap=await getDocs(collection(db,"pyqFiles"));
 
-pdfSnap.forEach(doc => {
+pdfSnap.forEach(doc=>{
+const d=doc.data();
 
-const d = doc.data();
+if(d.category!==category) return;
+if(d.post!==post) return;
 
-if(d.category !== category) return;
-if(d.post !== post) return;
-
-pdfHtml += `
+pdfHtml+=`
 <div class="card">
 <b>${safe(d.title)}</b>
-
 <div class="small">${safe(d.desc)}</div>
-
 <div class="small">${safe(d.fileName)}</div>
-
-<a href="${safe(d.fileName)}" target="_blank">
-Open PDF
-</a>
+<a href="${safe(d.fileName)}" target="_blank">Open PDF</a>
 </div>
 `;
-
 });
 
-document.getElementById("pdfBox").innerHTML =
+document.getElementById("pdfBox").innerHTML=
 pdfHtml || "<div class='empty'>No PDF Found</div>";
 
 /* QUESTIONS */
-const qSnap = await getDocs(collection(db,"pyqQuestions"));
+let temp=[];
 
-let tempQuestions = [];
+const qSnap=await getDocs(collection(db,"pyqQuestions"));
 
-qSnap.forEach(doc => {
+qSnap.forEach(doc=>{
+const d=doc.data();
 
-const d = doc.data();
+if(d.category!==category) return;
+if(d.post!==post) return;
 
-if(d.category !== category) return;
-if(d.post !== post) return;
-
-tempQuestions.push(d);
-
+temp.push(d);
 });
 
-questions = tempQuestions.sort((a,b) => {
+questions=temp.sort((a,b)=>{
+const na=parseInt(String(a.question).match(/^\d+/)?.[0] || 9999);
+const nb=parseInt(String(b.question).match(/^\d+/)?.[0] || 9999);
+return na-nb;
+}).map((item,index)=>{
 
-const qa = String(a.question || "").match(/^\d+/);
-const qb = String(b.question || "").match(/^\d+/);
-
-const na = qa ? parseInt(qa[0]) : 9999;
-const nb = qb ? parseInt(qb[0]) : 9999;
-
-return na - nb;
-
-}).map((item,index) => {
-
-let cleanQ = String(item.question || "")
-.replace(/^\d+[\).\-\s:]*/, "")
+let cleanQ=String(item.question || "")
+.replace(/^\d+[\).\-\s:]*/,"")
 .trim();
 
-return {
+return{
 ...item,
-question: cleanQ,
-serial: index + 1
+question:cleanQ,
+serial:index+1
 };
 
 });
 
-/* loadAll function close */
 }
 
 /* START QUIZ */
 function startQuiz(){
 
-if(questions.length === 0){
+if(questions.length===0){
 alert("No Questions Found");
 return;
 }
 
-document.getElementById("startBtn").style.display = "none";
-document.getElementById("quizBox").style.display = "block";
+document.getElementById("startBtn").style.display="none";
+document.getElementById("resultBox").style.display="none";
+document.getElementById("quizBox").style.display="block";
 
 showQuestion();
 }
@@ -387,113 +325,114 @@ showQuestion();
 /* SHOW QUESTION */
 function showQuestion(){
 
-const q = questions[current];
+const q=questions[current];
 
-let html = `
+let html=`
 <div class="card">
 <h3>Question ${q.serial} / ${questions.length}</h3>
-
 <p style="margin:15px 0;"><b>${safe(q.question)}</b></p>
 `;
 
 for(let i=0;i<4;i++){
 
-const op = safe(q.options?.[i]);
-const active = answers[current] === op ? "selected" : "";
+const op=safe(q.options?.[i]);
+const active=answers[current]===op ? "selected":"";
 
-html += `
+html+=`
 <button class="option ${active}" onclick="selectAns('${esc(op)}')">
 ${String.fromCharCode(65+i)}. ${op}
 </button>
 `;
-
 }
 
-html += "<br>";
+html+="<br>";
 
-if(current > 0){
-html += `<button class="nav-btn" onclick="prevQ()">Previous</button>`;
+if(current>0){
+html+=`<button class="nav-btn" onclick="prevQ()">Previous</button>`;
 }
 
-if(current > 0){
-html += `<button class="nav-btn" onclick="prevQ()">Previous</button>`;
+if(current<questions.length-1){
+html+=`<button class="nav-btn" onclick="nextQ()">Next</button>`;
 }
-
-if(current < questions.length-1){
-html += `<button class="nav-btn" onclick="nextQ()">Next</button>`;
-}
-
-html += `<button class="submit-btn" onclick="submitQuiz()">Submit</button>`;
   
+/* EVERY QUESTION PAGE */
+html += `<button class="submit-btn" onclick="submitQuiz()">Submit</button>`;
+
+html += "</div>";
+html+=`<button class="submit-btn" onclick="submitQuiz()">Submit</button>`;
+
+html+="</div>";
+
+document.getElementById("quizBox").innerHTML=html;
+}
+
 /* ACTIONS */
-window.selectAns = function(v){
-answers[current] = v;
+window.selectAns=function(v){
+answers[current]=v;
 showQuestion();
 };
 
-window.nextQ = function(){
-if(current < questions.length-1){
+window.nextQ=function(){
+if(current<questions.length-1){
 current++;
 showQuestion();
 }
 };
 
-window.prevQ = function(){
-if(current > 0){
+window.prevQ=function(){
+if(current>0){
 current--;
 showQuestion();
 }
 };
 
-/* OLD submitQuiz function ko pura replace karo */
+/* SUBMIT */
+window.submitQuiz=function(){
 
-window.submitQuiz = function(){
-
-let score = 0;
-let attempted = 0;
-let review = "";
+let score=0;
+let attempted=0;
+let review="";
 
 for(let i=0;i<questions.length;i++){
 
-const q = questions[i];
-const user = answers[i] || "Not Answered";
-const ans = safe(q.answer);
+const q=questions[i];
+const user=answers[i] || "Not Answered";
+const ans=safe(q.answer);
 
-const ok = user === ans;
+const ok=user===ans;
 
-if(user !== "Not Answered") attempted++;
+if(user!=="Not Answered") attempted++;
 if(ok) score++;
 
-review += `
-<div class="card" style="border-left:6px solid ${ok ? '#28a745' : '#dc3545'};">
+review+=`
+<div class="card" style="border-left:6px solid ${ok ? '#28a745':'#dc3545'};">
 <b>Q${q.serial}. ${safe(q.question)}</b>
 
-<div class="small" style="margin-top:10px;">
+<div class="small">
 Your Answer:
-<span style="font-weight:bold;color:${ok ? 'green' : 'red'};">
+<span style="color:${ok ? 'green':'red'};font-weight:bold;">
 ${user}
 </span>
 </div>
 
 <div class="small">
 Correct Answer:
-<span style="font-weight:bold;color:green;">
+<span style="color:green;font-weight:bold;">
 ${ans}
 </span>
 </div>
 
-<div class="small" style="margin-top:6px;font-weight:bold;color:${ok ? 'green' : 'red'};">
-${ok ? '✔ Correct' : '✘ Wrong'}
+<div class="small" style="font-weight:bold;color:${ok ? 'green':'red'};">
+${ok ? '✔ Correct':'✘ Wrong'}
 </div>
 </div>
 `;
-
 }
 
-document.getElementById("quizBox").style.display = "none";
-document.getElementById("resultBox").style.display = "block";
+document.getElementById("quizBox").style.display="none";
+document.getElementById("resultBox").style.display="block";
 
-document.getElementById("resultBox").innerHTML = `
+document.getElementById("resultBox").innerHTML=`
 <div class="card" style="text-align:center;">
 <h2>Quiz Result</h2>
 
@@ -501,7 +440,7 @@ document.getElementById("resultBox").innerHTML = `
 <p><b>Attempted:</b> ${attempted}</p>
 <p><b>Correct:</b> ${score}</p>
 <p><b>Wrong:</b> ${attempted-score}</p>
-<p><b>Score:</b> ${score} / ${questions.length}</p>
+<p><b>Score:</b> ${score}/${questions.length}</p>
 
 <button class="start-btn" onclick="location.reload()">
 Restart Quiz
@@ -510,15 +449,13 @@ Restart Quiz
 
 ${review}
 `;
-
 };
 
 /* EVENTS */
-document.getElementById("category").addEventListener("change", loadAll);
-document.getElementById("post").addEventListener("change", loadAll);
-document.getElementById("startBtn").addEventListener("click", startQuiz);
+document.getElementById("category").addEventListener("change",loadAll);
+document.getElementById("post").addEventListener("change",loadAll);
+document.getElementById("startBtn").addEventListener("click",startQuiz);
 
-/* FIRST LOAD */
 loadAll();
 
 </script>
