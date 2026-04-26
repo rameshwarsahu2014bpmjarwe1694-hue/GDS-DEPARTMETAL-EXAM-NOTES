@@ -3,13 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-<!-- NO CACHE -->
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
-<title>Start Quiz Ultra Final</title>
+<title>Mock Test Final</title>
 
 <style>
 *{
@@ -37,8 +31,8 @@ border:none;
 padding:10px 14px;
 border-radius:8px;
 font-weight:bold;
-color:#fff;
 cursor:pointer;
+color:#fff;
 }
 
 .back{background:#111;}
@@ -53,18 +47,6 @@ border-radius:14px;
 box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
 
-.loader,.ok,.err{
-padding:12px;
-border-radius:10px;
-font-weight:bold;
-margin-bottom:12px;
-text-align:center;
-}
-
-.loader{color:#007bff;}
-.ok{background:#e8fff0;color:green;}
-.err{background:#ffe8e8;color:#c00000;}
-
 .grid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
@@ -72,7 +54,9 @@ gap:12px;
 }
 
 @media(min-width:700px){
-.grid{grid-template-columns:repeat(3,1fr);}
+.grid{
+grid-template-columns:repeat(3,1fr);
+}
 }
 
 .card{
@@ -92,17 +76,36 @@ transform:translateY(-3px);
 
 .hide{display:none;}
 
-.small{
-margin-bottom:12px;
+.loader{
+text-align:center;
+padding:20px;
 font-weight:bold;
-color:#555;
+color:#007bff;
+}
+
+.err{
+background:#ffe8e8;
+color:#c00000;
+padding:12px;
+border-radius:10px;
+margin-top:12px;
+font-weight:bold;
+}
+
+.ok{
+background:#e8fff0;
+color:green;
+padding:12px;
+border-radius:10px;
+margin-top:12px;
+font-weight:bold;
 }
 
 .q{
 font-size:19px;
 font-weight:bold;
-line-height:1.5;
 margin-bottom:15px;
+line-height:1.5;
 }
 
 .opt{
@@ -114,7 +117,9 @@ border-radius:10px;
 cursor:pointer;
 }
 
-.opt:hover{background:#f0f7ff;}
+.opt:hover{
+background:#f0f7ff;
+}
 
 .correct{
 background:#d4edda !important;
@@ -138,8 +143,8 @@ padding:12px;
 border:none;
 border-radius:10px;
 font-weight:bold;
-color:#fff;
 cursor:pointer;
+color:#fff;
 }
 
 .prev{background:#6c757d;}
@@ -152,6 +157,12 @@ font-weight:bold;
 text-align:center;
 margin-top:18px;
 }
+
+.small{
+margin-bottom:12px;
+font-weight:bold;
+color:#555;
+}
 </style>
 </head>
 <body>
@@ -163,15 +174,25 @@ margin-top:18px;
 
 <div class="wrap">
 
-<div id="statusBox" class="loader">Loading Latest Version...</div>
+<div id="statusBox" class="loader">Checking login...</div>
 
-<!-- SUBJECT -->
 <div id="subjectBox" class="hide">
 <h2 style="text-align:center;margin-bottom:15px;">Select Subject</h2>
-<div class="grid" id="subjectGrid"></div>
+
+<div class="grid">
+
+<div class="card" onclick="startQuiz('POSTAL MANUAL VOLUME 7')">📘 POSTAL MANUAL VOLUME 7</div>
+<div class="card" onclick="startQuiz('GK')">📘 GK</div>
+<div class="card" onclick="startQuiz('Maths')">➕ Maths</div>
+<div class="card" onclick="startQuiz('Reasoning')">🧠 Reasoning</div>
+<div class="card" onclick="startQuiz('POSTAL MANUAL VOLUME 5')">📘 POSTAL MANUAL VOLUME 5</div>
+<div class="card" onclick="startQuiz('Post Office Guide 1')">📮 PO GUIDE 1</div>
+<div class="card" onclick="startQuiz('Post Office Guide 2')">📮 PO GUIDE 2</div>
+<div class="card" onclick="startQuiz('POSTAL MANUAL VOLUME 6 PART 3')">📘 POSTAL MANUAL VOLUME 6 PART 3</div>
+
+</div>
 </div>
 
-<!-- QUIZ -->
 <div id="quizBox" class="hide">
 <div class="small" id="progress"></div>
 <div class="q" id="question"></div>
@@ -191,14 +212,7 @@ margin-top:18px;
 </div>
 
 <script type="module">
-
-/* FORCE LATEST FILE */
-if(location.search.indexOf("v=")===-1){
-location.replace(location.pathname+"?v="+Date.now());
-}
-
-/* FIREBASE */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js?v=1";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getFirestore,
@@ -208,27 +222,27 @@ query,
 where,
 addDoc,
 serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js?v=1";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
 getAuth,
 onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js?v=1";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const firebaseConfig={
-apiKey:"AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-authDomain:"gds-departmental-exam-studyhub.firebaseapp.com",
-projectId:"gds-departmental-exam-studyhub",
-storageBucket:"gds-departmental-exam-studyhub.appspot.com",
-messagingSenderId:"759916756080",
-appId:"1:759916756080:web:7f2c0e66458bd007e888b5"
+/* FIREBASE */
+const firebaseConfig = {
+apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+projectId: "gds-departmental-exam-studyhub",
+storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+messagingSenderId: "759916756080",
+appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
-const auth=getAuth(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-/* VARIABLES */
 let user=null;
 let subject="";
 let questions=[];
@@ -239,79 +253,37 @@ let sec=1800;
 let timerInt=null;
 
 /* LOGIN CHECK */
-onAuthStateChanged(auth,async(u)=>{
+onAuthStateChanged(auth,(u)=>{
 
 if(u){
 user=u;
-msg("Login Success | Loading Subjects...",1);
-await loadSubjects();
+msg("Login Success",1);
+
+document.getElementById("subjectBox").classList.remove("hide");
+
 }else{
-msg("Please Login First");
+msg("Please login first");
 setTimeout(()=>{
-location.href="login.html?v="+Date.now();
+location.href="login.html";
 },1200);
 }
 
 });
 
-/* AUTO SUBJECT LOAD */
-async function loadSubjects(){
-
-try{
-
-const snap=await getDocs(collection(db,"quizQuestions"));
-
-let set=new Set();
-
-snap.forEach(doc=>{
-let d=doc.data();
-if(d.subject) set.add(d.subject);
-});
-
-let arr=[...set].sort();
-
-if(arr.length===0){
-msg("No Subjects Found");
-return;
-}
-
-let html="";
-
-arr.forEach(sub=>{
-html+=`
-<div class="card" onclick="startQuiz('${esc(sub)}')">
-📘 ${sub}
-</div>
-`;
-});
-
-document.getElementById("subjectGrid").innerHTML=html;
-document.getElementById("subjectBox").classList.remove("hide");
-
-msg("Select Subject",1);
-debug("Subjects Found: "+arr.length);
-
-}catch(e){
-msg("Subject Load Error");
-debug(e.message);
-}
-
-}
-
 /* START QUIZ */
-window.startQuiz=async function(sub){
+window.startQuiz = async function(sub){
 
 subject=sub;
 msg("Loading "+sub+" Questions...");
 
 try{
 
-const qy=query(
+const qy = query(
 collection(db,"quizQuestions"),
 where("subject","==",sub)
 );
 
-const snap=await getDocs(qy);
+const snap = await getDocs(qy);
 
 questions=[];
 
@@ -319,9 +291,10 @@ snap.forEach(doc=>{
 questions.push(doc.data());
 });
 
+debug("Subject Search = "+sub+" | Found = "+questions.length);
+
 if(questions.length===0){
-msg("No Questions Found");
-debug("Subject="+sub);
+msg("No Questions Found For "+sub);
 return;
 }
 
@@ -336,14 +309,12 @@ sec=1800;
 startTimer();
 render();
 
-debug("Loaded Subject: "+sub+" | Questions: "+questions.length);
-
 }catch(e){
-msg("Load Error");
+msg("Error Loading Questions");
 debug(e.message);
 }
 
-}
+};
 
 /* TIMER */
 function startTimer(){
@@ -370,7 +341,7 @@ submitQuiz();
 
 }
 
-/* RENDER QUESTION */
+/* RENDER */
 function render(){
 
 let q=questions[current];
@@ -385,7 +356,7 @@ let html="";
 
 q.options.forEach(op=>{
 
-let checked=answers[current]===op?"checked":"";
+let checked = answers[current]===op ? "checked":"";
 let cls="opt";
 
 if(submitted){
@@ -393,7 +364,7 @@ if(op===q.answer) cls+=" correct";
 else if(answers[current]===op && op!==q.answer) cls+=" wrong";
 }
 
-html+=`
+html += `
 <label class="${cls}">
 <input type="radio"
 name="x"
@@ -410,28 +381,28 @@ document.getElementById("options").innerHTML=html;
 
 }
 
-/* SAVE ANSWER */
+/* SAVE */
 window.saveAns=function(v){
 answers[current]=v;
-}
+};
 
-/* NAVIGATION */
+/* NAV */
 window.nextQ=function(){
 if(current<questions.length-1){
 current++;
 render();
 }
-}
+};
 
 window.prevQ=function(){
 if(current>0){
 current--;
 render();
 }
-}
+};
 
 /* SUBMIT */
-window.submitQuiz=async function(){
+window.submitQuiz = async function(){
 
 if(submitted) return;
 
@@ -464,22 +435,22 @@ createdAt:serverTimestamp()
 
 msg("Result Saved",1);
 
-}
+};
 
 /* BACK */
 window.goBack=function(){
 
-if(confirm("Exit Test?")){
+if(confirm("Exit test?")){
 
 if(history.length>1){
 history.back();
 }else{
-location.href="dashboard.html?v="+Date.now();
+location.href="candidate-dashboard.html";
 }
 
 }
 
-}
+};
 
 /* HELPERS */
 function msg(t,ok=0){
@@ -496,7 +467,6 @@ document.getElementById("debug").innerHTML=
 function esc(str){
 return String(str).replace(/'/g,"\\'");
 }
-
 </script>
 
 </body>
