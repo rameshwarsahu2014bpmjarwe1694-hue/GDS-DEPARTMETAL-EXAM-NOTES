@@ -276,6 +276,7 @@ serial: index + 1
 };
 
 });
+  
   }
 /* START QUIZ */
 function startQuiz(){
@@ -298,7 +299,7 @@ const q = questions[current];
 
 let html = `
 <div class="card">
-<h3>Question ${current+1} / ${questions.length}</h3>
+<h3>Question ${q.serial} / ${questions.length}</h3>
 
 <p style="margin:15px 0;"><b>${safe(q.question)}</b></p>
 `;
@@ -371,7 +372,7 @@ if(ok) score++;
 
 review += `
 <div class="card">
-<b>Q${i+1}. ${safe(q.question)}</b>
+<b>Q${q.serial}. ${safe(q.question)}</b>
 
 <div class="small">
 Your Answer:
