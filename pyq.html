@@ -1,9 +1,9 @@
 <!-- =========================
 FILE 2 : pyq.html
-STRICT FINAL EXISTING FIREBASE VERSION
-Same Firebase Config as Your Project
-Read Only Candidate Side
-PDF + Questions
+STRICT FINAL CORRECTED VERSION
+Same Firebase Config
+Candidate Side
+PDF + Questions + Working Quiz
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -17,12 +17,12 @@ PDF + Questions
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial,sans-serif
+font-family:Arial,sans-serif;
 }
 
 body{
 background:#f4f6f9;
-padding:20px
+padding:20px;
 }
 
 .container{
@@ -31,18 +31,18 @@ margin:auto;
 background:#fff;
 padding:20px;
 border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,.08)
+box-shadow:0 5px 15px rgba(0,0,0,.08);
 }
 
 h1{
 text-align:center;
-margin-bottom:20px
+margin-bottom:20px;
 }
 
 .grid{
 display:grid;
 gap:12px;
-margin-bottom:20px
+margin-bottom:20px;
 }
 
 select{
@@ -50,7 +50,7 @@ padding:12px;
 border:1px solid #ccc;
 border-radius:8px;
 font-size:16px;
-width:100%
+width:100%;
 }
 
 .card{
@@ -58,7 +58,7 @@ background:#fafafa;
 padding:15px;
 border:1px solid #ddd;
 border-radius:10px;
-margin-bottom:12px
+margin-bottom:12px;
 }
 
 a{
@@ -68,20 +68,40 @@ background:#007bff;
 color:#fff;
 text-decoration:none;
 border-radius:8px;
-margin-top:10px
+margin-top:10px;
 }
 
 .small{
 font-size:14px;
 color:#666;
-margin-top:6px
+margin-top:6px;
+line-height:1.6;
 }
 
 .empty{
 text-align:center;
 padding:20px;
 font-weight:bold;
-color:#666
+color:#666;
+}
+
+button{
+padding:10px 15px;
+background:#28a745;
+color:#fff;
+border:none;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+margin-top:10px;
+}
+
+.quiz-option{
+display:block;
+width:100%;
+text-align:left;
+margin-bottom:10px;
+background:#007bff;
 }
 </style>
 </head>
@@ -117,22 +137,14 @@ color:#666
 <div id="pdfBox">Loading...</div>
 
 <h3 style="margin-top:20px">Questions</h3>
-<button id="startQuizBtn" style="
-padding:10px 15px;
-background:#28a745;
-color:#fff;
-border:none;
-border-radius:8px;
-font-weight:bold;
-margin-top:15px;
-cursor:pointer;">
-Start Quiz Mode
-</button>
-<div id="normalQuestions">
-  <!-- current normal questions -->
-</div>
 
-<div id="quizBox" style="display:none;"></div>
+<button id="startQuizBtn">Start Quiz Mode</button>
+
+<div id="normalQuestions" style="margin-top:15px;">Loading...</div>
+
+<div id="quizBox" style="display:none;margin-top:15px;"></div>
+
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -143,7 +155,7 @@ collection,
 getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* YOUR EXISTING FIREBASE CONFIG */
+/* FIREBASE CONFIG */
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
 authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
@@ -156,20 +168,23 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+let quizQuestions = [];
+let currentQuiz = 0;
+let score = 0;
+
 /* LOAD ALL DATA */
 window.loadAll = async function(){
 
 const category = val("category");
 const post = val("post");
 
-/* LOAD PDF FILES */
+/* PDF */
 const pdfSnap = await getDocs(collection(db,"pyqFiles"));
 
 let pdfHtml = "";
 
-pdfSnap.forEach(item=>{
-
-let d = item.data();
+pdfSnap.forEach(doc=>{
+let d = doc.data();
 
 if(d.category !== category) return;
 if(d.post !== post) return;
@@ -178,37 +193,32 @@ pdfHtml += `
 <div class="card">
 <b>${safe(d.title)}</b>
 
-<div class="small">
-${safe(d.desc)}
-</div>
+<div class="small">${safe(d.desc)}</div>
+<div class="small">${safe(d.fileName)}</div>
 
-<div class="small">
-${safe(d.fileName)}
-</div>
-
-<a href="${safe(d.fileName)}" target="_blank">
-Open PDF
-</a>
+<a href="${safe(d.fileName)}" target="_blank">Open PDF</a>
 </div>
 `;
-
 });
 
 document.getElementById("pdfBox").innerHTML =
 pdfHtml || "<div class='empty'>No PDF Found</div>";
 
-/* LOAD QUESTIONS */
+/* QUESTIONS */
 const qSnap = await getDocs(collection(db,"pyqQuestions"));
 
 let qHtml = "";
 let i = 1;
+quizQuestions = [];
 
-qSnap.forEach(item=>{
+qSnap.forEach(doc=>{
 
-let d = item.data();
+let d = doc.data();
 
 if(d.category !== category) return;
 if(d.post !== post) return;
+
+quizQuestions.push(d);
 
 qHtml += `
 <div class="card">
@@ -230,12 +240,89 @@ D. ${safe(d.options?.[3])}
 `;
 
 i++;
-
 });
 
-document.getElementById("questionBox").innerHTML =
+document.getElementById("normalQuestions").innerHTML =
 qHtml || "<div class='empty'>No Questions Found</div>";
 
+document.getElementById("quizBox").style.display = "none";
+document.getElementById("startQuizBtn").style.display = "inline-block";
+document.getElementById("normalQuestions").style.display = "block";
+};
+
+/* QUIZ START */
+window.startQuiz = function(){
+
+if(quizQuestions.length === 0){
+alert("No Questions Found");
+return;
+}
+
+currentQuiz = 0;
+score = 0;
+
+document.getElementById("startQuizBtn").style.display = "none";
+document.getElementById("normalQuestions").style.display = "none";
+document.getElementById("quizBox").style.display = "block";
+
+showQuiz();
+};
+
+function showQuiz(){
+
+if(currentQuiz >= quizQuestions.length){
+
+document.getElementById("quizBox").innerHTML = `
+<div class="card">
+<h3>Quiz Finished</h3>
+<p>Your Score: ${score} / ${quizQuestions.length}</p>
+<button onclick="loadAll()">Back</button>
+</div>
+`;
+return;
+}
+
+let q = quizQuestions[currentQuiz];
+
+document.getElementById("quizBox").innerHTML = `
+<div class="card">
+<h3>Question ${currentQuiz+1}</h3>
+
+<p style="margin:15px 0;"><b>${safe(q.question)}</b></p>
+
+<button class="quiz-option" onclick="checkAnswer('${safe(q.options?.[0])}')">
+A. ${safe(q.options?.[0])}
+</button>
+
+<button class="quiz-option" onclick="checkAnswer('${safe(q.options?.[1])}')">
+B. ${safe(q.options?.[1])}
+</button>
+
+<button class="quiz-option" onclick="checkAnswer('${safe(q.options?.[2])}')">
+C. ${safe(q.options?.[2])}
+</button>
+
+<button class="quiz-option" onclick="checkAnswer('${safe(q.options?.[3])}')">
+D. ${safe(q.options?.[3])}
+</button>
+
+</div>
+`;
+}
+
+window.checkAnswer = function(selected){
+
+let q = quizQuestions[currentQuiz];
+
+if(selected === q.answer){
+score++;
+alert("Correct Answer");
+}else{
+alert("Wrong Answer");
+}
+
+currentQuiz++;
+showQuiz();
 };
 
 function val(id){
@@ -246,40 +333,12 @@ function safe(str){
 return str || "";
 }
 
+/* BUTTON CLICK */
+document.getElementById("startQuizBtn").addEventListener("click", startQuiz);
+
+/* FIRST LOAD */
 loadAll();
-<script>
-document.addEventListener("DOMContentLoaded", function () {
 
-const btn = document.getElementById("startQuizBtn");
-const normal = document.getElementById("normalQuestions");
-const quizBox = document.getElementById("quizBox");
-
-btn.addEventListener("click", function () {
-
-normal.style.display = "none";
-btn.style.display = "none";
-
-quizBox.style.display = "block";
-quizBox.innerHTML = `
-<h3>Quiz Started</h3>
-<p>Q1. हिंदी में सबसे पहले किस उत्तर दिशा की ओर आता है?</p>
-
-<button onclick="checkAns(this,false)">उत्तर-पश्चिम</button>
-<button onclick="checkAns(this,true)">उत्तर-पूर्व</button>
-<button onclick="checkAns(this,false)">दक्षिण</button>
-<button onclick="checkAns(this,false)">उत्तरप्रदेश</button>
-`;
-});
-
-});
-
-function checkAns(btn, correct){
-if(correct){
-alert("Correct Answer");
-}else{
-alert("Wrong Answer");
-}
-}
 </script>
 
 </body>
