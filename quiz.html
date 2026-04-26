@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Mock Test</title>
+<title>Mock Test Final</title>
 
 <style>
 *{
@@ -18,7 +18,7 @@ background:#f5f7fa;
 padding:15px;
 }
 
-.topbar{
+.top{
 display:flex;
 justify-content:space-between;
 align-items:center;
@@ -26,25 +26,19 @@ gap:10px;
 margin-bottom:15px;
 }
 
-.back{
-background:#111;
-color:#fff;
+.btn{
 border:none;
 padding:10px 14px;
 border-radius:8px;
 font-weight:bold;
 cursor:pointer;
-}
-
-.timer{
-background:#dc3545;
 color:#fff;
-padding:10px 14px;
-border-radius:8px;
-font-weight:bold;
 }
 
-.container{
+.back{background:#111;}
+.timer{background:#dc3545;}
+
+.wrap{
 max-width:900px;
 margin:auto;
 background:#fff;
@@ -80,33 +74,51 @@ transition:.25s;
 transform:translateY(-3px);
 }
 
-.hide{
-display:none;
+.hide{display:none;}
+
+.loader{
+text-align:center;
+padding:20px;
+font-weight:bold;
+color:#007bff;
 }
 
-.question{
+.err{
+background:#ffe8e8;
+color:#c00000;
+padding:12px;
+border-radius:10px;
+margin-top:12px;
+font-weight:bold;
+}
+
+.ok{
+background:#e8fff0;
+color:green;
+padding:12px;
+border-radius:10px;
+margin-top:12px;
+font-weight:bold;
+}
+
+.q{
 font-size:19px;
 font-weight:bold;
-margin-bottom:16px;
+margin-bottom:15px;
 line-height:1.5;
 }
 
-.option{
+.opt{
 display:block;
 padding:12px;
 margin:10px 0;
 border:1px solid #ddd;
 border-radius:10px;
 cursor:pointer;
-transition:.2s;
 }
 
-.option:hover{
+.opt:hover{
 background:#f0f7ff;
-}
-
-.option input{
-margin-right:8px;
 }
 
 .correct{
@@ -140,61 +152,68 @@ color:#fff;
 .submit{background:green;}
 
 .result{
-text-align:center;
 font-size:22px;
 font-weight:bold;
-margin-top:20px;
+text-align:center;
+margin-top:18px;
 }
 
 .small{
 margin-bottom:12px;
-color:#555;
 font-weight:bold;
+color:#555;
 }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-<button class="back" onclick="goBack()">⬅ Back</button>
-<div class="timer" id="timer">30:00</div>
+<div class="top">
+<button class="btn back" onclick="goBack()">⬅ Back</button>
+<div class="btn timer" id="timer">30:00</div>
 </div>
 
-<div class="container">
+<div class="wrap">
 
-<div id="subjectBox">
-<h2 style="margin-bottom:15px;text-align:center;">Select Subject</h2>
+<div id="statusBox" class="loader">Checking login...</div>
+
+<div id="subjectBox" class="hide">
+<h2 style="text-align:center;margin-bottom:15px;">Select Subject</h2>
 
 <div class="grid">
-<div class="card" onclick="startSubject('POSTAL MANUAL VOLUME 7')">📘 POSTAL MANUAL VOLUME 7</div>
-<div class="card" onclick="startSubject('GK')">📘 GK</div>
-<div class="card" onclick="startSubject('Maths')">➕ Maths</div>
-<div class="card" onclick="startSubject('Reasoning')">🧠 Reasoning</div>
-<div class="card" onclick="startSubject('POSTAL MANUAL VOLUME 5')">📘 PO MANUAL VOLUME 5</div>
-<div class="card" onclick="startSubject('Post Office Guide 1')">📮 PO GUIDE 1</div>
-<div class="card" onclick="startSubject('Post Office Guide 2')">📮 PO GUIDE 2</div>
-<div class="card" onclick="startSubject('POSTAL MANUAL VOLUME 6 PART 3')">📘 POSTAL MANUAL VOLUME 6 PART 3</div>
+
+<div class="card" onclick="startQuiz('POSTAL MANUAL VOLUME 7')">📘 POSTAL MANUAL VOLUME 7</div>
+<div class="card" onclick="startQuiz('GK')">📘 GK</div>
+<div class="card" onclick="startQuiz('Maths')">➕ Maths</div>
+<div class="card" onclick="startQuiz('Reasoning')">🧠 Reasoning</div>
+<div class="card" onclick="startQuiz('POSTAL MANUAL VOLUME 5')">📘 POSTAL MANUAL VOLUME 5</div>
+<div class="card" onclick="startQuiz('Post Office Guide 1')">📮 PO GUIDE 1</div>
+<div class="card" onclick="startQuiz('Post Office Guide 2')">📮 PO GUIDE 2</div>
+<div class="card" onclick="startQuiz('POSTAL MANUAL VOLUME 6 PART 3')">📘 POSTAL MANUAL VOLUME 6 PART 3</div>
+
 </div>
 </div>
 
 <div id="quizBox" class="hide">
 <div class="small" id="progress"></div>
-<div class="question" id="question"></div>
+<div class="q" id="question"></div>
 <div id="options"></div>
 
 <div class="nav">
 <button class="prev" onclick="prevQ()">Previous</button>
 <button class="next" onclick="nextQ()">Next</button>
-<button class="submit" onclick="submitTest()">Submit</button>
+<button class="submit" onclick="submitQuiz()">Submit</button>
 </div>
 
 <div class="result" id="result"></div>
 </div>
 
+<div id="debug"></div>
+
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
 getFirestore,
 collection,
@@ -210,7 +229,7 @@ getAuth,
 onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* SAME FIREBASE CONFIG */
+/* FIREBASE */
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
 authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
@@ -225,26 +244,39 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 let user=null;
+let subject="";
 let questions=[];
 let current=0;
 let answers={};
 let submitted=false;
-let timer=1800;
-let interval=null;
-let subject="";
+let sec=1800;
+let timerInt=null;
 
+/* LOGIN CHECK */
 onAuthStateChanged(auth,(u)=>{
+
 if(u){
 user=u;
+msg("Login Success",1);
+
+document.getElementById("subjectBox").classList.remove("hide");
+
 }else{
+msg("Please login first");
+setTimeout(()=>{
 location.href="login.html";
+},1200);
 }
+
 });
 
-/* SUBJECT START */
-window.startSubject = async function(sub){
+/* START QUIZ */
+window.startQuiz = async function(sub){
 
 subject=sub;
+msg("Loading "+sub+" Questions...");
+
+try{
 
 const qy = query(
 collection(db,"quizQuestions"),
@@ -256,14 +288,13 @@ const snap = await getDocs(qy);
 questions=[];
 
 snap.forEach(doc=>{
-questions.push({
-id:doc.id,
-...doc.data()
-});
+questions.push(doc.data());
 });
 
+debug("Subject Search = "+sub+" | Found = "+questions.length);
+
 if(questions.length===0){
-alert("No Questions Available");
+msg("No Questions Found For "+sub);
 return;
 }
 
@@ -273,31 +304,37 @@ document.getElementById("quizBox").classList.remove("hide");
 current=0;
 answers={};
 submitted=false;
+sec=1800;
 
 startTimer();
 render();
+
+}catch(e){
+msg("Error Loading Questions");
+debug(e.message);
+}
 
 };
 
 /* TIMER */
 function startTimer(){
 
-clearInterval(interval);
+clearInterval(timerInt);
 
-interval=setInterval(()=>{
+timerInt=setInterval(()=>{
 
-timer--;
+sec--;
 
-let m=Math.floor(timer/60);
-let s=timer%60;
+let m=Math.floor(sec/60);
+let s=sec%60;
 
-document.getElementById("timer").innerText =
+document.getElementById("timer").innerText=
 String(m).padStart(2,"0")+":"+
 String(s).padStart(2,"0");
 
-if(timer<=0){
-clearInterval(interval);
-submitTest();
+if(sec<=0){
+clearInterval(timerInt);
+submitQuiz();
 }
 
 },1000);
@@ -309,19 +346,18 @@ function render(){
 
 let q=questions[current];
 
-document.getElementById("progress").innerText =
-"Question "+(current+1)+" of "+questions.length;
+document.getElementById("progress").innerText=
+"Question "+(current+1)+" / "+questions.length;
 
-document.getElementById("question").innerText =
+document.getElementById("question").innerText=
 (current+1)+". "+q.question;
 
 let html="";
 
-q.options.forEach((op,i)=>{
+q.options.forEach(op=>{
 
 let checked = answers[current]===op ? "checked":"";
-
-let cls="option";
+let cls="opt";
 
 if(submitted){
 if(op===q.answer) cls+=" correct";
@@ -331,11 +367,10 @@ else if(answers[current]===op && op!==q.answer) cls+=" wrong";
 html += `
 <label class="${cls}">
 <input type="radio"
-name="opt"
-value="${escapeHtml(op)}"
+name="x"
 ${checked}
 ${submitted?"disabled":""}
-onclick="saveAns('${escapeJs(op)}')">
+onclick="saveAns('${esc(op)}')">
 ${op}
 </label>
 `;
@@ -346,7 +381,7 @@ document.getElementById("options").innerHTML=html;
 
 }
 
-/* SAVE ANSWER */
+/* SAVE */
 window.saveAns=function(v){
 answers[current]=v;
 };
@@ -367,13 +402,12 @@ render();
 };
 
 /* SUBMIT */
-window.submitTest = async function(){
+window.submitQuiz = async function(){
 
 if(submitted) return;
 
 submitted=true;
-
-clearInterval(interval);
+clearInterval(timerInt);
 
 let score=0;
 
@@ -383,10 +417,11 @@ if(answers[i]===q.answer) score++;
 
 render();
 
-document.getElementById("result").innerText =
+document.getElementById("result").innerText=
 "Score: "+score+" / "+questions.length;
 
 if(user){
+
 await addDoc(collection(db,"results"),{
 uid:user.uid,
 email:user.email,
@@ -395,14 +430,17 @@ score:score,
 total:questions.length,
 createdAt:serverTimestamp()
 });
+
 }
+
+msg("Result Saved",1);
 
 };
 
 /* BACK */
 window.goBack=function(){
 
-if(confirm("Exit mock test?")){
+if(confirm("Exit test?")){
 
 if(history.length>1){
 history.back();
@@ -414,15 +452,19 @@ location.href="candidate-dashboard.html";
 
 };
 
-function escapeHtml(str){
-return String(str)
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;");
+/* HELPERS */
+function msg(t,ok=0){
+document.getElementById("statusBox").className=
+ok?"ok":"loader";
+document.getElementById("statusBox").innerText=t;
 }
 
-function escapeJs(str){
+function debug(t){
+document.getElementById("debug").innerHTML=
+'<div class="err">'+t+'</div>';
+}
+
+function esc(str){
 return String(str).replace(/'/g,"\\'");
 }
 </script>
