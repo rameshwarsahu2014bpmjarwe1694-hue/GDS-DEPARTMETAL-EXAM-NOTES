@@ -1,9 +1,9 @@
 <!-- =========================
-FILE 2 : pyq.html
-STRICT FINAL CORRECTED VERSION
+FILE : pyq.html
+STRICT FINAL EXAM MODE VERSION
 Same Firebase Config
 Candidate Side
-PDF + Questions + Working Quiz
+PDF + Quiz Mode + Final Result
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -61,14 +61,41 @@ border-radius:10px;
 margin-bottom:12px;
 }
 
-a{
-display:inline-block;
-padding:10px 14px;
+button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+margin:5px;
+}
+
+.start-btn{background:#28a745;color:#fff;}
+.nav-btn{background:#007bff;color:#fff;}
+.submit-btn{background:#dc3545;color:#fff;}
+
+.option{
+display:block;
+width:100%;
+text-align:left;
+margin:8px 0;
+background:#eee;
+color:#000;
+}
+
+.selected{
 background:#007bff;
 color:#fff;
-text-decoration:none;
-border-radius:8px;
-margin-top:10px;
+}
+
+.correct{
+background:#28a745 !important;
+color:#fff;
+}
+
+.wrong{
+background:#dc3545 !important;
+color:#fff;
 }
 
 .small{
@@ -84,25 +111,6 @@ padding:20px;
 font-weight:bold;
 color:#666;
 }
-
-button{
-padding:10px 15px;
-background:#28a745;
-color:#fff;
-border:none;
-border-radius:8px;
-font-weight:bold;
-cursor:pointer;
-margin-top:10px;
-}
-
-.quiz-option{
-display:block;
-width:100%;
-text-align:left;
-margin-bottom:10px;
-background:#007bff;
-}
 </style>
 </head>
 <body>
@@ -112,7 +120,6 @@ background:#007bff;
 <h1>Previous Year Questions</h1>
 
 <div class="grid">
-
 <select id="category" onchange="loadAll()">
 <option>PYQ 2020</option>
 <option>PYQ 2021</option>
@@ -130,19 +137,18 @@ background:#007bff;
 <option>POSTMAN</option>
 <option>PA-SA</option>
 </select>
-
 </div>
 
 <h3>PDF Files</h3>
 <div id="pdfBox">Loading...</div>
 
-<h3 style="margin-top:20px">Questions</h3>
+<h3 style="margin-top:20px">Quiz</h3>
 
-<button id="startQuizBtn">Start Quiz Mode</button>
-
-<div id="normalQuestions" style="margin-top:15px;">Loading...</div>
+<button class="start-btn" id="startBtn">Start Quiz</button>
 
 <div id="quizBox" style="display:none;margin-top:15px;"></div>
+
+<div id="resultBox" style="display:none;margin-top:15px;"></div>
 
 </div>
 
@@ -168,12 +174,20 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let quizQuestions = [];
-let currentQuiz = 0;
-let score = 0;
+let questions = [];
+let current = 0;
+let selectedAnswers = [];
 
-/* LOAD ALL DATA */
+/* LOAD DATA */
 window.loadAll = async function(){
+
+questions = [];
+current = 0;
+selectedAnswers = [];
+
+document.getElementById("quizBox").style.display = "none";
+document.getElementById("resultBox").style.display = "none";
+document.getElementById("startBtn").style.display = "inline-block";
 
 const category = val("category");
 const post = val("post");
@@ -192,11 +206,8 @@ if(d.post !== post) return;
 pdfHtml += `
 <div class="card">
 <b>${safe(d.title)}</b>
-
 <div class="small">${safe(d.desc)}</div>
 <div class="small">${safe(d.fileName)}</div>
-
-<a href="${safe(d.fileName)}" target="_blank">Open PDF</a>
 </div>
 `;
 });
@@ -207,122 +218,132 @@ pdfHtml || "<div class='empty'>No PDF Found</div>";
 /* QUESTIONS */
 const qSnap = await getDocs(collection(db,"pyqQuestions"));
 
-let qHtml = "";
-let i = 1;
-quizQuestions = [];
-
 qSnap.forEach(doc=>{
-
 let d = doc.data();
 
 if(d.category !== category) return;
 if(d.post !== post) return;
 
-quizQuestions.push(d);
-
-qHtml += `
-<div class="card">
-
-<b>${i}. ${safe(d.question)}</b>
-
-<div class="small">
-A. ${safe(d.options?.[0])}<br>
-B. ${safe(d.options?.[1])}<br>
-C. ${safe(d.options?.[2])}<br>
-D. ${safe(d.options?.[3])}
-</div>
-
-<div class="small">
-<b>Answer:</b> ${safe(d.answer)}
-</div>
-
-</div>
-`;
-
-i++;
+questions.push(d);
 });
-
-document.getElementById("normalQuestions").innerHTML =
-qHtml || "<div class='empty'>No Questions Found</div>";
-
-document.getElementById("quizBox").style.display = "none";
-document.getElementById("startQuizBtn").style.display = "inline-block";
-document.getElementById("normalQuestions").style.display = "block";
 };
 
-/* QUIZ START */
+/* START QUIZ */
 window.startQuiz = function(){
 
-if(quizQuestions.length === 0){
+if(questions.length===0){
 alert("No Questions Found");
 return;
 }
 
-currentQuiz = 0;
-score = 0;
+document.getElementById("startBtn").style.display="none";
+document.getElementById("quizBox").style.display="block";
 
-document.getElementById("startQuizBtn").style.display = "none";
-document.getElementById("normalQuestions").style.display = "none";
-document.getElementById("quizBox").style.display = "block";
-
-showQuiz();
+showQuestion();
 };
 
-function showQuiz(){
+/* SHOW QUESTION */
+function showQuestion(){
 
-if(currentQuiz >= quizQuestions.length){
+let q = questions[current];
 
-document.getElementById("quizBox").innerHTML = `
+let html = `
 <div class="card">
-<h3>Quiz Finished</h3>
-<p>Your Score: ${score} / ${quizQuestions.length}</p>
-<button onclick="loadAll()">Back</button>
-</div>
-`;
-return;
-}
-
-let q = quizQuestions[currentQuiz];
-
-document.getElementById("quizBox").innerHTML = `
-<div class="card">
-<h3>Question ${currentQuiz+1}</h3>
-
+<h3>Question ${current+1} / ${questions.length}</h3>
 <p style="margin:15px 0;"><b>${safe(q.question)}</b></p>
+`;
 
-<button class="quiz-option" onclick="checkAnswer('${safe(q.options?.[0])}')">
-A. ${safe(q.options?.[0])}
+for(let i=0;i<4;i++){
+
+let option = safe(q.options?.[i]);
+let active = selectedAnswers[current]===option ? "selected" : "";
+
+html += `
+<button class="option ${active}" onclick="selectOption('${escapeQuote(option)}')">
+${String.fromCharCode(65+i)}. ${option}
 </button>
+`;
+}
 
-<button class="quiz-option" onclick="checkAnswer('${safe(q.options?.[1])}')">
-B. ${safe(q.options?.[1])}
-</button>
+html += `<br>`;
 
-<button class="quiz-option" onclick="checkAnswer('${safe(q.options?.[2])}')">
-C. ${safe(q.options?.[2])}
-</button>
+if(current>0){
+html += `<button class="nav-btn" onclick="prevQuestion()">Previous</button>`;
+}
 
-<button class="quiz-option" onclick="checkAnswer('${safe(q.options?.[3])}')">
-D. ${safe(q.options?.[3])}
-</button>
+if(current < questions.length-1){
+html += `<button class="nav-btn" onclick="nextQuestion()">Next</button>`;
+}else{
+html += `<button class="submit-btn" onclick="submitQuiz()">Submit</button>`;
+}
 
+html += `</div>`;
+
+document.getElementById("quizBox").innerHTML = html;
+}
+
+/* SELECT */
+window.selectOption = function(value){
+selectedAnswers[current] = value;
+showQuestion();
+};
+
+/* NAV */
+window.nextQuestion = function(){
+if(current < questions.length-1){
+current++;
+showQuestion();
+}
+};
+
+window.prevQuestion = function(){
+if(current>0){
+current--;
+showQuestion();
+}
+};
+
+/* SUBMIT */
+window.submitQuiz = function(){
+
+let score = 0;
+let review = "";
+
+for(let i=0;i<questions.length;i++){
+
+let q = questions[i];
+let user = selectedAnswers[i] || "Not Answered";
+let ans = safe(q.answer);
+
+let correct = user === ans;
+
+if(correct) score++;
+
+review += `
+<div class="card">
+<b>Q${i+1}. ${safe(q.question)}</b>
+
+<div class="small">Your Answer:
+<span style="color:${correct?'green':'red'}">${user}</span>
+</div>
+
+<div class="small">Correct Answer:
+<span style="color:green">${ans}</span>
+</div>
 </div>
 `;
 }
 
-window.checkAnswer = function(selected){
+document.getElementById("quizBox").style.display="none";
+document.getElementById("resultBox").style.display="block";
 
-let q = quizQuestions[currentQuiz];
-
-if(selected === q.answer){
-score++;
-alert("Correct Answer");
-}else{
-alert("Wrong Answer");
-}
-
-currentQuiz++;
-showQuiz();
+document.getElementById("resultBox").innerHTML = `
+<div class="card">
+<h2>Result</h2>
+<p><b>Score: ${score} / ${questions.length}</b></p>
+</div>
+${review}
+`;
 };
 
 function val(id){
@@ -333,10 +354,12 @@ function safe(str){
 return str || "";
 }
 
-/* BUTTON CLICK */
-document.getElementById("startQuizBtn").addEventListener("click", startQuiz);
+function escapeQuote(str){
+return (str || "").replace(/'/g,"\\'");
+}
 
-/* FIRST LOAD */
+document.getElementById("startBtn").addEventListener("click", startQuiz);
+
 loadAll();
 
 </script>
