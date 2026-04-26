@@ -58,9 +58,7 @@ gap:12px;
 grid-template-columns:repeat(3,1fr);
 }
 }
-
-/* NEXT LEVEL PREMIUM SUBJECT CARD */
-/* old .card replace karo */
+/* OLD .card ko replace karo */
 
 .card{
 min-height:92px;
@@ -71,38 +69,37 @@ display:flex;
 justify-content:center;
 align-items:center;
 text-align:center;
+gap:8px;
 
-font-size:16px;
+font-size:15px;
 font-weight:900;
 line-height:1.4;
-letter-spacing:.5px;
+letter-spacing:.4px;
 text-transform:uppercase;
 color:#ffffff;
 
 cursor:pointer;
 position:relative;
 overflow:hidden;
+z-index:1;
 
-background:
-linear-gradient(145deg,
+background:linear-gradient(145deg,
 rgba(255,255,255,.24),
 rgba(255,255,255,.08));
 
 backdrop-filter:blur(18px);
 -webkit-backdrop-filter:blur(18px);
 
-border:1px solid rgba(255,255,255,.22);
+border:1px solid rgba(255,255,255,.20);
 
 box-shadow:
 0 14px 28px rgba(0,0,0,.28),
-inset 0 1px 0 rgba(255,255,255,.30),
-inset 0 -2px 8px rgba(0,0,0,.18);
+inset 0 1px 0 rgba(255,255,255,.28);
 
 transition:.22s ease;
-transform-style:preserve-3d;
 }
 
-/* RGB top glow strip */
+/* top glow */
 .card::before{
 content:"";
 position:absolute;
@@ -110,73 +107,54 @@ top:0;
 left:0;
 width:100%;
 height:4px;
-background:linear-gradient(90deg,
-#00e5ff,#00ff95,#ffd54f,#ff6ec7,#00e5ff);
-background-size:300% 100%;
-animation:glowMove 4s linear infinite;
+background:linear-gradient(90deg,#00e5ff,#00ff95,#ffd54f,#ff6ec7);
+z-index:0;
 }
 
-/* Shine effect */
+/* shine */
 .card::after{
 content:"";
 position:absolute;
 top:-40%;
 left:-35%;
-width:55%;
+width:50%;
 height:180%;
-background:rgba(255,255,255,.10);
+background:rgba(255,255,255,.08);
 transform:rotate(25deg);
 transition:.25s;
+z-index:0;
 }
 
-/* Hover / tap raise */
+/* text visible */
+.card{
+text-shadow:
+0 1px 2px rgba(0,0,0,.70),
+0 0 8px rgba(255,255,255,.10);
+}
+
+/* hover */
 .card:hover{
-transform:translateY(-6px) scale(1.03);
-box-shadow:
-0 18px 34px rgba(0,0,0,.32),
-0 0 14px rgba(255,255,255,.12),
-inset 0 1px 0 rgba(255,255,255,.32);
+transform:translateY(-5px) scale(1.03);
 }
 
-/* 3D press effect */
-.card:active{
-transform:translateY(2px) scale(.98);
-box-shadow:
-0 6px 12px rgba(0,0,0,.24),
-inset 0 3px 8px rgba(0,0,0,.22);
-}
-
-/* icon glow */
-.card span{
-margin-right:8px;
-font-size:18px;
-filter:drop-shadow(0 0 8px rgba(255,255,255,.75));
-}
-
-/* moving shine on hover */
 .card:hover::after{
 left:120%;
 }
 
-/* animation */
-@keyframes glowMove{
-0%{background-position:0% 50%;}
-100%{background-position:300% 50%;}
+/* press */
+.card:active{
+transform:translateY(2px) scale(.98);
 }
 
-/* mobile premium */
+/* mobile */
 @media(max-width:600px){
 .card{
+font-size:13px;
 min-height:82px;
-font-size:14px;
 padding:14px;
 border-radius:18px;
 }
-.card span{
-font-size:16px;
 }
-}
-
 .err{
 background:#ffe8e8;
 color:#c00000;
