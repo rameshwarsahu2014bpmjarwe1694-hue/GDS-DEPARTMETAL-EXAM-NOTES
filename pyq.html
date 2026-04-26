@@ -237,8 +237,12 @@ Open PDF
 document.getElementById("pdfBox").innerHTML =
 pdfHtml || "<div class='empty'>No PDF Found</div>";
 
+/* QUESTIONS LOAD PART ko replace karo */
+
 /* QUESTIONS */
 const qSnap = await getDocs(collection(db,"pyqQuestions"));
+
+let tempQuestions = [];
 
 qSnap.forEach(doc => {
 
@@ -247,11 +251,37 @@ const d = doc.data();
 if(d.category !== category) return;
 if(d.post !== post) return;
 
-questions.push(d);
+tempQuestions.push(d);
 
 });
 
-}
+/* Strict clean numbering order */
+questions = tempQuestions.sort((a,b)=>{
+
+const qa = String(a.question || "").match(/^\d+/);
+const qb = String(b.question || "").match(/^\d+/);
+
+const na = qa ? parseInt(qa[0]) : 9999;
+const nb = qb ? parseInt(qb[0]) : 9999;
+
+return na - nb;
+
+});
+
+/* Auto remove old numbering + set fresh serial */
+questions = questions.map((item,index)=>{
+
+let cleanQ = String(item.question || "")
+.replace(/^\d+[\).\-\s:]*/,"")
+.trim();
+
+return {
+...item,
+question: cleanQ,
+serial: index + 1
+};
+
+});
 
 /* START QUIZ */
 function startQuiz(){
