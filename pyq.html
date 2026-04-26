@@ -86,15 +86,44 @@ background:#007bff;
 color:#fff;
 }
 
-.start-btn{background:#28a745;color:#fff;}
-.nav-btn{background:#007bff;color:#fff;}
-.submit-btn{background:#dc3545;color:#fff;}
+./* Previous / Next / Submit button spacing fix */
 
-/* =========================
-ULTRA FINAL QUIZ OPTION UI
-ONLY REPLACE OLD .option & .selected CSS
-बाकी coding same rahegi
-========================= */
+/* OLD nav-btn & submit-btn replace karo */
+
+.nav-btn,
+.submit-btn,
+.start-btn{
+display:inline-block;
+margin-top:14px;
+margin-right:10px;
+padding:10px 16px;
+border:none;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+}
+
+/* last button right gap remove */
+.nav-btn:last-child,
+.submit-btn:last-child{
+margin-right:0;
+}
+
+/* colors */
+.nav-btn{
+background:#007bff;
+color:#fff;
+}
+
+.submit-btn{
+background:#dc3545;
+color:#fff;
+}
+
+.start-btn{
+background:#28a745;
+color:#fff;
+}
 
 .option{
 display:flex;
@@ -417,9 +446,12 @@ showQuestion();
 }
 };
 
+/* OLD submitQuiz function ko pura replace karo */
+
 window.submitQuiz = function(){
 
 let score = 0;
+let attempted = 0;
 let review = "";
 
 for(let i=0;i<questions.length;i++){
@@ -430,20 +462,29 @@ const ans = safe(q.answer);
 
 const ok = user === ans;
 
+if(user !== "Not Answered") attempted++;
 if(ok) score++;
 
 review += `
-<div class="card">
-<b>Q${q.serial}. ${safe(q.question)}</b>
+<div class="card" style="border-left:6px solid ${ok ? '#28a745' : '#dc3545'};">
+<b>Q${i+1}. ${safe(q.question)}</b>
 
-<div class="small">
+<div class="small" style="margin-top:10px;">
 Your Answer:
-<span style="color:${ok?'green':'red'}">${user}</span>
+<span style="font-weight:bold;color:${ok ? 'green' : 'red'};">
+${user}
+</span>
 </div>
 
 <div class="small">
 Correct Answer:
-<span style="color:green">${ans}</span>
+<span style="font-weight:bold;color:green;">
+${ans}
+</span>
+</div>
+
+<div class="small" style="margin-top:6px;font-weight:bold;color:${ok ? 'green' : 'red'};">
+${ok ? '✔ Correct' : '✘ Wrong'}
 </div>
 </div>
 `;
@@ -454,10 +495,20 @@ document.getElementById("quizBox").style.display = "none";
 document.getElementById("resultBox").style.display = "block";
 
 document.getElementById("resultBox").innerHTML = `
-<div class="card">
-<h2>Result</h2>
-<p><b>Score: ${score} / ${questions.length}</b></p>
+<div class="card" style="text-align:center;">
+<h2>Quiz Result</h2>
+
+<p><b>Total Questions:</b> ${questions.length}</p>
+<p><b>Attempted:</b> ${attempted}</p>
+<p><b>Correct:</b> ${score}</p>
+<p><b>Wrong:</b> ${attempted-score}</p>
+<p><b>Score:</b> ${score} / ${questions.length}</p>
+
+<button class="start-btn" onclick="location.reload()">
+Restart Quiz
+</button>
 </div>
+
 ${review}
 `;
 
