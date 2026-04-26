@@ -415,18 +415,17 @@ if(current > 0){
 html += `<button class="nav-btn" onclick="prevQ()">Previous</button>`;
 }
 
+if(current > 0){
+html += `<button class="nav-btn" onclick="prevQ()">Previous</button>`;
+}
+
 if(current < questions.length-1){
 html += `<button class="nav-btn" onclick="nextQ()">Next</button>`;
-}else{
+}
+
 html += `<button class="submit-btn" onclick="submitQuiz()">Submit</button>`;
-}
-
-html += "</div>";
-
-document.getElementById("quizBox").innerHTML = html;
-
-}
-
+  }
+  
 /* ACTIONS */
 window.selectAns = function(v){
 answers[current] = v;
