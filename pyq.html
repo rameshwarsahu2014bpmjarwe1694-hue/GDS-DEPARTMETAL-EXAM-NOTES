@@ -117,7 +117,7 @@ color:#666
 <div id="pdfBox">Loading...</div>
 
 <h3 style="margin-top:20px">Questions</h3>
-<button onclick="startQuiz()" style="
+<button id="startQuizBtn" style="
 padding:10px 15px;
 background:#28a745;
 color:#fff;
@@ -128,9 +128,11 @@ margin-top:15px;
 cursor:pointer;">
 Start Quiz Mode
 </button>
-<div id="questionBox">Loading...</div>
-<div id="quizBox" style="display:none;margin-top:20px;"></div>
+<div id="normalQuestions">
+  <!-- current normal questions -->
 </div>
+
+<div id="quizBox" style="display:none;"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -245,6 +247,39 @@ return str || "";
 }
 
 loadAll();
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+const btn = document.getElementById("startQuizBtn");
+const normal = document.getElementById("normalQuestions");
+const quizBox = document.getElementById("quizBox");
+
+btn.addEventListener("click", function () {
+
+normal.style.display = "none";
+btn.style.display = "none";
+
+quizBox.style.display = "block";
+quizBox.innerHTML = `
+<h3>Quiz Started</h3>
+<p>Q1. हिंदी में सबसे पहले किस उत्तर दिशा की ओर आता है?</p>
+
+<button onclick="checkAns(this,false)">उत्तर-पश्चिम</button>
+<button onclick="checkAns(this,true)">उत्तर-पूर्व</button>
+<button onclick="checkAns(this,false)">दक्षिण</button>
+<button onclick="checkAns(this,false)">उत्तरप्रदेश</button>
+`;
+});
+
+});
+
+function checkAns(btn, correct){
+if(correct){
+alert("Correct Answer");
+}else{
+alert("Wrong Answer");
+}
+}
 </script>
 
 </body>
