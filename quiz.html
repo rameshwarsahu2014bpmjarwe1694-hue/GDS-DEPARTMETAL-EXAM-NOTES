@@ -1,8 +1,9 @@
-<!-- Top bar -->
-<div class="top-bar">
-  <button class="back-btn" onclick="goBack()">⬅ Back</button>
-  <h2>Mock Test</h2>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mock Test</title>
 
 <style>
 *{
@@ -11,18 +12,22 @@ padding:0;
 box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
+
 body{
 background:#f5f7fa;
 padding:15px;
 }
-.top-bar{
+
+.topbar{
 display:flex;
+justify-content:space-between;
 align-items:center;
 gap:10px;
 margin-bottom:15px;
 }
-.back-btn{
-background:#007bff;
+
+.back{
+background:#111;
 color:#fff;
 border:none;
 padding:10px 14px;
@@ -30,54 +35,162 @@ border-radius:8px;
 font-weight:bold;
 cursor:pointer;
 }
+
+.timer{
+background:#dc3545;
+color:#fff;
+padding:10px 14px;
+border-radius:8px;
+font-weight:bold;
+}
+
 .container{
-max-width:800px;
+max-width:900px;
 margin:auto;
 background:#fff;
 padding:20px;
-border-radius:12px;
-box-shadow:0 4px 10px rgba(0,0,0,.08);
+border-radius:14px;
+box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
-.question{
-font-size:18px;
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+}
+
+@media(min-width:700px){
+.grid{
+grid-template-columns:repeat(3,1fr);
+}
+}
+
+.card{
+background:#fff;
+padding:16px;
+border-radius:14px;
+text-align:center;
 font-weight:bold;
-margin-bottom:15px;
+cursor:pointer;
+box-shadow:0 4px 10px rgba(0,0,0,.08);
+transition:.25s;
 }
+
+.card:hover{
+transform:translateY(-3px);
+}
+
+.hide{
+display:none;
+}
+
+.question{
+font-size:19px;
+font-weight:bold;
+margin-bottom:16px;
+line-height:1.5;
+}
+
 .option{
 display:block;
 padding:12px;
-margin:8px 0;
+margin:10px 0;
 border:1px solid #ddd;
-border-radius:8px;
+border-radius:10px;
 cursor:pointer;
+transition:.2s;
 }
+
 .option:hover{
 background:#f0f7ff;
 }
-.submit-btn{
+
+.option input{
+margin-right:8px;
+}
+
+.correct{
+background:#d4edda !important;
+border-color:green !important;
+}
+
+.wrong{
+background:#f8d7da !important;
+border-color:red !important;
+}
+
+.nav{
+display:flex;
+gap:10px;
 margin-top:15px;
+}
+
+.nav button{
+flex:1;
 padding:12px;
-width:100%;
-background:green;
-color:#fff;
 border:none;
-border-radius:8px;
-font-size:16px;
+border-radius:10px;
 font-weight:bold;
 cursor:pointer;
+color:#fff;
 }
-#result{
-margin-top:15px;
-font-weight:bold;
+
+.prev{background:#6c757d;}
+.next{background:#007bff;}
+.submit{background:green;}
+
+.result{
 text-align:center;
+font-size:22px;
+font-weight:bold;
+margin-top:20px;
+}
+
+.small{
+margin-bottom:12px;
+color:#555;
+font-weight:bold;
 }
 </style>
+</head>
+<body>
+
+<div class="topbar">
+<button class="back" onclick="goBack()">⬅ Back</button>
+<div class="timer" id="timer">30:00</div>
+</div>
 
 <div class="container">
-<div class="question" id="question">Loading...</div>
+
+<div id="subjectBox">
+<h2 style="margin-bottom:15px;text-align:center;">Select Subject</h2>
+
+<div class="grid">
+<div class="card" onclick="startSubject('POSTAL MANUAL VOLUME 7')">📘 POSTAL MANUAL VOLUME 7</div>
+<div class="card" onclick="startSubject('GK')">📘 GK</div>
+<div class="card" onclick="startSubject('Maths')">➕ Maths</div>
+<div class="card" onclick="startSubject('Reasoning')">🧠 Reasoning</div>
+<div class="card" onclick="startSubject('POSTAL MANUAL VOLUME 5')">📘 PO MANUAL VOLUME 5</div>
+<div class="card" onclick="startSubject('Post Office Guide 1')">📮 PO GUIDE 1</div>
+<div class="card" onclick="startSubject('Post Office Guide 2')">📮 PO GUIDE 2</div>
+<div class="card" onclick="startSubject('POSTAL MANUAL VOLUME 6 PART 3')">📘 POSTAL MANUAL VOLUME 6 PART 3</div>
+</div>
+</div>
+
+<div id="quizBox" class="hide">
+<div class="small" id="progress"></div>
+<div class="question" id="question"></div>
 <div id="options"></div>
-<button class="submit-btn" onclick="submitQuiz()">Submit</button>
-<div id="result"></div>
+
+<div class="nav">
+<button class="prev" onclick="prevQ()">Previous</button>
+<button class="next" onclick="nextQ()">Next</button>
+<button class="submit" onclick="submitTest()">Submit</button>
+</div>
+
+<div class="result" id="result"></div>
+</div>
+
 </div>
 
 <script type="module">
@@ -86,44 +199,60 @@ import {
 getFirestore,
 collection,
 getDocs,
+query,
+where,
 addDoc,
 serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 import {
 getAuth,
 onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* Firebase Config */
+/* SAME FIREBASE CONFIG */
 const firebaseConfig = {
-apiKey: "YOUR_API_KEY",
-authDomain: "YOUR_PROJECT.firebaseapp.com",
-projectId: "YOUR_PROJECT_ID",
-storageBucket: "YOUR_PROJECT.appspot.com",
-messagingSenderId: "YOUR_ID",
-appId: "YOUR_APP_ID"
+apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+projectId: "gds-departmental-exam-studyhub",
+storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+messagingSenderId: "759916756080",
+appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-let currentUser=null;
+let user=null;
 let questions=[];
-let score=0;
-let selectedAnswers={};
+let current=0;
+let answers={};
+let submitted=false;
+let timer=1800;
+let interval=null;
+let subject="";
 
-onAuthStateChanged(auth,(user)=>{
-if(user){
-currentUser=user;
-loadQuestions();
+onAuthStateChanged(auth,(u)=>{
+if(u){
+user=u;
 }else{
-window.location.href="login.html";
+location.href="login.html";
 }
 });
 
-async function loadQuestions(){
-const snap = await getDocs(collection(db,"quizQuestions"));
+/* SUBJECT START */
+window.startSubject = async function(sub){
+
+subject=sub;
+
+const qy = query(
+collection(db,"quizQuestions"),
+where("subject","==",sub)
+);
+
+const snap = await getDocs(qy);
+
 questions=[];
 
 snap.forEach(doc=>{
@@ -133,75 +262,170 @@ id:doc.id,
 });
 });
 
-renderQuestions();
+if(questions.length===0){
+alert("No Questions Available");
+return;
 }
 
-function renderQuestions(){
+document.getElementById("subjectBox").classList.add("hide");
+document.getElementById("quizBox").classList.remove("hide");
+
+current=0;
+answers={};
+submitted=false;
+
+startTimer();
+render();
+
+};
+
+/* TIMER */
+function startTimer(){
+
+clearInterval(interval);
+
+interval=setInterval(()=>{
+
+timer--;
+
+let m=Math.floor(timer/60);
+let s=timer%60;
+
+document.getElementById("timer").innerText =
+String(m).padStart(2,"0")+":"+
+String(s).padStart(2,"0");
+
+if(timer<=0){
+clearInterval(interval);
+submitTest();
+}
+
+},1000);
+
+}
+
+/* RENDER */
+function render(){
+
+let q=questions[current];
+
+document.getElementById("progress").innerText =
+"Question "+(current+1)+" of "+questions.length;
+
+document.getElementById("question").innerText =
+(current+1)+". "+q.question;
+
 let html="";
-questions.forEach((q,index)=>{
+
+q.options.forEach((op,i)=>{
+
+let checked = answers[current]===op ? "checked":"";
+
+let cls="option";
+
+if(submitted){
+if(op===q.answer) cls+=" correct";
+else if(answers[current]===op && op!==q.answer) cls+=" wrong";
+}
+
 html += `
-<div class="question">${index+1}. ${escapeHTML(q.question)}</div>
-<div>
-<label class="option">
-<input type="radio" name="q${index}" value="A"> ${escapeHTML(q.a)}
+<label class="${cls}">
+<input type="radio"
+name="opt"
+value="${escapeHtml(op)}"
+${checked}
+${submitted?"disabled":""}
+onclick="saveAns('${escapeJs(op)}')">
+${op}
 </label>
-<label class="option">
-<input type="radio" name="q${index}" value="B"> ${escapeHTML(q.b)}
-</label>
-<label class="option">
-<input type="radio" name="q${index}" value="C"> ${escapeHTML(q.c)}
-</label>
-<label class="option">
-<input type="radio" name="q${index}" value="D"> ${escapeHTML(q.d)}
-</label>
-</div>
 `;
+
 });
-document.getElementById("question").innerHTML="";
+
 document.getElementById("options").innerHTML=html;
+
 }
 
-async function submitQuiz(){
-score=0;
+/* SAVE ANSWER */
+window.saveAns=function(v){
+answers[current]=v;
+};
 
-questions.forEach((q,index)=>{
-const ans=document.querySelector(`input[name="q${index}"]:checked`);
-if(ans && ans.value===q.correct){
-score++;
+/* NAV */
+window.nextQ=function(){
+if(current<questions.length-1){
+current++;
+render();
 }
+};
+
+window.prevQ=function(){
+if(current>0){
+current--;
+render();
+}
+};
+
+/* SUBMIT */
+window.submitTest = async function(){
+
+if(submitted) return;
+
+submitted=true;
+
+clearInterval(interval);
+
+let score=0;
+
+questions.forEach((q,i)=>{
+if(answers[i]===q.answer) score++;
 });
 
-document.getElementById("result").innerHTML=
-"Your Score: "+score+" / "+questions.length;
+render();
 
+document.getElementById("result").innerText =
+"Score: "+score+" / "+questions.length;
+
+if(user){
 await addDoc(collection(db,"results"),{
-uid: currentUser.uid,
-email: currentUser.email,
-score: score,
-total: questions.length,
-createdAt: serverTimestamp()
+uid:user.uid,
+email:user.email,
+subject:subject,
+score:score,
+total:questions.length,
+createdAt:serverTimestamp()
 });
 }
 
-/* Secure Back Button */
+};
+
+/* BACK */
 window.goBack=function(){
-if(confirm("Exit mock test and go back?")){
+
+if(confirm("Exit mock test?")){
+
 if(history.length>1){
 history.back();
 }else{
-window.location.href="candidate-dashboard.html";
-}
-}
+location.href="candidate-dashboard.html";
 }
 
-/* XSS Protection */
-function escapeHTML(str){
-if(!str) return "";
-return str
+}
+
+};
+
+function escapeHtml(str){
+return String(str)
 .replace(/&/g,"&amp;")
 .replace(/</g,"&lt;")
 .replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
+.replace(/"/g,"&quot;");
+}
+
+function escapeJs(str){
+return String(str).replace(/'/g,"\\'");
 }
 </script>
+
+</body>
+</html>
