@@ -242,7 +242,13 @@ return String(str).replace(/[&<>"']/g,m=>({
 }[m]));
 }
 
-function safe(v){ return v || ""; }
+function safe(v){
+return String(v || "")
+.replace(/^\d+\./,"")
+.replace(/^\d+\)/,"")
+.replace(/^\d+\-/,"")
+.trim();
+}
 
 /* SAVE PDF */
 window.savePdf = async function(){
