@@ -95,6 +95,12 @@ hr{margin:20px 0;border:none;border-top:1px solid #ddd}
 
 <hr>
 
+<h3>PDF OCR to Bulk Text</h3>
+
+<div class="grid">
+<input type="file" id="pdfFile" accept=".pdf,image/*">
+<button class="save-btn" onclick="extractPdf()">Extract Questions</button>
+</div>
 <h3>Save PDF</h3>
 
 <div class="grid">
@@ -323,7 +329,40 @@ console.log(err);
 }
 
 };
+window.extractPdf = async function(){
 
+if(!auth.currentUser) return alert("Admin not logged in");
+
+const file = document.getElementById("pdfFile").files[0];
+
+if(!file) return alert("Choose PDF/Image");
+
+status("OCR Reading...","blue");
+
+try{
+
+const result = await Tesseract.recognize(
+file,
+'eng+hin'
+);
+
+let text = result.data.text;
+
+text = text.replace(/\r/g,'');
+
+document.getElementById("bulk").value = text;
+
+status("OCR Completed");
+
+}catch(err){
+
+console.log(err);
+
+status("OCR Failed","red");
+
+}
+
+};
 /* BULK SAVE */
 window.bulkSave = async function(){
 
@@ -490,6 +529,6 @@ loadAll();
 document.addEventListener("contextmenu",e=>e.preventDefault());
 
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </body>
 </html>
