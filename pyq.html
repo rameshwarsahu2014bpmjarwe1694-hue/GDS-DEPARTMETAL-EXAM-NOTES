@@ -237,8 +237,6 @@ Open PDF
 document.getElementById("pdfBox").innerHTML =
 pdfHtml || "<div class='empty'>No PDF Found</div>";
 
-/* QUESTIONS LOAD PART ko replace karo */
-
 /* QUESTIONS */
 const qSnap = await getDocs(collection(db,"pyqQuestions"));
 
@@ -255,8 +253,7 @@ tempQuestions.push(d);
 
 });
 
-/* Strict clean numbering order */
-questions = tempQuestions.sort((a,b)=>{
+questions = tempQuestions.sort((a,b) => {
 
 const qa = String(a.question || "").match(/^\d+/);
 const qb = String(b.question || "").match(/^\d+/);
@@ -266,13 +263,10 @@ const nb = qb ? parseInt(qb[0]) : 9999;
 
 return na - nb;
 
-});
-
-/* Auto remove old numbering + set fresh serial */
-questions = questions.map((item,index)=>{
+}).map((item,index) => {
 
 let cleanQ = String(item.question || "")
-.replace(/^\d+[\).\-\s:]*/,"")
+.replace(/^\d+[\).\-\s:]*/, "")
 .trim();
 
 return {
