@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Admin Quiz Manager</title>
+<title>Admin Quiz Manager V2</title>
 
 <style>
 *{
@@ -12,22 +12,26 @@ padding:0;
 box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
+
 body{
-background:#f4f4f4;
+background:#f4f6f9;
 }
+
 .topbar{
-background:#000;
+background:#111;
 color:#fff;
-padding:15px;
+padding:16px;
 text-align:center;
-font-size:20px;
+font-size:22px;
 font-weight:bold;
 }
+
 .container{
-max-width:1000px;
+max-width:1100px;
 margin:auto;
-padding:20px;
+padding:18px;
 }
+
 .box{
 background:#fff;
 padding:18px;
@@ -35,26 +39,34 @@ border-radius:14px;
 box-shadow:0 4px 10px rgba(0,0,0,.08);
 margin-bottom:18px;
 }
+
 .grid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
-gap:14px;
-margin-bottom:18px;
+gap:12px;
 }
+
+@media(min-width:700px){
+.grid{
+grid-template-columns:repeat(3,1fr);
+}
+}
+
 .card{
 background:#fff;
-padding:18px 10px;
+padding:16px;
 border-radius:14px;
 text-align:center;
 font-weight:bold;
-font-size:16px;
-box-shadow:0 4px 10px rgba(0,0,0,.08);
 cursor:pointer;
-transition:.3s;
+box-shadow:0 4px 10px rgba(0,0,0,.08);
+transition:.25s;
 }
+
 .card:hover{
 transform:translateY(-3px);
 }
+
 input,textarea,select{
 width:100%;
 padding:11px;
@@ -63,10 +75,12 @@ border:1px solid #ccc;
 border-radius:10px;
 font-size:15px;
 }
+
 textarea{
 min-height:100px;
 resize:vertical;
 }
+
 button{
 width:100%;
 padding:12px;
@@ -76,8 +90,44 @@ font-weight:bold;
 cursor:pointer;
 margin-top:12px;
 }
+
 .save{background:#007bff;color:#fff;}
-.bulk{background:green;color:#fff;}
+.bulk{background:#28a745;color:#fff;}
+.update{background:#ff9800;color:#fff;}
+.delete{background:#dc3545;color:#fff;}
+.smallbtn{
+width:auto;
+padding:8px 12px;
+margin-right:8px;
+}
+
+.item{
+background:#fafafa;
+padding:12px;
+border-radius:12px;
+border-left:4px solid #007bff;
+margin-bottom:12px;
+}
+
+.hide{
+display:none;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+margin-top:10px;
+}
+
+.stat{
+background:#f8f8f8;
+padding:12px;
+border-radius:12px;
+text-align:center;
+font-weight:bold;
+}
+
 .back{
 display:block;
 text-align:center;
@@ -89,44 +139,32 @@ border-radius:10px;
 font-weight:bold;
 margin-top:18px;
 }
-.list{
-margin-top:15px;
-}
-.item{
-background:#f8f8f8;
-padding:10px;
-border-radius:10px;
-margin-bottom:10px;
-border-left:4px solid #007bff;
-}
-.hide{
-display:none;
-}
-@media(min-width:700px){
-.grid{
-grid-template-columns:repeat(3,1fr);
-}
-}
 </style>
 </head>
-
 <body>
 
-<div class="topbar">📝 Admin Quiz Manager</div>
+<div class="topbar">📝 Admin Quiz Manager V2</div>
 
 <div class="container">
 
 <div class="box">
-<b>Welcome Admin 🔐 Permanent Firestore Save</b>
+<b>Firestore Permanent Save • Edit • Delete • Duplicate Protection</b>
+
+<div class="stats">
+<div class="stat">Subject: <span id="subName">None</span></div>
+<div class="stat">Questions: <span id="countBox">0</span></div>
+</div>
 </div>
 
 <div class="grid">
+<div class="card" onclick="choose('POSTAL MANUAL VOLUME 7')">📘 POSTAL MANUAL VOLUME 7</div>
 <div class="card" onclick="choose('GK')">📘 GK</div>
 <div class="card" onclick="choose('Maths')">➕ Maths</div>
 <div class="card" onclick="choose('Reasoning')">🧠 Reasoning</div>
-<div class="card" onclick="choose('English')">🔤 English</div>
-<div class="card" onclick="choose('Post Office Guide 1')">📮 POG 1</div>
-<div class="card" onclick="choose('Post Office Guide 2')">📮 POG 2</div>
+<div class="card" onclick="choose('POSTAL MANUAL VOLUME 5')">🔤  PO MANUAL VOLUME 5</div>
+<div class="card" onclick="choose('Post Office Guide 1')">📮 PO GUIDE 1</div>
+<div class="card" onclick="choose('Post Office Guide 2')">📮 PO GUIDE 2</div>
+<div class="card" onclick="choose('POSTAL MANUAL VOLUME 6 PART 3')">📘POSTAL MANUAL VOLUME 6 PART 3 </div>
 </div>
 
 <div class="box hide" id="panel">
@@ -156,26 +194,25 @@ grid-template-columns:repeat(3,1fr);
 <option value="D">Option D</option>
 </select>
 
-<button class="save" onclick="saveSingle()">Save Single Question</button>
+<button class="save" id="saveBtn" onclick="saveSingle()">Save Single Question</button>
+<button class="update hide" id="updateBtn" onclick="updateQuestion()">Update Question</button>
 
 <hr style="margin:18px 0">
 
 <h3>Bulk Paste Questions</h3>
 
-<textarea id="bulkBox" placeholder="Format:
-
-Question text
+<textarea id="bulkBox" placeholder="Question text
 A) option
 B) option
 C) option
 D) option
 Answer: A
 
-(next question)..."></textarea>
+(next question)"></textarea>
 
 <button class="bulk" onclick="bulkImport()">Bulk Import</button>
 
-<div class="list" id="listBox"></div>
+<div id="listBox" style="margin-top:15px;"></div>
 
 </div>
 
@@ -191,21 +228,26 @@ collection,
 addDoc,
 getDocs,
 query,
-where
+where,
+doc,
+deleteDoc,
+updateDoc
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 let current = "";
+let editId = "";
 
-/* ---------- CATEGORY ---------- */
+/* SUBJECT */
 window.choose = function(cat){
 
 current = cat;
+editId = "";
 
+document.getElementById("subName").innerText = cat;
 document.getElementById("panel").classList.remove("hide");
+document.getElementById("title").innerText = cat + " - Add Questions";
 
-document.getElementById("title").innerText =
-cat + " - Add Questions";
-
+resetMode();
 showList();
 
 window.scrollTo({
@@ -215,11 +257,11 @@ behavior:"smooth"
 
 };
 
-/* ---------- SAVE SINGLE ---------- */
+/* SAVE SINGLE */
 window.saveSingle = async function(){
 
 if(current===""){
-alert("Select subject first.");
+alert("Select subject first");
 return;
 }
 
@@ -231,12 +273,25 @@ let d = val("opt4");
 let ans = val("answer");
 
 if(q===""||a===""||b===""||c===""||d===""){
-alert("Fill all fields.");
+alert("Fill all fields");
+return;
+}
+
+/* Duplicate Check */
+const dup = query(
+collection(window.db,"quizQuestions"),
+where("subject","==",current),
+where("question","==",q)
+);
+
+const dupSnap = await getDocs(dup);
+
+if(!dupSnap.empty){
+alert("Duplicate question already exists");
 return;
 }
 
 let correct = a;
-
 if(ans==="B") correct=b;
 if(ans==="C") correct=c;
 if(ans==="D") correct=d;
@@ -249,25 +304,25 @@ answer:correct,
 createdAt:Date.now()
 });
 
-clearSingle();
+clearForm();
 showList();
 
-alert("Question Saved Permanently");
+alert("Question Saved");
 
 };
 
-/* ---------- BULK IMPORT ---------- */
+/* BULK */
 window.bulkImport = async function(){
 
 if(current===""){
-alert("Select subject first.");
+alert("Select subject first");
 return;
 }
 
 let text = val("bulkBox");
 
 if(text===""){
-alert("Paste questions first.");
+alert("Paste questions first");
 return;
 }
 
@@ -286,10 +341,22 @@ let b = clean(lines[2]);
 let c = clean(lines[3]);
 let d = clean(lines[4]);
 
+/* duplicate skip */
+const dup = query(
+collection(window.db,"quizQuestions"),
+where("subject","==",current),
+where("question","==",q)
+);
+
+const dupSnap = await getDocs(dup);
+
+if(!dupSnap.empty){
+continue;
+}
+
 let ansLine = lines[5].toUpperCase();
 
 let correct = a;
-
 if(ansLine.includes("B")) correct=b;
 if(ansLine.includes("C")) correct=c;
 if(ansLine.includes("D")) correct=d;
@@ -315,39 +382,48 @@ alert(count + " Questions Imported");
 
 };
 
-/* ---------- SHOW LIST ---------- */
+/* SHOW LIST */
 async function showList(){
+
+if(current==="") return;
 
 let box = document.getElementById("listBox");
 
-let q = query(
+const qy = query(
 collection(window.db,"quizQuestions"),
 where("subject","==",current)
 );
 
-let snap = await getDocs(q);
+const snap = await getDocs(qy);
+
+document.getElementById("countBox").innerText = snap.size;
 
 if(snap.empty){
-box.innerHTML="<br><b>No Questions Added</b>";
+box.innerHTML="<b>No Questions Added</b>";
 return;
 }
 
-let html="<br><b>Total Questions: "+snap.size+"</b><br><br>";
+let html = "";
 
-let i=1;
+let i = 1;
 
-snap.forEach(doc=>{
+snap.forEach(x=>{
 
-let x = doc.data();
+let d = x.data();
 
 html += `
 <div class="item">
-<b>${i}. ${x.question}</b><br>
-A. ${x.options[0]}<br>
-B. ${x.options[1]}<br>
-C. ${x.options[2]}<br>
-D. ${x.options[3]}<br>
-<b>Answer:</b> ${x.answer}
+
+<b>${i}. ${d.question}</b><br>
+A. ${d.options[0]}<br>
+B. ${d.options[1]}<br>
+C. ${d.options[2]}<br>
+D. ${d.options[3]}<br>
+<b>Answer:</b> ${d.answer}<br><br>
+
+<button class="smallbtn update" onclick="editQuestion('${x.id}')">Edit</button>
+<button class="smallbtn delete" onclick="deleteQuestion('${x.id}')">Delete</button>
+
 </div>
 `;
 
@@ -359,20 +435,117 @@ box.innerHTML = html;
 
 }
 
-/* ---------- HELPERS ---------- */
-function val(id){
-return document.getElementById(id).value.trim();
+/* EDIT */
+window.editQuestion = async function(id){
+
+const qy = query(
+collection(window.db,"quizQuestions"),
+where("subject","==",current)
+);
+
+const snap = await getDocs(qy);
+
+snap.forEach(x=>{
+
+if(x.id===id){
+
+let d = x.data();
+
+document.getElementById("question").value = d.question;
+document.getElementById("opt1").value = d.options[0];
+document.getElementById("opt2").value = d.options[1];
+document.getElementById("opt3").value = d.options[2];
+document.getElementById("opt4").value = d.options[3];
+
+let ans = "A";
+if(d.answer===d.options[1]) ans="B";
+if(d.answer===d.options[2]) ans="C";
+if(d.answer===d.options[3]) ans="D";
+
+document.getElementById("answer").value = ans;
+
+editId = id;
+
+document.getElementById("saveBtn").classList.add("hide");
+document.getElementById("updateBtn").classList.remove("hide");
+
+window.scrollTo({
+top:450,
+behavior:"smooth"
+});
+
 }
 
-function clearSingle(){
-["question","opt1","opt2","opt3","opt4"].forEach(id=>{
-document.getElementById(id).value="";
 });
+
+};
+
+/* UPDATE */
+window.updateQuestion = async function(){
+
+if(editId==="") return;
+
+let q = val("question");
+let a = val("opt1");
+let b = val("opt2");
+let c = val("opt3");
+let d = val("opt4");
+let ans = val("answer");
+
+let correct = a;
+if(ans==="B") correct=b;
+if(ans==="C") correct=c;
+if(ans==="D") correct=d;
+
+await updateDoc(doc(window.db,"quizQuestions",editId),{
+question:q,
+options:[a,b,c,d],
+answer:correct,
+updatedAt:Date.now()
+});
+
+clearForm();
+resetMode();
+showList();
+
+alert("Question Updated");
+
+};
+
+/* DELETE */
+window.deleteQuestion = async function(id){
+
+if(!confirm("Delete this question?")) return;
+
+await deleteDoc(doc(window.db,"quizQuestions",id));
+
+showList();
+
+};
+
+/* HELPERS */
+function val(id){
+return document.getElementById(id).value.trim();
 }
 
 function clean(t){
 return t.replace(/^A\)|^B\)|^C\)|^D\)/i,"").trim();
 }
+
+function clearForm(){
+["question","opt1","opt2","opt3","opt4","bulkBox"].forEach(id=>{
+document.getElementById(id).value="";
+});
+document.getElementById("answer").value="A";
+}
+
+function resetMode(){
+editId="";
+document.getElementById("saveBtn").classList.remove("hide");
+document.getElementById("updateBtn").classList.add("hide");
+clearForm();
+}
+
 </script>
 
 </body>
