@@ -4,7 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Mock Test Final</title>
+.reviewCard{
+background:rgba(255,255,255,.08);
+padding:15px;
+border-radius:14px;
+margin-top:12px;
+color:#fff;
+line-height:1.6;
+border:1px solid rgba(255,255,255,.12);
+}
 
+#reviewList{
+margin-top:15px;
+max-height:70vh;
+overflow:auto;
+padding-right:4px;
+}
 <style>
 *{
 margin:0;
@@ -258,7 +273,10 @@ color:#555;
 <div class="small" id="progress"></div>
 <div class="q" id="question"></div>
 <div id="options"></div>
-
+<div id="resultReviewBox" class="hide">
+<div class="result" id="finalScore"></div>
+<div id="reviewList"></div>
+</div>
 <div class="nav">
 <button class="prev" onclick="prevQ()">Previous</button>
 <button class="next" onclick="nextQ()">Next</button>
@@ -461,27 +479,64 @@ render();
 }
 };
 
-/* SUBMIT */
 window.submitQuiz = async function(){
 
 if(submitted) return;
 
-submitted=true;
+submitted = true;
 clearInterval(timerInt);
 
-let score=0;
+let score = 0;
+let attempted = 0;
 
 questions.forEach((q,i)=>{
-if(answers[i]===q.answer) score++;
+if(answers[i]){
+attempted++;
+}
+if(answers[i] === q.answer){
+score++;
+}
 });
 
-render();
+document.getElementById("quizBox").classList.add("hide");
+document.getElementById("resultReviewBox").classList.remove("hide");
 
-document.getElementById("result").innerText=
-"Score: "+score+" / "+questions.length;
+document.getElementById("finalScore").innerHTML =
+`Score: ${score}/${questions.length}<br>
+Attempted: ${attempted}/${questions.length}`;
+
+let html = "";
+
+questions.forEach((q,i)=>{
+
+let userAns = answers[i] || "Not Attempted";
+let correct = q.answer;
+
+let status = userAns === correct
+? "<span style='color:lime;font-weight:bold;'>✔ Correct</span>"
+: "<span style='color:red;font-weight:bold;'>✘ Wrong</span>";
+
+html += `
+<div class="reviewCard">
+<b>Q${i+1}. ${q.question}</b><br><br>
+
+Your Answer:
+<span style="color:${userAns===correct?'lime':'red'};">
+${userAns}
+</span><br>
+
+Correct Answer:
+<span style="color:lime;">${correct}</span><br><br>
+
+${status}
+</div>
+`;
+
+});
+
+document.getElementById("reviewList").innerHTML = html;
 
 if(user){
-
 await addDoc(collection(db,"results"),{
 uid:user.uid,
 email:user.email,
@@ -490,7 +545,6 @@ score:score,
 total:questions.length,
 createdAt:serverTimestamp()
 });
-
 }
 
 msg("Result Saved",1);
