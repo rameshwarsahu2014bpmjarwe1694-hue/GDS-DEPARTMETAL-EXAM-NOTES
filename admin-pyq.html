@@ -347,7 +347,22 @@ file,
 );
 
 let text = result.data.text;
+text = text.replace(/\r/g,'');
 
+/* Auto Cleaner */
+text = text.replace(/RAMESHWAR SAHU/gi,'');
+text = text.replace(/GDS DEPARTMENTAL EXAM STUDY HUB/gi,'');
+text = text.replace(/GDS TO MTS/gi,'');
+text = text.replace(/PYQ 20\d\d/gi,'');
+
+/* Page numbers like 1/10 */
+text = text.replace(/\b\d+\s*\/\s*\d+\b/g,'');
+
+/* Multiple blank lines clean */
+text = text.replace(/\n{3,}/g,"\n\n");
+
+/* Trim */
+text = text.trim();
 text = text.replace(/\r/g,'');
 
 document.getElementById("bulk").value = text;
