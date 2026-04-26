@@ -206,11 +206,25 @@ if(d.post !== post) return;
 pdfHtml += `
 <div class="card">
 <b>${safe(d.title)}</b>
+
 <div class="small">${safe(d.desc)}</div>
+
 <div class="small">${safe(d.fileName)}</div>
+
+<a href="${safe(d.fileName)}" target="_blank" style="
+display:inline-block;
+padding:10px 14px;
+background:#007bff;
+color:#fff;
+text-decoration:none;
+border-radius:8px;
+margin-top:10px;
+">
+Open PDF
+</a>
+
 </div>
 `;
-});
 
 document.getElementById("pdfBox").innerHTML =
 pdfHtml || "<div class='empty'>No PDF Found</div>";
