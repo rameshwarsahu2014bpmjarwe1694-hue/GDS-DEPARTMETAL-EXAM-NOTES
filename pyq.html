@@ -86,7 +86,7 @@ background:#007bff;
 color:#fff;
 }
 
-./* Previous / Next / Submit button spacing fix */
+/* Previous / Next / Submit button spacing fix */
 
 /* OLD nav-btn & submit-btn replace karo */
 
@@ -191,7 +191,6 @@ box-shadow:inset 0 0 0 4px #fff;
 font-size:14px;
 padding:13px 14px;
 border-radius:12px;
-}
 }
 }
 
@@ -367,8 +366,10 @@ serial: index + 1
 };
 
 });
-  
-  }
+
+/* loadAll function close */
+}
+
 /* START QUIZ */
 function startQuiz(){
 
@@ -467,7 +468,7 @@ if(ok) score++;
 
 review += `
 <div class="card" style="border-left:6px solid ${ok ? '#28a745' : '#dc3545'};">
-<b>Q${i+1}. ${safe(q.question)}</b>
+<b>Q${q.serial}. ${safe(q.question)}</b>
 
 <div class="small" style="margin-top:10px;">
 Your Answer:
