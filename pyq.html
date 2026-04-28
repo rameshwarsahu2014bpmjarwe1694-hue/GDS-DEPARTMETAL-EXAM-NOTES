@@ -249,8 +249,8 @@ questions=[];
 current=0;
 answers=[];
 
-const category=val("category");
-const post=val("post");
+const category=val("pyqSelect");
+const post=val("postSelect");
 
 /* PDF */
 let pdfHtml="";
@@ -455,8 +455,8 @@ ${review}
 };
 
 /* EVENTS */
-document.getElementById("category").addEventListener("change",loadAll);
-document.getElementById("post").addEventListener("change",loadAll);
+document.getElementById("pyqSelect").addEventListener("change",loadAll);
+document.getElementById("postSelect").addEventListener("change",loadAll);
 document.getElementById("startBtn").addEventListener("click",startQuiz);
 
 loadAll();
