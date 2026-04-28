@@ -388,14 +388,19 @@ status("OCR Failed","red");
 }
 
 };
-/* BULK SAVE */
+/* =========================
+REPLACE ONLY bulkSave() FUNCTION
+VERSION 2 ULTRA SMART PARSER
+बाकी पूरी coding same रखो
+========================= */
+
 window.bulkSave = async function(){
 
 if(!auth.currentUser) return alert("Admin not logged in");
 
-const category=val("category");
-const post=val("post");
-const bulk=val("bulk");
+const category = val("category");
+const post = val("post");
+const bulk = val("bulk");
 
 if(!category || !post || !bulk){
 return alert("Select category/post and paste data");
@@ -403,54 +408,77 @@ return alert("Select category/post and paste data");
 
 try{
 
-let blocks = bulk.split(/\n\s*\n/);
+status("Ultra Bulk Saving...","blue");
+
+let text = bulk.replace(/\r/g," ").replace(/\t/g," ");
+text = text.replace(/\s+/g," ").trim();
+
+/* split by question number */
+let blocks = text.split(/(?=\d+\.\s)|(?=Q\d+\.\s)|(?=Question:\s*Q?\d+\.)/i);
 
 for(let block of blocks){
 
-let lines = block.split("\n").map(x=>x.trim()).filter(Boolean);
+block = block.trim();
+if(!block) continue;
 
-if(lines.length>=6){
-let q = lines[0]
-.replace(/^\d+\./,"")
-.replace(/^\d+\)/,"")
-.replace(/^\d+\-/,"")
-.replace(/^\s+/,"")
-.trim();
-let a=lines[1].replace(/^A\)/i,"").trim();
-let b=lines[2].replace(/^B\)/i,"").trim();
-let c=lines[3].replace(/^C\)/i,"").trim();
-let d=lines[4].replace(/^D\)/i,"").trim();
-let ans=lines[5].toUpperCase();
+/* question */
+let qMatch = block.match(/^(?:Question:\s*)?(?:Q?\d+\.)\s*(.*?)(?=\s+A[\)\.\:\-a-z])/i);
+if(!qMatch) continue;
 
-let answer=a;
-if(ans.includes("B")) answer=b;
-if(ans.includes("C")) answer=c;
-if(ans.includes("D")) answer=d;
+let q = qMatch[1].trim();
 
+/* options */
+let a = (block.match(/A[\)\.\:\-]\s*(.*?)(?=\s+B[\)\.\:\-])/i)||[])[1] || "";
+let b = (block.match(/B[\)\.\:\-]\s*(.*?)(?=\s+C[\)\.\:\-])/i)||[])[1] || "";
+let c = (block.match(/C[\)\.\:\-]\s*(.*?)(?=\s+D[\)\.\:\-])/i)||[])[1] || "";
+let d = (block.match(/D[\)\.\:\-]\s*(.*?)(?=\s+Answer|\s*$)/i)||[])[1] || "";
+
+/* lowercase fallback */
+if(!a) a = (block.match(/a[\)\.\:\-]\s*(.*?)(?=\s+b[\)\.\:\-])/i)||[])[1] || "";
+if(!b) b = (block.match(/b[\)\.\:\-]\s*(.*?)(?=\s+c[\)\.\:\-])/i)||[])[1] || "";
+if(!c) c = (block.match(/c[\)\.\:\-]\s*(.*?)(?=\s+d[\)\.\:\-])/i)||[])[1] || "";
+if(!d) d = (block.match(/d[\)\.\:\-]\s*(.*?)(?=\s+Answer|\s*$)/i)||[])[1] || "";
+
+/* answer */
+let ansMatch = block.match(/Answer\s*[:\-]?\s*([ABCD])/i);
+let ans = ansMatch ? ansMatch[1].toUpperCase() : "A";
+
+/* skip invalid */
+if(!q || !a || !b || !c || !d) continue;
+
+let answer = a;
+if(ans==="B") answer=b;
+if(ans==="C") answer=c;
+if(ans==="D") answer=d;
+
+/* save */
 await addDoc(collection(db,"pyqQuestions"),{
 category:esc(category),
 post:esc(post),
 question:esc(q),
-options:[esc(a),esc(b),esc(c),esc(d)],
-answer:esc(answer),
+options:[
+esc(a.trim()),
+esc(b.trim()),
+esc(c.trim()),
+esc(d.trim())
+],
+answer:esc(answer.trim()),
 createdAt:serverTimestamp()
 });
 
 }
 
-}
-
 document.getElementById("bulk").value="";
-status("Bulk Questions Saved");
+status("Ultra Bulk Questions Saved");
 loadAll();
 
 }catch(err){
-status("Bulk Save Failed","red");
 console.log(err);
+status("Bulk Save Failed","red");
 }
 
 };
-
+  
 /* LOAD ALL */
 async function loadAll(){
 
