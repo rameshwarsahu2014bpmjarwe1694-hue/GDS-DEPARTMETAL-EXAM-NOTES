@@ -178,7 +178,9 @@ color:#666;
 <option>Model Paper</option>
 <option>Practice Set</option>
 </select>
-
+<select id="circle">
+<option value="">Select Circle</option>
+</select>
 <!-- Post Category -->
 <select id="postSelect">
 <option value="" selected disabled>Select Post Category</option>
@@ -220,7 +222,35 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+window.updateCircles = async function () {
+
+const year = document.getElementById("pyqSelect").value;
+const circle = document.getElementById("circle");
+
+circle.innerHTML = `<option value="">Loading...</option>`;
+
+try {
+
+const snap = await getDoc(doc(db,"circles",year));
+
+circle.innerHTML = `<option value="">Select Circle</option>`;
+
+if(snap.exists()){
+const list = snap.data().list || [];
+
+list.forEach(c=>{
+circle.innerHTML += `<option value="${c}">${c}</option>`;
+});
+}
+
+} catch(e){
+console.log(e);
+circle.innerHTML = `<option value="">Error</option>`;
+}
+
+};
 let questions = [];
 let current = 0;
 let answers = [];
@@ -455,7 +485,10 @@ ${review}
 };
 
 /* EVENTS */
-document.getElementById("pyqSelect").addEventListener("change",loadAll);
+document.getElementById("pyqSelect").addEventListener("change",()=>{
+updateCircles();
+loadAll();
+});
 document.getElementById("postSelect").addEventListener("change",loadAll);
 document.getElementById("startBtn").addEventListener("click",startQuiz);
 
