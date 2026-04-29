@@ -204,7 +204,21 @@ document.getElementById("statusMsg").style.color=color;
 window.updateCircles = function () {
 return;
 };
+window.savePdf = async function () {
+status("Saving...", "blue");
 
+await addDoc(collection(db, "pdfs"), {
+title: document.getElementById("title").value,
+fileName: document.getElementById("fileName").value,
+desc: document.getElementById("desc").value,
+year: document.getElementById("category").value,
+circle: document.getElementById("circle").value,
+post: document.getElementById("post").value,
+time: serverTimestamp()
+});
+
+status("PDF Saved Successfully");
+};
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
