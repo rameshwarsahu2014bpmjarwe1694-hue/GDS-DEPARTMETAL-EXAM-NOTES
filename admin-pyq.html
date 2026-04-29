@@ -204,11 +204,11 @@ document.getElementById("statusMsg").style.color=color;
 window.updateCircles = function () {
 return;
 };
+window.updateCircles = function () {
+return;
+};
+
 window.savePdf = async function () {
-window.saveQuestion = async function(){...}
-window.bulkSave = async function(){...}
-window.loadAll = async function(){...}
-window.extractPdf = async function(){...}
 status("Saving...", "blue");
 
 await addDoc(collection(db, "pdfs"), {
@@ -222,6 +222,18 @@ time: serverTimestamp()
 });
 
 status("PDF Saved Successfully");
+};
+
+window.saveQuestion = async function () {
+};
+
+window.bulkSave = async function () {
+};
+
+window.loadAll = async function () {
+};
+
+window.extractPdf = async function () {
 };
 </script>
 
