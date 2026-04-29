@@ -205,30 +205,6 @@ window.updateCircles = function () {
 return;
 };
 
-const year = document.getElementById("category").value;
-const circle = document.getElementById("circle");
-
-circle.innerHTML = `<option value="">Loading...</option>`;
-
-try {
-
-const snap = await getDoc(doc(db,"circles",year));
-
-circle.innerHTML = `<option value="">Select Circle</option>`;
-
-if(snap.exists()){
-const list = snap.data().list || [];
-list.forEach(c=>{
-circle.innerHTML += `<option value="${c}">${c}</option>`;
-});
-}
-
-} catch(e){
-circle.innerHTML = `<option value="">Error</option>`;
-}
-
-};
-
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
