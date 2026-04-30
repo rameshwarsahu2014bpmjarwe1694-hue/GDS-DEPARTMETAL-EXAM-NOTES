@@ -270,37 +270,37 @@ let count = 0;
 
 for(const block of blocks){
 
-const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+const lines = block.split("\n").map(l => l.trim()).filter(l => l);
 
 if(lines.length < 5) continue;
 
 let q = lines[0];
 let a="", b="", c="", d="", ans="";
 
-for(let i=1;i<lines.length;i++){
+// STRICT CLEAN LOOP
+for(let l of lines.slice(1)){
 
-let l = lines[i];
-
-// OPTION DETECTION (STRONG FIX)
-if(/^A[\)\.\-:]?\s*/i.test(l)) a = l.replace(/^A[\)\.\-:]?\s*/i,"");
-else if(/^B[\)\.\-:]?\s*/i.test(l)) b = l.replace(/^B[\)\.\-:]?\s*/i,"");
-else if(/^C[\)\.\-:]?\s*/i.test(l)) c = l.replace(/^C[\)\.\-:]?\s*/i,"");
-else if(/^D[\)\.\-:]?\s*/i.test(l)) d = l.replace(/^D[\)\.\-:]?\s*/i,"");
-
-// ANSWER FIX
-else if(/answer/i.test(l)){
+// IGNORE ANSWER FROM OPTIONS MIX
+if(/^answer/i.test(l)){
 ans = l.replace(/answer\s*[:\-]?\s*/i,"").trim();
+continue;
 }
+
+// OPTIONS ONLY
+if(/^A[\)\.\-]?\s*/i.test(l)) a = l.replace(/^A[\)\.\-]?\s*/i,"").trim();
+else if(/^B[\)\.\-]?\s*/i.test(l)) b = l.replace(/^B[\)\.\-]?\s*/i,"").trim();
+else if(/^C[\)\.\-]?\s*/i.test(l)) c = l.replace(/^C[\)\.\-]?\s*/i,"").trim();
+else if(/^D[\)\.\-]?\s*/i.test(l)) d = l.replace(/^D[\)\.\-]?\s*/i,"").trim();
 
 }
 
-// if answer missing → skip
+// FINAL VALIDATION
 if(!q || !a || !b || !c || !d) continue;
 
 await addDoc(collection(db,"pyqQuestions"),{
 question: q,
 options: [a,b,c,d],
-answer: ans || "",
+answer: ans,
 category,
 circle,
 post,
