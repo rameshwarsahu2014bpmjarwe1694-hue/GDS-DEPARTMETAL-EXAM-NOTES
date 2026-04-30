@@ -415,8 +415,19 @@ window.loadAll = async function () {
 
 window.extractPdf = async function () {
 };
+    <script type="module">
+
+// ... सभी functions (savePdf, loadAll, bulkSave etc)
+
+// 🔥 यही सबसे last में add करो (THIS IS CORRECT PLACE)
+window.addEventListener("load", function () {
+loadAll();
+loadPdfs();
+});
+
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script
+src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </body>
 </html>
