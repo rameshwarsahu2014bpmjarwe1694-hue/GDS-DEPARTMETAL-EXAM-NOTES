@@ -1,7 +1,7 @@
 <!-- =========================
 FILE : pyq.html
-FINAL SAFE ADVANCED VERSION
-NO DATA LOSS + FIREBASE SAME
+ULTRA STRICT FINAL VERSION
+PDF + Quiz + Same Firebase Config
 ========================= -->
 <!DOCTYPE html>
 <html lang="en">
@@ -47,13 +47,12 @@ display:grid;
 gap:12px;
 }
 
-select,input{
+select{
 width:100%;
 padding:12px;
 border:1px solid #ccc;
 border-radius:8px;
 font-size:16px;
-margin-top:8px;
 }
 
 .card{
@@ -82,7 +81,10 @@ font-weight:bold;
 margin-top:10px;
 }
 
-a{background:#007bff;color:#fff;}
+a{
+background:#007bff;
+color:#fff;
+}
 
 .start-btn,.nav-btn,.submit-btn{
 margin-right:10px;
@@ -90,9 +92,20 @@ padding:10px 16px;
 border-radius:10px;
 }
 
-.start-btn{background:#28a745;color:#fff;}
-.nav-btn{background:#007bff;color:#fff;}
-.submit-btn{background:#dc3545;color:#fff;}
+.start-btn{
+background:#28a745;
+color:#fff;
+}
+
+.nav-btn{
+background:#007bff;
+color:#fff;
+}
+
+.submit-btn{
+background:#dc3545;
+color:#fff;
+}
 
 .option{
 display:flex;
@@ -109,17 +122,22 @@ border-radius:14px;
 font-size:15px;
 font-weight:600;
 cursor:pointer;
+transition:.18s;
 }
 
 .option::before{
 content:"";
-width:20px;height:20px;
+width:20px;
+height:20px;
 border:2px solid #9aa0a6;
 border-radius:50%;
 background:#fff;
 }
 
-.option:hover{border-color:#0d6efd;background:#f5f9ff;}
+.option:hover{
+border-color:#0d6efd;
+background:#f5f9ff;
+}
 
 .selected{
 background:#eaf3ff !important;
@@ -141,7 +159,6 @@ color:#666;
 }
 </style>
 </head>
-
 <body>
 
 <div class="container">
@@ -149,8 +166,6 @@ color:#666;
 <h1>Previous Year Questions</h1>
 
 <div class="grid">
-
-<!-- YEAR -->
 <select id="pyqSelect">
 <option value="" selected disabled>Select PYQ Year</option>
 <option>PYQ 2020</option>
@@ -164,28 +179,13 @@ color:#666;
 <option>Practice Set</option>
 </select>
 
-<!-- POST -->
+<!-- Post Category -->
 <select id="postSelect">
 <option value="" selected disabled>Select Post Category</option>
 <option>MTS</option>
 <option>POSTMAN</option>
 <option>PA-SA</option>
 </select>
-
-<!-- CIRCLE -->
-<select id="circle">
-<option value="all">All Circles</option>
-<option value="chhattisgarh">Chhattisgarh Circle</option>
-<option value="mp">MP Circle</option>
-<option value="jammu_kashmir">J & K Circle</option>
-<option value="bihar">Bihar Circle</option>
-<option value="rajasthan">Rajasthan Circle</option>
-<option value="jharkhand">Jharkhand Circle</option>
-</select>
-
-<!-- SEARCH -->
-<input type="text" id="searchInput" placeholder="Search Question / PDF...">
-
 </div>
 
 <h3>PDF Files</h3>
@@ -202,8 +202,12 @@ color:#666;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+getFirestore,
+collection,
+getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
@@ -217,55 +221,53 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* FILTER STATE */
-let searchText = "";
-let circleVal = "all";
+let questions = [];
+let current = 0;
+let answers = [];
 
-document.getElementById("searchInput").addEventListener("input",(e)=>{
-searchText = e.target.value.toLowerCase();
-loadAll();
-});
+function val(id){
+return document.getElementById(id).value.trim();
+}
 
-document.getElementById("circle").addEventListener("change",(e)=>{
-circleVal = e.target.value;
-loadAll();
-});
+function safe(v){
+return v || "";
+}
 
-let questions=[];
-let current=0;
-let answers=[];
+function esc(v){
+return String(v || "").replace(/'/g,"\\'");
+}
 
-function val(id){return document.getElementById(id).value || "";}
-function safe(v){return v||"";}
-
-/* LOAD ALL */
+/* LOAD DATA */
 async function loadAll(){
 
 document.getElementById("pdfBox").innerHTML="Loading...";
+document.getElementById("quizBox").style.display="none";
+document.getElementById("resultBox").style.display="none";
+document.getElementById("startBtn").style.display="inline-block";
+
 questions=[];
+current=0;
+answers=[];
 
 const category=val("pyqSelect");
 const post=val("postSelect");
 
 /* PDF */
 let pdfHtml="";
+
 const pdfSnap=await getDocs(collection(db,"pyqFiles"));
 
 pdfSnap.forEach(doc=>{
 const d=doc.data();
 
-if(d.category !== category.replace("PYQ ","")) return;
+if(d.category!==category) return;
 if(d.post!==post) return;
-if(circleVal!=="all" && d.circle!==circleVal) return;
-
-if(searchText &&
-!d.title?.toLowerCase().includes(searchText) &&
-!d.desc?.toLowerCase().includes(searchText)) return;
 
 pdfHtml+=`
 <div class="card">
 <b>${safe(d.title)}</b>
 <div class="small">${safe(d.desc)}</div>
+<div class="small">${safe(d.fileName)}</div>
 <a href="${safe(d.fileName)}" target="_blank">Open PDF</a>
 </div>
 `;
@@ -276,67 +278,180 @@ pdfHtml || "<div class='empty'>No PDF Found</div>";
 
 /* QUESTIONS */
 let temp=[];
+
 const qSnap=await getDocs(collection(db,"pyqQuestions"));
 
 qSnap.forEach(doc=>{
 const d=doc.data();
 
-if(d.category !== category.replace("PYQ ","")) return;
+if(d.category!==category) return;
 if(d.post!==post) return;
-if(circleVal!=="all" && d.circle!==circleVal) return;
-
-if(searchText &&
-!String(d.question).toLowerCase().includes(searchText)) return;
 
 temp.push(d);
 });
 
-questions=temp.map((q,i)=>({
-...q,
-serial:i+1
-}));
+questions=temp.sort((a,b)=>{
+const na=parseInt(String(a.question).match(/^\d+/)?.[0] || 9999);
+const nb=parseInt(String(b.question).match(/^\d+/)?.[0] || 9999);
+return na-nb;
+}).map((item,index)=>{
+
+let cleanQ=String(item.question || "")
+.replace(/^\d+[\).\-\s:]*/,"")
+.trim();
+
+return{
+...item,
+question:cleanQ,
+serial:index+1
+};
+
+});
 
 }
 
-/* QUIZ */
+/* START QUIZ */
 function startQuiz(){
-if(questions.length===0){alert("No Questions Found");return;}
+
+if(questions.length===0){
+alert("No Questions Found");
+return;
+}
+
 document.getElementById("startBtn").style.display="none";
+document.getElementById("resultBox").style.display="none";
 document.getElementById("quizBox").style.display="block";
+
 showQuestion();
 }
 
+/* SHOW QUESTION */
 function showQuestion(){
 
 const q=questions[current];
 
-let html=`<div class="card">
-<h3>Question ${q.serial}</h3>
-<p><b>${safe(q.question)}</b></p>`;
+let html=`
+<div class="card">
+<h3>Question ${q.serial} / ${questions.length}</h3>
+<p style="margin:15px 0;"><b>${safe(q.question)}</b></p>
+`;
 
 for(let i=0;i<4;i++){
+
 const op=safe(q.options?.[i]);
-const active=answers[current]===op?"selected":"";
+const active=answers[current]===op ? "selected":"";
+
 html+=`
-<button class="option ${active}" onclick="selectAns('${op}')">
+<button class="option ${active}" onclick="selectAns('${esc(op)}')">
 ${String.fromCharCode(65+i)}. ${op}
-</button>`;
+</button>
+`;
 }
 
-if(current>0) html+=`<button class="nav-btn" onclick="prevQ()">Prev</button>`;
-if(current<questions.length-1) html+=`<button class="nav-btn" onclick="nextQ()">Next</button>`;
+html+="<br>";
 
-html+=`<button class="submit-btn" onclick="submitQuiz()">Submit</button></div>`;
+if(current>0){
+html+=`<button class="nav-btn" onclick="prevQ()">Previous</button>`;
+}
+
+if(current<questions.length-1){
+html+=`<button class="nav-btn" onclick="nextQ()">Next</button>`;
+}
+  
+/* EVERY QUESTION PAGE */
+html += `<button class="submit-btn" onclick="submitQuiz()">Submit</button>`;
+
+html += "</div>";
+
+
+html+="</div>";
 
 document.getElementById("quizBox").innerHTML=html;
 }
 
-window.selectAns=(v)=>{answers[current]=v;showQuestion();};
-window.nextQ=()=>{current++;showQuestion();};
-window.prevQ=()=>{current--;showQuestion();};
+/* ACTIONS */
+window.selectAns=function(v){
+answers[current]=v;
+showQuestion();
+};
 
-window.submitQuiz=()=>{
-alert("Result system same as old code (unchanged)");
+window.nextQ=function(){
+if(current<questions.length-1){
+current++;
+showQuestion();
+}
+};
+
+window.prevQ=function(){
+if(current>0){
+current--;
+showQuestion();
+}
+};
+
+/* SUBMIT */
+window.submitQuiz=function(){
+
+let score=0;
+let attempted=0;
+let review="";
+
+for(let i=0;i<questions.length;i++){
+
+const q=questions[i];
+const user=answers[i] || "Not Answered";
+const ans=safe(q.answer);
+
+const ok=user===ans;
+
+if(user!=="Not Answered") attempted++;
+if(ok) score++;
+
+review+=`
+<div class="card" style="border-left:6px solid ${ok ? '#28a745':'#dc3545'};">
+<b>Q${q.serial}. ${safe(q.question)}</b>
+
+<div class="small">
+Your Answer:
+<span style="color:${ok ? 'green':'red'};font-weight:bold;">
+${user}
+</span>
+</div>
+
+<div class="small">
+Correct Answer:
+<span style="color:green;font-weight:bold;">
+${ans}
+</span>
+</div>
+
+<div class="small" style="font-weight:bold;color:${ok ? 'green':'red'};">
+${ok ? '✔ Correct':'✘ Wrong'}
+</div>
+</div>
+`;
+}
+
+document.getElementById("quizBox").style.display="none";
+document.getElementById("resultBox").style.display="block";
+
+document.getElementById("resultBox").innerHTML=`
+<div class="card" style="text-align:center;">
+<h2>Quiz Result</h2>
+
+<p><b>Total Questions:</b> ${questions.length}</p>
+<p><b>Attempted:</b> ${attempted}</p>
+<p><b>Correct:</b> ${score}</p>
+<p><b>Wrong:</b> ${attempted-score}</p>
+<p><b>Score:</b> ${score}/${questions.length}</p>
+
+<button class="start-btn" onclick="location.reload()">
+Restart Quiz
+</button>
+</div>
+
+${review}
+`;
 };
 
 /* EVENTS */
