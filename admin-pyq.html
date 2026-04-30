@@ -222,8 +222,50 @@ time: serverTimestamp()
 });
 
 status("PDF Saved Successfully");
+
+loadPdfs();
 };
 
+window.deletePdf = async function(id){
+
+if(!confirm("Delete this PDF?")) return;
+
+await deleteDoc(doc(db,"pyqFiles",id));
+
+alert("Deleted Successfully");
+
+loadPdfs();
+};
+
+window.loadPdfs = async function () {
+
+const snap = await getDocs(collection(db,"pyqFiles"));
+
+let html = "";
+
+snap.forEach(docSnap => {
+let d = docSnap.data();
+
+html += `
+<div class="card">
+<div><b>${d.title}</b></div>
+<div class="small">${d.desc || ""}</div>
+<div class="small">${d.fileName || ""}</div>
+
+<button class="delete-btn" onclick="deletePdf('${docSnap.id}')">
+Delete
+</button>
+
+</div>
+`;
+});
+
+document.getElementById("pdfList").innerHTML = html;
+};
+
+// =====================
+// SAVE QUESTION
+// =====================
 window.saveQuestion = async function () {
 
 const q = document.getElementById("question").value.trim();
@@ -245,14 +287,67 @@ await addDoc(collection(db,"pyqQuestions"),{
 question: q,
 options: [a,b,c,d],
 answer: ans,
-category: category,
-circle: circle,
-post: post,
+category,
+circle,
+post,
 time: serverTimestamp()
 });
 
 status("Question Saved ✅");
+};
 
+
+// =====================
+// LOAD ALL QUESTIONS
+// =====================
+window.loadAll = async function () {
+
+const qSnap = await getDocs(collection(db,"pyqQuestions"));
+
+let html = "";
+
+qSnap.forEach(docSnap => {
+let d = docSnap.data();
+
+html += `
+<div class="card">
+
+<div><b>${d.question}</b></div>
+
+<div class="small">
+A. ${d.options?.[0] || ""}<br>
+B. ${d.options?.[1] || ""}<br>
+C. ${d.options?.[2] || ""}<br>
+D. ${d.options?.[3] || ""}
+</div>
+
+<div class="small">Answer: ${d.answer || ""}</div>
+
+<button class="delete-btn" onclick="deleteQuestion('${docSnap.id}')">
+Delete
+</button>
+
+</div>
+`;
+});
+
+document.getElementById("questionList").innerHTML = html;
+
+};
+
+
+// =====================
+// DELETE QUESTION (FIXED)
+// =====================
+window.deleteQuestion = async function(id){
+
+if(!confirm("Delete this question?")) return;
+
+await deleteDoc(doc(db,"pyqQuestions",id));
+
+alert("Deleted Successfully");
+
+loadAll();
 };
 
 window.bulkSave = async function () {
@@ -270,27 +365,27 @@ let count = 0;
 
 for(const block of blocks){
 
-const lines = block.split("\n").filter(l => l.trim());
+const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
 
 if(lines.length < 5) continue;
 
-let q = lines[0].trim();
+let q = lines[0];
 let a="", b="", c="", d="", ans="";
 
 for(let i=1;i<lines.length;i++){
-let l = lines[i].trim();
+let l = lines[i];
 
-// ANSWER STRICT SEPARATION
-if(l.toLowerCase().startsWith("answer")){
+// ANSWER
+if(/^answer/i.test(l)){
 ans = l.split(":")[1]?.trim() || "";
 continue;
 }
 
-// OPTIONS CLEAN
-if(l.startsWith("A")) a = l.replace("A","").replace(/[\)\.\-:]*/,"").trim();
-else if(l.startsWith("B")) b = l.replace("B","").replace(/[\)\.\-:]*/,"").trim();
-else if(l.startsWith("C")) c = l.replace("C","").replace(/[\)\.\-:]*/,"").trim();
-else if(l.startsWith("D")) d = l.replace("D","").replace(/[\)\.\-:]*/,"").trim();
+// OPTIONS FIXED CLEAN
+if(/^A[\)\.\-:]?/i.test(l)) a = l.replace(/^A[\)\.\-:]?/i,"").trim();
+else if(/^B[\)\.\-:]?/i.test(l)) b = l.replace(/^B[\)\.\-:]?/i,"").trim();
+else if(/^C[\)\.\-:]?/i.test(l)) c = l.replace(/^C[\)\.\-:]?/i,"").trim();
+else if(/^D[\)\.\-:]?/i.test(l)) d = l.replace(/^D[\)\.\-:]?/i,"").trim();
 }
 
 if(!q || !a || !b || !c || !d) continue;
@@ -310,7 +405,10 @@ count++;
 
 alert(count + " Questions Uploaded");
 status(count + " Questions Saved");
+
+loadAll();
 };
+
 
 window.loadAll = async function () {
 };
