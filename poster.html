@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MCQ Poster Generator</title>
+
+<style>
+body{
+  font-family: Arial;
+  background:#f2f2f2;
+}
+
+.poster{
+  width: 900px;
+  margin: 20px auto;
+  background: white;
+  border: 5px solid #0b2a5b;
+  padding: 20px;
+}
+
+.header{
+  text-align:center;
+  font-size:28px;
+  font-weight:bold;
+  color:#0b2a5b;
+}
+
+.sub{
+  text-align:center;
+  color:#b30000;
+  font-size:20px;
+  margin-bottom:10px;
+}
+
+.qbox{
+  border:1px solid #ccc;
+  margin:10px 0;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.q{
+  width:70%;
+}
+
+.answer{
+  width:25%;
+  background:#e8f5e9;
+  padding:10px;
+  font-weight:bold;
+  color:green;
+}
+
+input{
+  width:100%;
+  padding:5px;
+  margin-top:5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="poster">
+
+  <div class="header">Rameshwar Sahu GDS Exam Study Hub</div>
+  <div class="sub">TOP QUESTIONS - AUTO ANSWER SYSTEM</div>
+
+  <div id="container"></div>
+
+  <button onclick="addQuestion()">Add Question</button>
+
+</div>
+
+<script>
+
+function addQuestion(){
+  const div = document.createElement("div");
+  div.className = "qbox";
+
+  div.innerHTML = `
+    <div class="q">
+      <input placeholder="Enter Question (e.g. 2+3*5)" oninput="calc(this)">
+      <small>Type expression like: 500/10*2 or (5+3)*2</small>
+    </div>
+    <div class="answer">Answer: <span>0</span></div>
+  `;
+
+  document.getElementById("container").appendChild(div);
+}
+
+function calc(el){
+  let parent = el.parentElement.parentElement;
+  let ansBox = parent.querySelector(".answer span");
+
+  try{
+    let result = eval(el.value);
+    ansBox.innerText = result;
+  }catch(e){
+    ansBox.innerText = "Error";
+  }
+}
+
+// default 5 questions
+for(let i=0;i<5;i++) addQuestion();
+
+</script>
+
+</body>
+</html>
