@@ -264,27 +264,41 @@ const category = document.getElementById("category").value;
 const circle = document.getElementById("circle").value;
 const post = document.getElementById("post").value;
 
-const blocks = text.split("\n\n"); // each question block
+const blocks = text.split(/\n\s*\n/);
 
 let count = 0;
 
 for(const block of blocks){
 
-const lines = block.split("\n");
+const lines = block
+.split("\n")
+.map(l => l.trim())
+.filter(l => l.length > 0);
 
-let q="", a="", b="", c="", d="", ans="";
+if(lines.length < 5) continue;
 
-lines.forEach(l=>{
-l = l.trim();
+let q = "";
+let a = "", b = "", c = "", d = "", ans = "";
 
-if(!q) q = l;
-else if(l.startsWith("A")) a = l.replace(/^A[\)\.\-:]?\s*/,"");
-else if(l.startsWith("B")) b = l.replace(/^B[\)\.\-:]?\s*/,"");
-else if(l.startsWith("C")) c = l.replace(/^C[\)\.\-:]?\s*/,"");
-else if(l.startsWith("D")) d = l.replace(/^D[\)\.\-:]?\s*/,"");
-else if(l.toLowerCase().startsWith("answer")) ans = l.split(":")[1]?.trim();
+for(let l of lines){
 
-});
+if(!q && !l.startsWith("A") && !l.startsWith("B") &&
+!l.startsWith("C") && !l.startsWith("D") &&
+!l.toLowerCase().includes("answer")){
+q = l;
+continue;
+}
+
+if(/^A[\)\.\-:]*/i.test(l)) a = l.replace(/^A[\)\.\-:]*/i,"").trim();
+else if(/^B[\)\.\-:]*/i.test(l)) b = l.replace(/^B[\)\.\-:]*/i,"").trim();
+else if(/^C[\)\.\-:]*/i.test(l)) c = l.replace(/^C[\)\.\-:]*/i,"").trim();
+else if(/^D[\)\.\-:]*/i.test(l)) d = l.replace(/^D[\)\.\-:]*/i,"").trim();
+
+else if(/answer/i.test(l)){
+ans = l.split(/[:\-]/)[1]?.trim();
+}
+
+}
 
 if(!q || !a || !b || !c || !d || !ans) continue;
 
@@ -292,17 +306,17 @@ await addDoc(collection(db,"pyqQuestions"),{
 question: q,
 options: [a,b,c,d],
 answer: ans,
-category: category,
-circle: circle,
-post: post,
+category,
+circle,
+post,
 time: serverTimestamp()
 });
 
 count++;
-
 }
 
 alert(count + " Questions Uploaded");
+status(count + " Questions Saved ✅");
 };
 
 window.loadAll = async function () {
