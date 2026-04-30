@@ -270,42 +270,37 @@ let count = 0;
 
 for(const block of blocks){
 
-const lines = block
-.split("\n")
-.map(l => l.trim())
-.filter(l => l.length > 0);
+const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
 
 if(lines.length < 5) continue;
 
-let q = "";
-let a = "", b = "", c = "", d = "", ans = "";
+let q = lines[0];
+let a="", b="", c="", d="", ans="";
 
-for(let l of lines){
+for(let i=1;i<lines.length;i++){
 
-if(!q && !l.startsWith("A") && !l.startsWith("B") &&
-!l.startsWith("C") && !l.startsWith("D") &&
-!l.toLowerCase().includes("answer")){
-q = l;
-continue;
-}
+let l = lines[i];
 
-if(/^A[\)\.\-:]*/i.test(l)) a = l.replace(/^A[\)\.\-:]*/i,"").trim();
-else if(/^B[\)\.\-:]*/i.test(l)) b = l.replace(/^B[\)\.\-:]*/i,"").trim();
-else if(/^C[\)\.\-:]*/i.test(l)) c = l.replace(/^C[\)\.\-:]*/i,"").trim();
-else if(/^D[\)\.\-:]*/i.test(l)) d = l.replace(/^D[\)\.\-:]*/i,"").trim();
+// OPTION DETECTION (STRONG FIX)
+if(/^A[\)\.\-:]?\s*/i.test(l)) a = l.replace(/^A[\)\.\-:]?\s*/i,"");
+else if(/^B[\)\.\-:]?\s*/i.test(l)) b = l.replace(/^B[\)\.\-:]?\s*/i,"");
+else if(/^C[\)\.\-:]?\s*/i.test(l)) c = l.replace(/^C[\)\.\-:]?\s*/i,"");
+else if(/^D[\)\.\-:]?\s*/i.test(l)) d = l.replace(/^D[\)\.\-:]?\s*/i,"");
 
+// ANSWER FIX
 else if(/answer/i.test(l)){
-ans = l.split(/[:\-]/)[1]?.trim();
+ans = l.replace(/answer\s*[:\-]?\s*/i,"").trim();
 }
 
 }
 
-if(!q || !a || !b || !c || !d || !ans) continue;
+// if answer missing → skip
+if(!q || !a || !b || !c || !d) continue;
 
 await addDoc(collection(db,"pyqQuestions"),{
 question: q,
 options: [a,b,c,d],
-answer: ans,
+answer: ans || "",
 category,
 circle,
 post,
@@ -316,7 +311,7 @@ count++;
 }
 
 alert(count + " Questions Uploaded");
-status(count + " Questions Saved ✅");
+status(count + " Questions Saved");
 };
 
 window.loadAll = async function () {
