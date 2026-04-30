@@ -225,9 +225,84 @@ status("PDF Saved Successfully");
 };
 
 window.saveQuestion = async function () {
+
+const q = document.getElementById("question").value.trim();
+const a = document.getElementById("a").value.trim();
+const b = document.getElementById("b").value.trim();
+const c = document.getElementById("c").value.trim();
+const d = document.getElementById("d").value.trim();
+const ans = document.getElementById("ans").value;
+
+const category = document.getElementById("category").value;
+const circle = document.getElementById("circle").value;
+const post = document.getElementById("post").value;
+
+if(!q || !a || !b || !c || !d || !ans){
+return alert("Fill all fields");
+}
+
+await addDoc(collection(db,"pyqQuestions"),{
+question: q,
+options: [a,b,c,d],
+answer: ans,
+category: category,
+circle: circle,
+post: post,
+time: serverTimestamp()
+});
+
+status("Question Saved ✅");
+
 };
 
 window.bulkSave = async function () {
+
+const text = document.getElementById("bulk").value.trim();
+if(!text) return alert("Paste questions first");
+
+const category = document.getElementById("category").value;
+const circle = document.getElementById("circle").value;
+const post = document.getElementById("post").value;
+
+const blocks = text.split("\n\n"); // each question block
+
+let count = 0;
+
+for(const block of blocks){
+
+const lines = block.split("\n");
+
+let q="", a="", b="", c="", d="", ans="";
+
+lines.forEach(l=>{
+l = l.trim();
+
+if(!q) q = l;
+else if(l.startsWith("A")) a = l.replace(/^A[\)\.\-:]?\s*/,"");
+else if(l.startsWith("B")) b = l.replace(/^B[\)\.\-:]?\s*/,"");
+else if(l.startsWith("C")) c = l.replace(/^C[\)\.\-:]?\s*/,"");
+else if(l.startsWith("D")) d = l.replace(/^D[\)\.\-:]?\s*/,"");
+else if(l.toLowerCase().startsWith("answer")) ans = l.split(":")[1]?.trim();
+
+});
+
+if(!q || !a || !b || !c || !d || !ans) continue;
+
+await addDoc(collection(db,"pyqQuestions"),{
+question: q,
+options: [a,b,c,d],
+answer: ans,
+category: category,
+circle: circle,
+post: post,
+time: serverTimestamp()
+});
+
+count++;
+
+}
+
+alert(count + " Questions Uploaded");
 };
 
 window.loadAll = async function () {
