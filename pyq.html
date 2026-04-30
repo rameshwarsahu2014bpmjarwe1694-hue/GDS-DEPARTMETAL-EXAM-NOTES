@@ -254,7 +254,7 @@ const pdfSnap=await getDocs(collection(db,"pyqFiles"));
 pdfSnap.forEach(doc=>{
 const d=doc.data();
 
-if(d.category!==category) return;
+if(d.category !== category.replace("PYQ ","")) return;
 if(d.post!==post) return;
 if(circleVal!=="all" && d.circle!==circleVal) return;
 
@@ -281,7 +281,7 @@ const qSnap=await getDocs(collection(db,"pyqQuestions"));
 qSnap.forEach(doc=>{
 const d=doc.data();
 
-if(d.category!==category) return;
+if(d.category !== category.replace("PYQ ","")) return;
 if(d.post!==post) return;
 if(circleVal!=="all" && d.circle!==circleVal) return;
 
