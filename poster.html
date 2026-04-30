@@ -1,109 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>MCQ Poster Generator</title>
+<title>Exam Poster System</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 body{
   font-family: Arial;
-  background:#f2f2f2;
+  background:#f1f1f1;
+  text-align:center;
 }
 
-.poster{
-  width: 900px;
-  margin: 20px auto;
-  background: white;
-  border: 5px solid #0b2a5b;
-  padding: 20px;
+.container{
+  padding:15px;
+}
+
+input{
+  width:40%;
+  padding:10px;
+  margin:5px;
+}
+
+button{
+  padding:10px 15px;
+  margin:5px;
+  cursor:pointer;
+}
+
+#poster{
+  width:800px;
+  margin:20px auto;
+  background:white;
+  padding:20px;
+  text-align:left;
+  box-shadow:0px 0px 10px gray;
 }
 
 .header{
   text-align:center;
-  font-size:28px;
+  font-size:22px;
   font-weight:bold;
-  color:#0b2a5b;
-}
-
-.sub{
-  text-align:center;
-  color:#b30000;
-  font-size:20px;
   margin-bottom:10px;
+  color:#2c3e50;
 }
 
 .qbox{
-  border:1px solid #ccc;
-  margin:10px 0;
-  padding:10px;
-  display:flex;
-  justify-content:space-between;
+  border-bottom:1px solid #ddd;
+  padding:10px 0;
 }
 
 .q{
-  width:70%;
-}
-
-.answer{
-  width:25%;
-  background:#e8f5e9;
-  padding:10px;
   font-weight:bold;
-  color:green;
 }
 
-input{
-  width:100%;
-  padding:5px;
+.a{
+  color:green;
   margin-top:5px;
+}
+
+.page-break{
+  page-break-after: always;
 }
 </style>
 </head>
 
 <body>
 
-<div class="poster">
+<div class="container">
 
-  <div class="header">Rameshwar Sahu GDS Exam Study Hub</div>
-  <div class="sub">TOP QUESTIONS - AUTO ANSWER SYSTEM</div>
+<h2>📘 Exam Poster Generator (Pro Version)</h2>
 
-  <div id="container"></div>
+<input id="question" placeholder="Enter Question">
+<input id="answer" placeholder="Enter Answer">
 
-  <button onclick="addQuestion()">Add Question</button>
+<br>
 
+<button onclick="addQA()">➕ Add Question</button>
+<button onclick="downloadPDF()">📄 Download PDF</button>
+
+</div>
+
+<div id="poster">
+  <div class="header">Rameshwar Sahu GDS Study Hub</div>
+  <div id="content"></div>
 </div>
 
 <script>
 
-function addQuestion(){
-  const div = document.createElement("div");
-  div.className = "qbox";
+let count = 0;
+let pageLimit = 8; // per page questions
+
+function addQA(){
+
+  let q = document.getElementById("question").value;
+  let a = document.getElementById("answer").value;
+
+  if(q=="" || a==""){
+    alert("Fill both fields");
+    return;
+  }
+
+  count++;
+
+  let page = Math.ceil(count / pageLimit);
+  let div = document.createElement("div");
+
+  if(count % pageLimit == 1 && count > 1){
+    div.classList.add("page-break");
+  }
+
+  div.classList.add("qbox");
 
   div.innerHTML = `
-    <div class="q">
-      <input placeholder="Enter Question (e.g. 2+3*5)" oninput="calc(this)">
-      <small>Type expression like: 500/10*2 or (5+3)*2</small>
-    </div>
-    <div class="answer">Answer: <span>0</span></div>
+    <div class="q">Q${count}. ${q}</div>
+    <div class="a">Ans: ${a}</div>
   `;
 
-  document.getElementById("container").appendChild(div);
+  document.getElementById("content").appendChild(div);
+
+  document.getElementById("question").value="";
+  document.getElementById("answer").value="";
 }
 
-function calc(el){
-  let parent = el.parentElement.parentElement;
-  let ansBox = parent.querySelector(".answer span");
+function downloadPDF(){
 
-  try{
-    let result = eval(el.value);
-    ansBox.innerText = result;
-  }catch(e){
-    ansBox.innerText = "Error";
-  }
+  const { jsPDF } = window.jspdf;
+
+  html2canvas(document.getElementById("poster"),{
+    scale:2
+  }).then(canvas => {
+
+    let imgData = canvas.toDataURL("image/png");
+
+    let pdf = new jsPDF("p","mm","a4");
+
+    let pageWidth = 210;
+    let pageHeight = 297;
+
+    let imgHeight = canvas.height * pageWidth / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while(heightLeft > 0){
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, pageWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save("exam-poster.pdf");
+
+  });
+
 }
-
-// default 5 questions
-for(let i=0;i<5;i++) addQuestion();
 
 </script>
 
