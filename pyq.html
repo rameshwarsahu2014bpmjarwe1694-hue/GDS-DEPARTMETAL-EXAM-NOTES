@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>PYQ Section</title>
+    <title>PYQ Section - Study Hub</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif; }
         body { background:#f4f6f9; padding:15px; }
         .container { max-width:900px; margin:auto; background:#fff; padding:20px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,.1); }
         h1 { text-align:center; margin-bottom:20px; color: #333; }
         .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 20px; }
-        select { width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; font-size:16px; background: #fff; }
-        .card { background:#fafafa; border:1px solid #ddd; border-radius:10px; padding:15px; margin-bottom:12px; }
-        .btn { display:inline-block; padding:10px 15px; border-radius:8px; text-decoration:none; font-weight:bold; cursor:pointer; border:none; margin-top:10px; }
-        .btn-blue { background:#007bff; color:#fff; }
+        select { width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; font-size:16px; background: #fff; outline: none; }
+        .card { background:#fafafa; border:1px solid #ddd; border-radius:10px; padding:15px; margin-bottom:12px; transition: 0.3s; }
+        .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .btn { display:inline-block; padding:10px 15px; border-radius:8px; text-decoration:none; font-weight:bold; cursor:pointer; border:none; margin-top:10px; text-align: center; }
+        .btn-blue { background:#007bff; color:#fff; width: 100%; }
         .btn-green { background:#28a745; color:#fff; width: 100%; font-size: 18px; }
-        .option { display:block; width:100%; text-align:left; padding:12px; margin:8px 0; border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; }
-        .selected { border-color:#007bff; background:#e7f3ff; }
+        .option { display:block; width:100%; text-align:left; padding:12px; margin:8px 0; border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-weight: bold; }
+        .selected { border-color:#007bff; background:#e7f3ff; color: #007bff; }
         .loading { text-align:center; padding:20px; font-weight:bold; color:#007bff; }
         .empty { text-align:center; padding:20px; color:#666; border:1px dashed #ccc; border-radius:10px; }
     </style>
@@ -24,28 +25,28 @@
 <body>
 
 <div class="container">
-    <h1>Previous Year Questions</h1>
+    <h1>📚 Previous Year Questions</h1>
 
     <div class="grid">
         <select id="pyqSelect">
-            <option value="" selected disabled>Select Year</option>
+            <option value="" selected disabled>वर्ष चुनें (Select Year)</option>
             <option>PYQ 2020</option><option>PYQ 2021</option><option>PYQ 2022</option>
             <option>PYQ 2023</option><option>PYQ 2024</option><option>PYQ 2025</option>
             <option>Model Paper</option><option>Practice Set</option>
         </select>
 
         <select id="postSelect">
-            <option value="" selected disabled>Select Post</option>
+            <option value="" selected disabled>पोस्ट चुनें (Select Post)</option>
             <option>MTS</option><option>POSTMAN</option><option>PA-SA</option>
         </select>
     </div>
 
-    <h3>📄 PDF Files</h3>
-    <div id="pdfBox"><div class="empty">Please select Year and Post</div></div>
+    <h3>📄 उपलब्ध PDF फाइल्स</h3>
+    <div id="pdfBox"><div class="empty">कृपया साल और पोस्ट चुनें...</div></div>
 
-    <hr style="margin:20px 0;">
+    <hr style="margin:25px 0;">
 
-    <h3>📝 Online Quiz</h3>
+    <h3>📝 ऑनलाइन क्विज़ (Quiz)</h3>
     <button class="btn btn-green" id="startBtn" onclick="startQuiz()">Start Quiz</button>
 
     <div id="quizBox" style="display:none;"></div>
@@ -53,23 +54,12 @@
 </div>
 
 <script type="module">
+    // Firebase Libraries (Fixed Links)
     import { initializeApp } from "https://gstatic.com";
     import { getFirestore, collection, getDocs } from "https://gstatic.com";
+    import { getAuth, onAuthStateChanged } from "https://gstatic.com";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-        authDomain: "://firebaseapp.com",
-        projectId: "gds-departmental-exam-studyhub",
-        storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
-        appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
-    };
-
-<script type="module">
-    // 1. सही Firebase Links (इन्हें ठीक कर दिया गया है)
-    import { initializeApp } from "https://gstatic.com";
-    import { getFirestore, collection, getDocs } from "https://gstatic.com";
-
-    // 2. सही Config (Storage की ज़रूरत नहीं है, सिर्फ Firestore चलेगा)
+    // Firebase Config (Fixed authDomain)
     const firebaseConfig = {
         apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
         authDomain: "://firebaseapp.com",
@@ -80,24 +70,35 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
     let questions = [];
     let currentIdx = 0;
     let answers = [];
 
-    // डेटा लोड करने का फंक्शन
+    // लॉगिन चेक: इसके बिना रूल्स डेटा ब्लॉक कर देंगे
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            alert("कृपया पहले लॉगिन करें!");
+            window.location.href = "login.html";
+        } else {
+            console.log("लॉगिन यूजर:", user.email);
+        }
+    });
+
+    // डेटा लोड करने का मुख्य फंक्शन
     async function loadData() {
         const year = document.getElementById("pyqSelect").value;
         const post = document.getElementById("postSelect").value;
         if(!year || !post) return;
 
-        document.getElementById("pdfBox").innerHTML = "<div class='loading'>Firestore से डेटा ला रहे हैं...</div>";
+        document.getElementById("pdfBox").innerHTML = "<div class='loading'>डेटा लोड हो रहा है...</div>";
         document.getElementById("quizBox").style.display = "none";
         document.getElementById("resultBox").style.display = "none";
         document.getElementById("startBtn").style.display = "block";
 
         try {
-            // Firestore के 'pyqFiles' कलेक्शन से PDF लिंक्स लाना
+            // PDF Files लाना
             const pdfSnap = await getDocs(collection(db, "pyqFiles"));
             let pdfHtml = "";
             pdfSnap.forEach(doc => {
@@ -106,14 +107,14 @@
                     pdfHtml += `
                         <div class="card">
                             <b>${d.title}</b>
-                            <p style="font-size:14px;color:#666;">${d.desc || ''}</p>
-                            <a href="${d.fileName}" class="btn btn-blue" target="_blank">Open PDF Link</a>
+                            <p style="font-size:14px;color:#666;margin:5px 0;">${d.desc || ''}</p>
+                            <a href="${d.fileName}" class="btn btn-blue" target="_blank">📥 Open PDF</a>
                         </div>`;
                 }
             });
-            document.getElementById("pdfBox").innerHTML = pdfHtml || "<div class='empty'>इस विषय के लिए कोई PDF लिंक नहीं मिला।</div>";
+            document.getElementById("pdfBox").innerHTML = pdfHtml || "<div class='empty'>No PDF Found.</div>";
 
-            // 'pyqQuestions' कलेक्शन से सवाल लाना
+            // Questions लाना
             const qSnap = await getDocs(collection(db, "pyqQuestions"));
             questions = [];
             qSnap.forEach(doc => {
@@ -126,15 +127,15 @@
 
         } catch (error) {
             console.error("Firestore Error:", error);
-            document.getElementById("pdfBox").innerHTML = "<div class='empty' style='color:red;'>Firestore से संपर्क नहीं हो पाया!</div>";
+            document.getElementById("pdfBox").innerHTML = "<div class='empty' style='color:red;'>सर्वर से डेटा नहीं मिल सका।</div>";
         }
     }
 
-    // Dropdown change events
+    // इवेंट लिसनर्स
     document.getElementById("pyqSelect").onchange = loadData;
     document.getElementById("postSelect").onchange = loadData;
 
-    // Quiz Functions
+    // Quiz Logics
     window.startQuiz = function() {
         if(questions.length === 0) return alert("इस कैटेगरी में सवाल उपलब्ध नहीं हैं।");
         currentIdx = 0;
@@ -157,10 +158,10 @@
                     </button>
                 `).join('')}
                 <div style="margin-top:20px;">
-                    ${currentIdx > 0 ? '<button class="btn btn-blue" onclick="prevQ()">Previous</button>' : ''}
+                    ${currentIdx > 0 ? '<button class="btn btn-blue" style="width:auto;padding:10px 20px;" onclick="prevQ()">Pervious</button>' : ''}
                     ${currentIdx < questions.length - 1 ? 
-                        '<button class="btn btn-blue" style="margin-left:10px;" onclick="nextQ()">Next</button>' : 
-                        '<button class="btn btn-green" style="width:auto;padding:10px 25px;float:right;" onclick="submitQuiz()">Submit Test</button>'}
+                        '<button class="btn btn-blue" style="width:auto;padding:10px 20px;margin-left:10px;" onclick="nextQ()">Next</button>' : 
+                        '<button class="btn btn-green" style="width:auto;padding:10px 25px;float:right;" onclick="submitQuiz()">Submit</button>'}
                 </div>
             </div>`;
         document.getElementById("quizBox").innerHTML = html;
@@ -177,22 +178,21 @@
             const isCorrect = answers[i] === q.answer;
             if(isCorrect) score++;
             reviewHtml += `
-                <div class="card" style="border-left:5px solid ${isCorrect ? 'green' : 'red'}">
+                <div class="card" style="border-left:5px solid ${isCorrect ? '#28a745' : '#dc3545'}">
                     <p><b>Q${i+1}. ${q.question}</b></p>
-                    <p style="color:${isCorrect ? 'green' : 'red'}">आपका जवाब: ${answers[i] || 'नहीं दिया'}</p>
-                    <p style="color:green">सही जवाब: ${q.answer}</p>
+                    <p style="font-size:14px;color:${isCorrect ? 'green' : 'red'}">आपका जवाब: ${answers[i] || 'नहीं दिया'}</p>
+                    <p style="font-size:14px;color:green">सही जवाब: ${q.answer}</p>
                 </div>`;
         });
         document.getElementById("quizBox").style.display = "none";
         document.getElementById("resultBox").style.display = "block";
         document.getElementById("resultBox").innerHTML = `
             <div class="card" style="text-align:center; background:#e7f3ff;">
-                <h2>स्कोर: ${score} / ${questions.length}</h2>
-                <button class="btn btn-blue" onclick="location.reload()">Back</button>
+                <h2>कुल स्कोर: ${score} / ${questions.length}</h2>
+                <button class="btn btn-blue" onclick="location.reload()" style="max-width:200px;">Back</button>
             </div> ${reviewHtml}`;
     }
 </script>
-
 
 </body>
 </html>
