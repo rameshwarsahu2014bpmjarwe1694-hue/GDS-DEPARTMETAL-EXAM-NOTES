@@ -3,468 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Mock Test Final</title>
+<title>Mock Test Pro</title>
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-body{
-background:#f5f7fa;
-padding:15px;
-}
-
-.top{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px;
-margin-bottom:15px;
-}
-
-.btn{
-border:none;
-padding:10px 14px;
-border-radius:8px;
-font-weight:bold;
-cursor:pointer;
-color:#fff;
-}
-
-.back{background:#111;}
-.timer{background:#dc3545;}
-
-.wrap{
-max-width:900px;
-margin:auto;
-background:#fff;
-padding:20px;
-border-radius:14px;
-box-shadow:0 4px 12px rgba(0,0,0,.08);
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:12px;
-}
-
-@media(min-width:700px){
-.grid{
-grid-template-columns:repeat(3,1fr);
-}
-}
-
-.card{
-background:#fff;
-padding:16px;
-border-radius:14px;
-text-align:center;
-font-weight:bold;
-cursor:pointer;
-box-shadow:0 4px 10px rgba(0,0,0,.08);
-transition:.25s;
-}
-
-.card:hover{
-transform:translateY(-3px);
-}
-
-.hide{display:none;}
-
-.loader{
-text-align:center;
-padding:20px;
-font-weight:bold;
-color:#007bff;
-}
-
-.err{
-background:#ffe8e8;
-color:#c00000;
-padding:12px;
-border-radius:10px;
-margin-top:12px;
-font-weight:bold;
-}
-
-.ok{
-background:#e8fff0;
-color:green;
-padding:12px;
-border-radius:10px;
-margin-top:12px;
-font-weight:bold;
-}
-
-.q{
-font-size:19px;
-font-weight:bold;
-margin-bottom:15px;
-line-height:1.5;
-}
-
-.opt{
-display:block;
-padding:12px;
-margin:10px 0;
-border:1px solid #ddd;
-border-radius:10px;
-cursor:pointer;
-}
-
-.opt:hover{
-background:#f0f7ff;
-}
-
-.correct{
-background:#d4edda !important;
-border-color:green !important;
-}
-
-.wrong{
-background:#f8d7da !important;
-border-color:red !important;
-}
-
-.nav{
-display:flex;
-gap:10px;
-margin-top:15px;
-}
-
-.nav button{
-flex:1;
-padding:12px;
-border:none;
-border-radius:10px;
-font-weight:bold;
-cursor:pointer;
-color:#fff;
-}
-
-.prev{background:#6c757d;}
-.next{background:#007bff;}
-.submit{background:green;}
-
-.result{
-font-size:22px;
-font-weight:bold;
-text-align:center;
-margin-top:18px;
-}
-
-.small{
-margin-bottom:12px;
-font-weight:bold;
-color:#555;
-}
+body{font-family:Arial;background:#f5f7fa;margin:0;padding:15px}
+.wrap{max-width:900px;margin:auto;background:#fff;padding:20px;border-radius:12px}
+.card{padding:12px;margin:8px;background:#eee;border-radius:10px;cursor:pointer}
+.opt{display:block;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:8px;cursor:pointer}
+.correct{background:#d4edda}
+.wrong{background:#f8d7da}
+.hide{display:none}
+.top{display:flex;justify-content:space-between;margin-bottom:10px}
+.btn{padding:8px 12px;border:none;border-radius:6px;cursor:pointer}
+.timer{background:red;color:#fff}
 </style>
 </head>
+
 <body>
 
 <div class="top">
-<button class="btn back" onclick="goBack()">⬅ Back</button>
+<button class="btn" onclick="goBack()">Back</button>
 <div class="btn timer" id="timer">30:00</div>
 </div>
 
 <div class="wrap">
 
-<div id="statusBox" class="loader">Checking login...</div>
+<div id="status">Loading...</div>
 
-<div id="subjectBox" class="hide">
-<h2 style="text-align:center;margin-bottom:15px;">Select Subject</h2>
+<div id="subjects" class="hide">
+<h3>Select Subject</h3>
 
-<div class="grid">
-
-<div class="card" onclick="startQuiz('POSTAL MANUAL VOLUME 7')">📘 POSTAL MANUAL VOLUME 7</div>
-<div class="card" onclick="startQuiz('GK')">📘 GK</div>
-<div class="card" onclick="startQuiz('Maths')">➕ Maths</div>
-<div class="card" onclick="startQuiz('Reasoning')">🧠 Reasoning</div>
-<div class="card" onclick="startQuiz('POSTAL MANUAL VOLUME 5')">📘 POSTAL MANUAL VOLUME 5</div>
-<div class="card" onclick="startQuiz('Post Office Guide 1')">📮 PO GUIDE 1</div>
-<div class="card" onclick="startQuiz('Post Office Guide 2')">📮 PO GUIDE 2</div>
-<div class="card" onclick="startQuiz('POSTAL MANUAL VOLUME 6 PART 3')">📘 POSTAL MANUAL VOLUME 6 PART 3</div>
+<div class="card" onclick="startQuiz('GK')">GK</div>
+<div class="card" onclick="startQuiz('Maths')">Maths</div>
+<div class="card" onclick="startQuiz('Reasoning')">Reasoning</div>
 
 </div>
-</div>
 
-<div id="quizBox" class="hide">
-<div class="small" id="progress"></div>
-<div class="q" id="question"></div>
+<div id="quiz" class="hide">
+<div id="qno"></div>
+<div id="question"></div>
 <div id="options"></div>
 
-<div class="nav">
-<button class="prev" onclick="prevQ()">Previous</button>
-<button class="next" onclick="nextQ()">Next</button>
-<button class="submit" onclick="submitQuiz()">Submit</button>
-</div>
+<button onclick="prev()">Prev</button>
+<button onclick="next()">Next</button>
+<button onclick="submit()">Submit</button>
 
-<div class="result" id="result"></div>
+<div id="result"></div>
 </div>
-
-<div id="debug"></div>
 
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
 import {
-getFirestore,
-collection,
-getDocs,
-query,
-where,
-addDoc,
-serverTimestamp
+getFirestore, collection, getDocs, query, where, addDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 import {
-getAuth,
-onAuthStateChanged
+getAuth, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* FIREBASE */
 const firebaseConfig = {
-apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-projectId: "gds-departmental-exam-studyhub",
-storageBucket: "gds-departmental-exam-studyhub.appspot.com",
-messagingSenderId: "759916756080",
-appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+apiKey: "YOUR_KEY",
+authDomain: "YOUR_DOMAIN",
+projectId: "YOUR_PROJECT",
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+/* ===== SINGLE STATE ONLY ===== */
 let user = null;
 let subject = "";
 let questions = [];
-let current = 0;
+let index = 0;
 let answers = {};
+let time = 1800;
+let timer = null;
 let submitted = false;
-let sec = 1800;
-let timerInt = null;
+
+/* AUTH (FIXED - NO DOUBLE CALL) */
 onAuthStateChanged(auth, (u) => {
-
-  if (!u) {
-    msg("Please login first");
-    setTimeout(() => {
-      location.href = "login.html";
-    }, 1200);
-    return;
-  }
-
-  user = u;
-  window.user = u;
-
-  msg("Login Success",1);
-
-  document.getElementById("subjectBox").classList.remove("hide");
-});
-
-/* START QUIZ */
-window.startQuiz = async function(sub){
-
-subject=sub;
-msg("Loading "+sub+" Questions...");
-
-try{
-
-const qy = query(
-collection(db,"quizQuestions"),
-where("subject","==",sub)
-);
-
-const snap = await getDocs(qy);
-
-questions=[];
-
-snap.forEach(doc=>{
-questions.push(doc.data());
-});
-
-debug("Subject Search = "+sub+" | Found = "+questions.length);
-
-if(questions.length===0){
-msg("No Questions Found For "+sub);
+if(!u){
+document.getElementById("status").innerText="Login required";
 return;
 }
 
-document.getElementById("subjectBox").classList.add("hide");
-document.getElementById("quizBox").classList.remove("hide");
+user = u;
+document.getElementById("status").innerText="Logged in";
+document.getElementById("subjects").classList.remove("hide");
+});
 
-current=0;
-answers={};
-submitted=false;
-sec=1800;
+/* START QUIZ (FAST FIRESTORE QUERY) */
+window.startQuiz = async (sub) => {
+subject = sub;
+document.getElementById("status").innerText="Loading...";
+
+try {
+const q = query(collection(db,"quizQuestions"), where("subject","==",sub));
+const snap = await getDocs(q);
+
+questions = snap.docs.map(d => d.data());
+
+if(questions.length === 0){
+document.getElementById("status").innerText="No questions found";
+return;
+}
+
+index = 0;
+answers = {};
+submitted = false;
+time = 1800;
+
+document.getElementById("subjects").classList.add("hide");
+document.getElementById("quiz").classList.remove("hide");
 
 startTimer();
 render();
 
-}catch(e){
-msg("Error Loading Questions");
-debug(e.message);
+} catch(e){
+console.log(e);
+document.getElementById("status").innerText="Error loading quiz";
 }
-
 };
 
 /* TIMER */
 function startTimer(){
+clearInterval(timer);
 
-clearInterval(timerInt);
+timer = setInterval(()=>{
+time--;
 
-timerInt=setInterval(()=>{
+let m = Math.floor(time/60);
+let s = time%60;
 
-sec--;
+document.getElementById("timer").innerText =
+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
 
-let m=Math.floor(sec/60);
-let s=sec%60;
-
-document.getElementById("timer").innerText=
-String(m).padStart(2,"0")+":"+
-String(s).padStart(2,"0");
-
-if(sec<=0){
-clearInterval(timerInt);
-submitQuiz();
+if(time<=0){
+clearInterval(timer);
+submit();
 }
 
 },1000);
-
 }
 
-/* RENDER */
+/* RENDER SAFE */
 function render(){
+let q = questions[index];
+if(!q) return;
 
-let q=questions[current];
+document.getElementById("qno").innerText =
+`Q ${index+1}/${questions.length}`;
 
-document.getElementById("progress").innerText=
-"Question "+(current+1)+" / "+questions.length;
+document.getElementById("question").innerText = q.question;
 
-document.getElementById("question").innerText=
-(current+1)+". "+q.question;
-
-let html="";
-
-q.options.forEach(op=>{
-
-let checked = answers[current]===op ? "checked":"";
-let cls="opt";
-
-if(submitted){
-if(op===q.answer) cls+=" correct";
-else if(answers[current]===op && op!==q.answer) cls+=" wrong";
-}
-
-html += `
-<label class="${cls}">
-<input type="radio"
-name="x"
-${checked}
-${submitted?"disabled":""}
-onclick="saveAns(`${op}`)">
+document.getElementById("options").innerHTML =
+q.options.map(op => `
+<label class="opt ${submitted ? (op===q.answer?'correct':answers[index]===op?'wrong':'') : ''}">
+<input type="radio" name="opt"
+${answers[index]===op?'checked':''}
+${submitted?'disabled':''}
+onchange="selectAns('${op.replace(/'/g,"\\'")}')">
 ${op}
 </label>
-`;
-
-});
-
-document.getElementById("options").innerHTML=html;
-
+`).join("");
 }
 
-/* SAVE */
-window.saveAns=function(v){
-answers[current]=v;
+/* ANSWER SAVE */
+window.selectAns = (val) => {
+answers[index] = val;
 };
 
 /* NAV */
-window.nextQ=function(){
-if(current<questions.length-1){
-current++;
+window.next = () => {
+if(index < questions.length-1){
+index++;
 render();
 }
 };
 
-window.prevQ=function(){
-if(current>0){
-current--;
+window.prev = () => {
+if(index > 0){
+index--;
 render();
 }
 };
 
 /* SUBMIT */
-window.submitQuiz = async function(){
-
+window.submit = async () => {
 if(submitted) return;
 
-submitted=true;
-clearInterval(timerInt);
+submitted = true;
+clearInterval(timer);
 
-let score=0;
-
+let score = 0;
 questions.forEach((q,i)=>{
-if(answers[i]===q.answer) score++;
+if(answers[i] === q.answer) score++;
 });
 
 render();
 
-document.getElementById("result").innerText=
-"Score: "+score+" / "+questions.length;
+document.getElementById("result").innerText =
+`Score: ${score}/${questions.length}`;
 
 if(user){
-
 await addDoc(collection(db,"results"),{
 uid:user.uid,
-email:user.email,
-subject:subject,
-score:score,
+subject,
+score,
 total:questions.length,
 createdAt:serverTimestamp()
 });
-
 }
-
-msg("Result Saved",1);
-
 };
 
 /* BACK */
-window.goBack=function(){
-
-if(confirm("Exit test?")){
-
-if(history.length>1){
+window.goBack = () => {
 history.back();
-}else{
-location.href="candidate-dashboard.html";
-}
-
-}
-
 };
-
-/* HELPERS */
-function msg(t,ok=0){
-document.getElementById("statusBox").className=
-ok?"ok":"loader";
-document.getElementById("statusBox").innerText=t;
-}
-
-function debug(t){
-document.getElementById("debug").innerHTML=
-'<div class="err">'+t+'</div>';
-}
-
-function esc(str){
-return String(str).replace(/'/g,"\\'");
-}
 </script>
 
 </body>
