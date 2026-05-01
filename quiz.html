@@ -263,24 +263,6 @@ let submitted=false;
 let sec=1800;
 let timerInt=null;
 
-/* LOGIN CHECK */
-onAuthStateChanged(auth,(u)=>{
-
-if(u){
-user=u;
-msg("Login Success",1);
-
-document.getElementById("subjectBox").classList.remove("hide");
-
-}else{
-msg("Please login first");
-setTimeout(()=>{
-location.href="login.html";
-},1200);
-}
-
-});
-
 /* START QUIZ */
 window.startQuiz = async function(sub){
 
