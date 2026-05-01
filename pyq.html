@@ -3,213 +3,211 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PYQ Section</title>
+<title>PYQ Candidate Portal</title>
 
 <style>
-body{
-font-family:Arial;
-background:#f4f6f9;
-padding:15px;
-}
-
-.container{
-max-width:1000px;
-margin:auto;
-background:#fff;
-padding:18px;
-border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,.1);
-}
-
-h1{text-align:center;}
-
-select{
-width:100%;
-padding:10px;
-margin:10px 0;
-border:1px solid #ccc;
-border-radius:8px;
-}
-
-.card{
-background:#fafafa;
-padding:12px;
-margin:10px 0;
-border-radius:8px;
-border:1px solid #ddd;
-}
-
-button{
-padding:10px 15px;
-margin-top:10px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-}
-
-.start-btn{background:green;color:#fff;}
-.option{
-display:block;
-padding:10px;
-margin:5px 0;
-background:#fff;
-border:1px solid #ccc;
-cursor:pointer;
-}
+body{font-family:Arial;background:#f4f6f9;padding:15px}
+.container{max-width:950px;margin:auto;background:#fff;padding:20px;border-radius:12px}
+h1{text-align:center}
+select,button{padding:10px;width:100%;margin:8px 0;font-size:16px}
+.card{padding:15px;border:1px solid #ddd;border-radius:10px;margin:10px 0}
+.option{display:block;margin:8px 0;padding:10px;border:1px solid #ccc;border-radius:8px;cursor:pointer}
+.option.selected{background:#dff0ff;border-color:#007bff}
+.start-btn{background:green;color:#fff;border:none;border-radius:8px}
+.nav-btn{background:#007bff;color:#fff;border:none;border-radius:8px;padding:8px;margin:5px}
+.submit-btn{background:red;color:#fff;border:none;border-radius:8px;padding:10px}
 </style>
 
 </head>
-
 <body>
 
 <div class="container">
 
-<h1>Previous Year Questions</h1>
+<h1>📘 PYQ Candidate Portal</h1>
 
-<!-- DROPDOWNS -->
-<select id="pyqSelect">
-<option value="" disabled selected>Select PYQ Year</option>
+<h3>Select Category</h3>
+<select id="category">
+<option value="">Select</option>
 <option>PYQ 2020</option>
 <option>PYQ 2021</option>
 <option>PYQ 2022</option>
 <option>PYQ 2023</option>
 <option>PYQ 2024</option>
+<option>PYQ 2025</option>
+<option>PYQ 2026</option>
+<option>Model Paper</option>
+<option>Practice Set</option>
 </select>
 
-<select id="postSelect">
-<option value="" disabled selected>Select Post</option>
+<h3>Select Post</h3>
+<select id="post">
+<option value="">Select</option>
 <option>MTS</option>
 <option>POSTMAN</option>
 <option>PA-SA</option>
 </select>
 
-<h3>PDF Files</h3>
-<div id="pdfBox">Loading...</div>
+<button onclick="loadData()">Load Data</button>
 
-<h3>Quiz</h3>
-<button class="start-btn" id="startBtn">Start Quiz</button>
+<hr>
+
+<h3>📄 PDFs</h3>
+<div id="pdfBox">Select category & post</div>
+
+<h3>🧠 Quiz</h3>
+<button class="start-btn" onclick="startQuiz()">Start Quiz</button>
 
 <div id="quizBox"></div>
 
 </div>
 
-<!-- FIREBASE -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const app = initializeApp({
-apiKey:"AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-authDomain:"gds-departmental-exam-studyhub.firebaseapp.com",
-projectId:"gds-departmental-exam-studyhub"
-});
+const firebaseConfig = {
+apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+projectId: "gds-departmental-exam-studyhub"
+};
 
+const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let questions=[];
-let current=0;
-let answers=[];
+let questions = [];
+let current = 0;
+let answers = [];
 
-/* GET VALUE */
 function val(id){
-const el=document.getElementById(id);
-return el?el.value.trim():"";
+return document.getElementById(id).value;
 }
 
-/* LOAD DATA */
-async function loadAll(){
+/* LOAD PDF + QUESTIONS */
+window.loadData = async function(){
 
-document.getElementById("pdfBox").innerHTML="Loading...";
+const category = val("category");
+const post = val("post");
 
-questions=[];
-current=0;
-answers=[];
+if(!category || !post){
+alert("Select category & post");
+return;
+}
 
-const year = val("pyqSelect").replace("PYQ ","").trim();
-const post = val("postSelect");
-
-/* PDF */
-let pdfHtml="";
-
+/* PDFs */
+let pdfHTML = "";
 const pdfSnap = await getDocs(collection(db,"pyqFiles"));
 
-pdfSnap.forEach(doc=>{
-const d=doc.data();
+pdfSnap.forEach(d=>{
+let data = d.data();
 
-if(String(d.year).trim() !== String(year)) return;
-if(String(d.post).trim() !== String(post)) return;
+if(data.category !== category) return;
+if(data.post !== post) return;
 
-pdfHtml += `
+pdfHTML += `
 <div class="card">
-<b>${d.title}</b>
-<p>${d.desc}</p>
-<a href="${d.fileName}" target="_blank">Open PDF</a>
+<b>${data.title}</b><br>
+<div>${data.desc}</div>
+<a href="${data.fileName}" target="_blank">Open PDF</a>
 </div>
 `;
 });
 
-document.getElementById("pdfBox").innerHTML =
-pdfHtml || "No PDF Found";
+document.getElementById("pdfBox").innerHTML = pdfHTML || "No PDF Found";
 
 /* QUESTIONS */
-let temp=[];
-
+questions = [];
 const qSnap = await getDocs(collection(db,"pyqQuestions"));
 
-qSnap.forEach(doc=>{
-const d=doc.data();
+qSnap.forEach(d=>{
+let data = d.data();
 
-if(String(d.year).trim() !== String(year)) return;
-if(String(d.post).trim() !== String(post)) return;
+if(data.category !== category) return;
+if(data.post !== post) return;
 
-temp.push(d);
+questions.push(data);
 });
 
-questions = temp;
+alert("Data Loaded: " + questions.length + " Questions");
+};
 
-}
+/* QUIZ START */
+window.startQuiz = function(){
 
-/* START QUIZ */
-function startQuiz(){
 if(!questions.length){
 alert("No Questions Found");
 return;
 }
+
+current = 0;
+answers = [];
 showQ();
-}
+};
 
 /* SHOW QUESTION */
 function showQ(){
 
-const q = questions[current];
+let q = questions[current];
 
 let html = `
 <div class="card">
-<h3>Q ${current+1}</h3>
-<p><b>${q.question}</b></p>
+<h3>Q ${current+1}/${questions.length}</h3>
+<b>${q.question}</b>
+<br><br>
 `;
 
-(q.options||[]).forEach(op=>{
-html += `<button class="option" onclick="selectAns('${op}')">${op}</button>`;
+q.options.forEach(op=>{
+let sel = answers[current] === op ? "selected" : "";
+html += `<div class="option ${sel}" onclick="selectAns('${op}')">${op}</div>`;
 });
 
-html += `</div>`;
+html += `
+<br>
+<button class="nav-btn" onclick="prev()">Previous</button>
+<button class="nav-btn" onclick="next()">Next</button>
+<button class="submit-btn" onclick="submitQuiz()">Submit</button>
+</div>
+`;
 
 document.getElementById("quizBox").innerHTML = html;
 }
 
-window.selectAns=function(v){
-answers[current]=v;
+window.selectAns = function(ans){
+answers[current] = ans;
+showQ();
 };
 
-/* EVENTS */
-document.getElementById("pyqSelect").addEventListener("change",loadAll);
-document.getElementById("postSelect").addEventListener("change",loadAll);
-document.getElementById("startBtn").addEventListener("click",startQuiz);
+window.next = function(){
+if(current < questions.length-1){
+current++;
+showQ();
+}
+};
 
-loadAll();
+window.prev = function(){
+if(current > 0){
+current--;
+showQ();
+}
+};
+
+/* SUBMIT */
+window.submitQuiz = function(){
+
+let score = 0;
+
+questions.forEach((q,i)=>{
+if(answers[i] === q.answer) score++;
+});
+
+document.getElementById("quizBox").innerHTML = `
+<div class="card">
+<h2>Result</h2>
+<p>Score: ${score}/${questions.length}</p>
+<button onclick="location.reload()">Restart</button>
+</div>
+`;
+};
 
 </script>
 
