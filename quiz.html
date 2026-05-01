@@ -243,6 +243,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 onAuthStateChanged(auth, (u) => {
+onAuthStateChanged(auth, (u) => {
 
   if (!u) {
     msg("Please login first");
@@ -253,6 +254,8 @@ onAuthStateChanged(auth, (u) => {
   }
 
   user = u;
+  window.user = u;
+
   msg("Login Success",1);
 
   document.getElementById("subjectBox").classList.remove("hide");
