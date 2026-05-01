@@ -149,7 +149,11 @@ function val(id){
 const el = document.getElementById(id);
 return el ? el.value.trim() : "";
 }
-
+function norm(v){
+return String(v || "")
+.toLowerCase()
+.replace(/[^a-z0-9]/g,"");
+}
 /* LOAD DATA */
 async function loadAll(){
 
@@ -166,8 +170,8 @@ const pdfSnap=await getDocs(collection(db,"pyqFiles"));
 pdfSnap.forEach(doc=>{
 const d=doc.data();
 
-if(norm(d.category)!==norm(category)) return;
-if(norm(d.post)!==norm(post)) return;
+if(norm(d.category) !== norm(category)) return;
+if(norm(d.post) !== norm(post)) return;
 
 pdfHtml+=`
 <div class="card">
@@ -187,8 +191,8 @@ const qSnap=await getDocs(collection(db,"pyqQuestions"));
 qSnap.forEach(doc=>{
 const d=doc.data();
 
-if(norm(d.category)!==norm(category)) return;
-if(norm(d.post)!==norm(post)) return;
+if(norm(d.category) !== norm(category)) return;
+if(norm(d.post) !== norm(post)) return;
 
 temp.push(d);
 });
