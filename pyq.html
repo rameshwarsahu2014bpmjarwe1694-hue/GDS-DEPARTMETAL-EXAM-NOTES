@@ -1,38 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PYQ System</title>
-
+<title>PYQ System FIXED CORE</title>
 <style>
-body{font-family:Arial;background:#f4f6f9;padding:15px;}
-.container{max-width:900px;margin:auto;background:#fff;padding:15px;border-radius:10px;}
-.card{background:#fafafa;padding:15px;margin:10px 0;border-radius:10px;border:1px solid #ddd;}
-button{padding:10px 15px;border:none;background:#007bff;color:#fff;border-radius:8px;cursor:pointer;}
-.start-btn{background:#28a745;margin-top:10px;}
-.option{display:block;margin:8px 0;padding:10px;border:1px solid #ccc;border-radius:8px;cursor:pointer;}
-.selected{background:#dbe9ff;}
-.empty{text-align:center;color:#777;}
+body{font-family:Arial;background:#f5f6f7;padding:20px;}
+.card{padding:15px;background:#fff;margin:10px 0;border-radius:10px;}
+button{padding:10px 15px;background:#007bff;color:#fff;border:0;border-radius:8px;}
 </style>
 </head>
-
 <body>
 
-<div class="container">
+<h2>PYQ AUTO SYSTEM</h2>
 
-<h2>PYQ System (Auto Fix Version)</h2>
-
-<h3>PDF</h3>
-<div id="pdfBox">Loading...</div>
-
-<h3>Quiz</h3>
-<button class="start-btn" id="startBtn">Start Quiz</button>
-
-<div id="quizBox"></div>
-<div id="resultBox"></div>
-
-</div>
+<div id="sets"></div>
+<div id="pdfs"></div>
+<div id="quiz"></div>
 
 <script type="module">
 
@@ -40,128 +22,77 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, collection, getDocs }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* FIREBASE */
-const firebaseConfig = {
-apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-projectId: "gds-departmental-exam-studyhub",
-storageBucket: "gds-departmental-exam-studyhub.appspot.com",
-messagingSenderId: "759916756080",
-appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
-};
+const app = initializeApp({
+apiKey:"X",
+authDomain:"X",
+projectId:"X"
+});
 
-const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* STATE */
-let questions = [];
-let current = 0;
-let answers = [];
+let DATA = {};
+let currentQuestions = [];
 
-/* NORMALIZE (FINAL FIX) */
-function norm(v){
-return String(v || "")
-.toLowerCase()
-.replace(/\s+/g,"")
-.trim();
-}
+async function load(){
 
-/* LOAD DATA */
-async function loadAll(){
+const snap = await getDocs(collection(db,"pyqSets"));
 
-document.getElementById("pdfBox").innerHTML="Loading...";
-
-questions = [];
-current = 0;
-answers = [];
-
-/* FETCH DATA */
-const pdfSnap = await getDocs(collection(db,"pyqFiles"));
-const qSnap = await getDocs(collection(db,"pyqQuestions"));
-
-let pdfHtml = "";
-
-/* PDF FILTER */
-pdfSnap.forEach(doc=>{
-const d = doc.data();
-
-/* SAFE MATCH (NO BUG EVER) */
-const category = norm(d.category);
-const post = norm(d.post);
-
-/* FORCE MATCH ANY SELECTED GROUP */
-pdfHtml += `
-<div class="card">
-<b>${d.title || ""}</b><br>
-${d.desc || ""}<br>
-<a href="${d.fileName}" target="_blank">Open PDF</a>
-</div>`;
+snap.forEach(d=>{
+DATA[d.id] = d.data();
 });
 
-/* QUESTIONS LOAD */
-qSnap.forEach(doc=>{
-const d = doc.data();
-
-questions.push(d);
-});
-
-document.getElementById("pdfBox").innerHTML =
-pdfHtml || "<div class='empty'>No PDF Found</div>";
-
+render();
 }
 
-/* SHOW QUESTION */
-function showQ(){
+function render(){
 
-const q = questions[current];
+let html = "";
 
-let html = `
-<div class="card">
-<h3>Q ${current+1}/${questions.length}</h3>
-<p><b>${q.question}</b></p>
-`;
-
-for(let i=0;i<4;i++){
+Object.keys(DATA).forEach(id=>{
 html += `
-<div class="option" onclick="selectAns('${q.options[i]}')">
-${q.options[i]}
+<div class="card">
+<h3>${id}</h3>
+<button onclick="openSet('${id}')">Open</button>
 </div>
 `;
+});
+
+document.getElementById("sets").innerHTML = html;
 }
 
-html += `<br><button onclick="nextQ()">Next</button>`;
-html += `</div>`;
+window.openSet = function(id){
 
-document.getElementById("quizBox").innerHTML = html;
-}
+const data = DATA[id];
 
-/* ACTIONS */
-window.selectAns = function(v){
-answers[current] = v;
+document.getElementById("pdfs").innerHTML =
+(data.pdfs||[]).map(p=>`
+<div class="card">
+<a href="${p}" target="_blank">Open PDF</a>
+</div>
+`).join("");
+
+currentQuestions = data.questions || [];
+
+document.getElementById("quiz").innerHTML = `
+<div class="card">
+<button onclick="startQuiz()">Start Quiz</button>
+</div>
+`;
 };
 
-window.nextQ = function(){
-if(current < questions.length-1){
-current++;
-showQ();
-}
-};
+window.startQuiz = function(){
 
-/* START */
-document.getElementById("startBtn").onclick = function(){
+let q = currentQuestions[0];
 
-if(questions.length === 0){
-alert("No Questions Found");
-return;
-}
-
-document.getElementById("startBtn").style.display="none";
-showQ();
+document.getElementById("quiz").innerHTML = `
+<div class="card">
+<h3>${q.question}</h3>
+</div>
+`;
 
 };
 
-/* INIT */
-loadAll();
+load();
 
 </script>
 
