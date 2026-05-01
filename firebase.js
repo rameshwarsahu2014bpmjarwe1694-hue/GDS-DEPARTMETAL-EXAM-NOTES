@@ -1,30 +1,34 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
 
 import {
-getAuth,
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-signOut
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
 import {
-getFirestore
+  getFirestore
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-projectId: "gds-departmental-exam-studyhub",
-storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
-messagingSenderId: "759916756080",
-appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+  apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+  authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+  projectId: "gds-departmental-exam-studyhub",
+  storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
+  messagingSenderId: "759916756080",
+  appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
+// INIT
 const app = initializeApp(firebaseConfig);
-window.app = app;
+
+// SERVICES
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// GLOBAL EXPORTS (OLD STYLE ONLY)
+window.app = app;
 window.auth = auth;
 window.db = db;
 
