@@ -242,7 +242,18 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+onAuthStateChanged(auth, (user) => {
 
+  if (!user) {
+    msg("Please login first");
+    setTimeout(() => {
+      location.href = "login.html";
+    }, 1200);
+    return;
+  }
+
+  window.user = user; // store globally for submitQuiz()
+});
 let user=null;
 let subject="";
 let questions=[];
