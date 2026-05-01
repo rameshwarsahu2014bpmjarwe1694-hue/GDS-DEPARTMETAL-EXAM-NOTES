@@ -110,7 +110,7 @@ return;
 
 waitForFirebase(function(){
 
-import("https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js")
++ import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js")
 .then((firebaseAuth) => {
 
 firebaseAuth.sendPasswordResetEmail(window.auth, email)
@@ -126,6 +126,34 @@ alert(error.message);
 });
 
 };
+<script>
+async function candidateLogin() {
+
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+
+  if(!email || !password){
+    alert("Enter email & password");
+    return;
+  }
+
+  try {
+
+    const user = await window.signInWithEmailAndPassword(
+      window.auth,
+      email,
+      password
+    );
+
+    alert("Login Success");
+
+    // redirect
+    window.location.href = "pyq.html";
+
+  } catch (err) {
+    alert(err.message);
+  }
+}
 </script>
 
 </body>
