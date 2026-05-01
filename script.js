@@ -69,7 +69,7 @@ window.signInWithEmailAndPassword(window.auth, email, password)
 const user = userCredential.user;
 
 const { doc, getDoc, setDoc } = await import(
-"https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js"
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
 );
 
 const ref = doc(window.db, "candidates", user.uid);
