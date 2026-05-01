@@ -260,8 +260,16 @@ const pdfSnap=await getDocs(collection(db,"pyqFiles"));
 pdfSnap.forEach(doc=>{
 const d=doc.data();
 
-if(d.category!==category) return;
-if(d.post!==post) return;
+function normalize(v){
+  return String(v || "")
+    .toLowerCase()
+    .replace(/\s+/g,"")
+    .replace(/pyq/g,"")
+    .trim();
+}
+
+if(normalize(d.category) !== normalize(category)) return;
+if(normalize(d.post) !== normalize(post)) return;
 
 pdfHtml+=`
 <div class="card">
@@ -284,8 +292,18 @@ const qSnap=await getDocs(collection(db,"pyqQuestions"));
 qSnap.forEach(doc=>{
 const d=doc.data();
 
-if(d.category!==category) return;
-if(d.post!==post) return;
+function clean(v){
+  return String(v || "")
+    .toLowerCase()
+    .replace(/\s+/g,"")
+    .trim();
+}
+
+const catMatch = clean(d.category) === clean(category);
+const postMatch = !post || clean(d.post) === clean(post);
+
+if(!catMatch) return;
+if(!postMatch) return;
 
 temp.push(d);
 });
