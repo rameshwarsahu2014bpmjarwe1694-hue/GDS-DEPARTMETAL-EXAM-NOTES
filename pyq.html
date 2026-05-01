@@ -3,31 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PYQ Candidate Portal</title>
+<title>PYQ System</title>
 
 <style>
 body{font-family:Arial;background:#f4f6f9;padding:15px}
-.container{max-width:950px;margin:auto;background:#fff;padding:20px;border-radius:12px}
-h1{text-align:center}
-select,button{padding:10px;width:100%;margin:8px 0;font-size:16px}
+.container{max-width:900px;margin:auto;background:#fff;padding:20px;border-radius:12px}
 .card{padding:15px;border:1px solid #ddd;border-radius:10px;margin:10px 0}
-.option{display:block;margin:8px 0;padding:10px;border:1px solid #ccc;border-radius:8px;cursor:pointer}
-.option.selected{background:#dff0ff;border-color:#007bff}
-.start-btn{background:green;color:#fff;border:none;border-radius:8px}
-.nav-btn{background:#007bff;color:#fff;border:none;border-radius:8px;padding:8px;margin:5px}
-.submit-btn{background:red;color:#fff;border:none;border-radius:8px;padding:10px}
+button{padding:10px;border:none;border-radius:8px;cursor:pointer;background:green;color:#fff}
+select{padding:10px;margin:5px 0;width:100%}
 </style>
-
 </head>
+
 <body>
 
 <div class="container">
 
-<h1>📘 PYQ Candidate Portal</h1>
+<h2>📘 PYQ System</h2>
 
-<h3>Select Category</h3>
 <select id="category">
-<option value="">Select</option>
+<option value="">Select Category</option>
 <option>PYQ 2020</option>
 <option>PYQ 2021</option>
 <option>PYQ 2022</option>
@@ -39,32 +33,30 @@ select,button{padding:10px;width:100%;margin:8px 0;font-size:16px}
 <option>Practice Set</option>
 </select>
 
-<h3>Select Post</h3>
 <select id="post">
-<option value="">Select</option>
+<option value="">Select Post</option>
 <option>MTS</option>
 <option>POSTMAN</option>
 <option>PA-SA</option>
 </select>
 
-<button onclick="loadData()">Load Data</button>
+<button id="loadBtn">Load Data</button>
 
 <hr>
 
 <h3>📄 PDFs</h3>
-<div id="pdfBox">Select category & post</div>
+<div id="pdfBox">No Data</div>
 
-<h3>🧠 Quiz</h3>
-<button class="start-btn" onclick="startQuiz()">Start Quiz</button>
-
-<div id="quizBox"></div>
+<h3>❓ Questions</h3>
+<div id="quizBox">No Data</div>
 
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
@@ -75,16 +67,15 @@ projectId: "gds-departmental-exam-studyhub"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let questions = [];
-let current = 0;
-let answers = [];
-
+/* helpers */
 function val(id){
-return document.getElementById(id).value;
+return document.getElementById(id).value.trim();
 }
 
-/* LOAD PDF + QUESTIONS */
-window.loadData = async function(){
+/* MAIN LOAD FUNCTION */
+async function loadData(){
+
+console.log("LOAD CLICKED");
 
 const category = val("category");
 const post = val("post");
@@ -94,18 +85,16 @@ alert("Select category & post");
 return;
 }
 
-/* PDFs */
+/* ===== PDF LOAD ===== */
 let pdfHTML = "";
 const pdfSnap = await getDocs(collection(db,"pyqFiles"));
 
 pdfSnap.forEach(d=>{
 let data = d.data();
 
-/* FILTER */
 if(data.category !== category) return;
 if(data.post !== post) return;
 
-/* TEXT ONLY DISPLAY */
 pdfHTML += `
 <div class="card">
 <b>📌 ${data.title}</b><br>
@@ -118,9 +107,9 @@ pdfHTML += `
 document.getElementById("pdfBox").innerHTML =
 pdfHTML || "No PDF Found";
 
-};
-/* QUESTIONS */
-questions = [];
+
+/* ===== QUESTION LOAD ===== */
+let qHTML = "";
 const qSnap = await getDocs(collection(db,"pyqQuestions"));
 
 qSnap.forEach(d=>{
@@ -129,89 +118,26 @@ let data = d.data();
 if(data.category !== category) return;
 if(data.post !== post) return;
 
-questions.push(data);
-});
-
-alert("Data Loaded: " + questions.length + " Questions");
-};
-
-/* QUIZ START */
-window.startQuiz = function(){
-
-if(!questions.length){
-alert("No Questions Found");
-return;
-}
-
-current = 0;
-answers = [];
-showQ();
-};
-
-/* SHOW QUESTION */
-function showQ(){
-
-let q = questions[current];
-
-let html = `
+qHTML += `
 <div class="card">
-<h3>Q ${current+1}/${questions.length}</h3>
-<b>${q.question}</b>
-<br><br>
-`;
-
-q.options.forEach(op=>{
-let sel = answers[current] === op ? "selected" : "";
-html += `<div class="option ${sel}" onclick="selectAns('${op}')">${op}</div>`;
-});
-
-html += `
-<br>
-<button class="nav-btn" onclick="prev()">Previous</button>
-<button class="nav-btn" onclick="next()">Next</button>
-<button class="submit-btn" onclick="submitQuiz()">Submit</button>
+<b>${data.question}</b><br><br>
+A. ${data.options[0]}<br>
+B. ${data.options[1]}<br>
+C. ${data.options[2]}<br>
+D. ${data.options[3]}<br><br>
+<b>Ans: ${data.answer}</b>
 </div>
 `;
-
-document.getElementById("quizBox").innerHTML = html;
-}
-
-window.selectAns = function(ans){
-answers[current] = ans;
-showQ();
-};
-
-window.next = function(){
-if(current < questions.length-1){
-current++;
-showQ();
-}
-};
-
-window.prev = function(){
-if(current > 0){
-current--;
-showQ();
-}
-};
-
-/* SUBMIT */
-window.submitQuiz = function(){
-
-let score = 0;
-
-questions.forEach((q,i)=>{
-if(answers[i] === q.answer) score++;
 });
 
-document.getElementById("quizBox").innerHTML = `
-<div class="card">
-<h2>Result</h2>
-<p>Score: ${score}/${questions.length}</p>
-<button onclick="location.reload()">Restart</button>
-</div>
-`;
-};
+document.getElementById("quizBox").innerHTML =
+qHTML || "No Questions Found";
+
+}
+
+/* BUTTON FIX */
+document.getElementById("loadBtn")
+.addEventListener("click", loadData);
 
 </script>
 
