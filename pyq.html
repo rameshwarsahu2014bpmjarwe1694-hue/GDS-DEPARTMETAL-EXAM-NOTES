@@ -64,12 +64,12 @@
         appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
     };
 
-    <script type="module">
-    // 1. सही Firebase Links (इन्हें बदलना बहुत ज़रूरी था)
+<script type="module">
+    // 1. सही Firebase Links (इन्हें ठीक कर दिया गया है)
     import { initializeApp } from "https://gstatic.com";
     import { getFirestore, collection, getDocs } from "https://gstatic.com";
 
-    // 2. सही Config (AuthDomain को ठीक किया गया है)
+    // 2. सही Config (Storage की ज़रूरत नहीं है, सिर्फ Firestore चलेगा)
     const firebaseConfig = {
         apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
         authDomain: "://firebaseapp.com",
@@ -85,18 +85,19 @@
     let currentIdx = 0;
     let answers = [];
 
+    // डेटा लोड करने का फंक्शन
     async function loadData() {
         const year = document.getElementById("pyqSelect").value;
         const post = document.getElementById("postSelect").value;
         if(!year || !post) return;
 
-        document.getElementById("pdfBox").innerHTML = "<div class='loading'>Data लोड हो रहा है...</div>";
+        document.getElementById("pdfBox").innerHTML = "<div class='loading'>Firestore से डेटा ला रहे हैं...</div>";
         document.getElementById("quizBox").style.display = "none";
         document.getElementById("resultBox").style.display = "none";
         document.getElementById("startBtn").style.display = "block";
 
         try {
-            // PDF Files लाना
+            // Firestore के 'pyqFiles' कलेक्शन से PDF लिंक्स लाना
             const pdfSnap = await getDocs(collection(db, "pyqFiles"));
             let pdfHtml = "";
             pdfSnap.forEach(doc => {
@@ -106,13 +107,13 @@
                         <div class="card">
                             <b>${d.title}</b>
                             <p style="font-size:14px;color:#666;">${d.desc || ''}</p>
-                            <a href="${d.fileName}" class="btn btn-blue" target="_blank">Open PDF</a>
+                            <a href="${d.fileName}" class="btn btn-blue" target="_blank">Open PDF Link</a>
                         </div>`;
                 }
             });
-            document.getElementById("pdfBox").innerHTML = pdfHtml || "<div class='empty'>इस विषय के लिए कोई PDF नहीं मिली।</div>";
+            document.getElementById("pdfBox").innerHTML = pdfHtml || "<div class='empty'>इस विषय के लिए कोई PDF लिंक नहीं मिला।</div>";
 
-            // सवाल लाना
+            // 'pyqQuestions' कलेक्शन से सवाल लाना
             const qSnap = await getDocs(collection(db, "pyqQuestions"));
             questions = [];
             qSnap.forEach(doc => {
@@ -124,16 +125,16 @@
             questions.sort((a, b) => (a.serial || 0) - (b.serial || 0));
 
         } catch (error) {
-            console.error("Error:", error);
-            document.getElementById("pdfBox").innerHTML = "<div class='empty' style='color:red;'>डेटा लोड करने में समस्या आई!</div>";
+            console.error("Firestore Error:", error);
+            document.getElementById("pdfBox").innerHTML = "<div class='empty' style='color:red;'>Firestore से संपर्क नहीं हो पाया!</div>";
         }
     }
 
-    // इवेंट लिसनर्स
+    // Dropdown change events
     document.getElementById("pyqSelect").onchange = loadData;
     document.getElementById("postSelect").onchange = loadData;
 
-    // क्विज़ फंक्शन्स (window. पर डालना ज़रूरी है ताकि बटन काम करें)
+    // Quiz Functions
     window.startQuiz = function() {
         if(questions.length === 0) return alert("इस कैटेगरी में सवाल उपलब्ध नहीं हैं।");
         currentIdx = 0;
@@ -191,6 +192,7 @@
             </div> ${reviewHtml}`;
     }
 </script>
+
 
 </body>
 </html>
