@@ -160,21 +160,20 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    alert("Login required");
-    return;
-  }
-
-  currentUser = user;
-  currentRole = await loadUserRole(user);
-});
 const list = document.getElementById("list");
 const categoryFilter = document.getElementById("categoryFilter");
 const searchBox = document.getElementById("searchBox");
 
 let allData = [];
+onAuthStateChanged(window.auth, (user) => {
 
+  if (!user) {
+    document.body.innerHTML = "Login required";
+    return;
+  }
+
+  loadData();
+});
 /* LOAD DATA */
 async function loadData(){
 
