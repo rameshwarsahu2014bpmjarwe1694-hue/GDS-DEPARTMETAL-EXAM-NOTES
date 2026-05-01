@@ -155,7 +155,23 @@ getDocs,
 query,
 orderBy
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("Login required");
+    return;
+  }
 
+  currentUser = user;
+  currentRole = await loadUserRole(user);
+
+  // access check
+  if (!currentRole.isPaid && !currentRole.isTester) {
+    document.body.innerHTML = "Payment required";
+    return;
+  }
+
+  loadNotes();
+});
 let allNotes = [];
 
 function safe(v){
