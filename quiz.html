@@ -242,15 +242,21 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, (u) => {
 
-  if (!user) {
+  if (!u) {
     msg("Please login first");
     setTimeout(() => {
       location.href = "login.html";
     }, 1200);
     return;
   }
+
+  user = u;
+  msg("Login Success",1);
+
+  document.getElementById("subjectBox").classList.remove("hide");
+});
 
   window.user = user; // store globally for submitQuiz()
 });
