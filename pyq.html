@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>PYQ Section - Study Hub</title>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background:#f4f6f9; padding:15px; }
         .container { max-width:900px; margin:auto; background:#fff; padding:20px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,.1); }
-        h1 { text-align:center; margin-bottom:20px; color: #333; }
+        h1 { text-align:center; margin-bottom:20px; color: #1a73e8; }
         .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 20px; }
         select { width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; font-size:16px; background: #fff; outline: none; }
-        .card { background:#fafafa; border:1px solid #ddd; border-radius:10px; padding:15px; margin-bottom:12px; transition: 0.3s; }
-        .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .card { background:#fafafa; border:1px solid #ddd; border-radius:10px; padding:15px; margin-bottom:12px; transition: 0.2s; }
+        .card:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .btn { display:inline-block; padding:10px 15px; border-radius:8px; text-decoration:none; font-weight:bold; cursor:pointer; border:none; margin-top:10px; text-align: center; }
-        .btn-blue { background:#007bff; color:#fff; width: 100%; }
+        .btn-blue { background:#1a73e8; color:#fff; width: 100%; }
         .btn-green { background:#28a745; color:#fff; width: 100%; font-size: 18px; }
-        .option { display:block; width:100%; text-align:left; padding:12px; margin:8px 0; border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-weight: bold; }
-        .selected { border-color:#007bff; background:#e7f3ff; color: #007bff; }
-        .loading { text-align:center; padding:20px; font-weight:bold; color:#007bff; }
+        .option { display:block; width:100%; text-align:left; padding:12px; margin:8px 0; border:2px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; font-weight: 600; }
+        .selected { border-color:#1a73e8; background:#e7f3ff; color: #1a73e8; }
+        .loading { text-align:center; padding:20px; font-weight:bold; color:#1a73e8; }
         .empty { text-align:center; padding:20px; color:#666; border:1px dashed #ccc; border-radius:10px; }
     </style>
 </head>
@@ -46,7 +46,7 @@
 
     <hr style="margin:25px 0;">
 
-    <h3>📝 ऑनलाइन क्विज़ (Quiz)</h3>
+    <h3>📝 प्रैक्टिस क्विज़ (Online Quiz)</h3>
     <button class="btn btn-green" id="startBtn" onclick="startQuiz()">Start Quiz</button>
 
     <div id="quizBox" style="display:none;"></div>
@@ -54,17 +54,19 @@
 </div>
 
 <script type="module">
-    // Firebase Libraries (Fixed Links)
+    // 1. सही Firebase Libraries (Links Fixed)
     import { initializeApp } from "https://gstatic.com";
     import { getFirestore, collection, getDocs } from "https://gstatic.com";
     import { getAuth, onAuthStateChanged } from "https://gstatic.com";
 
-    // Firebase Config (Fixed authDomain)
+    // 2. आपका Exact सही Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
         authDomain: "://firebaseapp.com",
+        databaseURL: "https://firebasedatabase.app",
         projectId: "gds-departmental-exam-studyhub",
         storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
+        messagingSenderId: "759916756080",
         appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
     };
 
@@ -76,17 +78,17 @@
     let currentIdx = 0;
     let answers = [];
 
-    // लॉगिन चेक: इसके बिना रूल्स डेटा ब्लॉक कर देंगे
+    // 3. लॉगिन चेक (जैसा आपने माँगा था)
     onAuthStateChanged(auth, (user) => {
         if (!user) {
             alert("कृपया पहले लॉगिन करें!");
             window.location.href = "login.html";
         } else {
-            console.log("लॉगिन यूजर:", user.email);
+            console.log("लॉगिन सफल:", user.email);
         }
     });
 
-    // डेटा लोड करने का मुख्य फंक्शन
+    // 4. डेटा लोड करने का फंक्शन (Firestore Fixed)
     async function loadData() {
         const year = document.getElementById("pyqSelect").value;
         const post = document.getElementById("postSelect").value;
@@ -98,44 +100,45 @@
         document.getElementById("startBtn").style.display = "block";
 
         try {
-            // PDF Files लाना
+            // PDF Fetch
             const pdfSnap = await getDocs(collection(db, "pyqFiles"));
             let pdfHtml = "";
             pdfSnap.forEach(doc => {
                 const d = doc.data();
-                if(String(d.category).trim() === year && String(d.post).trim() === post) {
+                if(String(d.category || "").trim() === year && String(d.post || "").trim() === post) {
                     pdfHtml += `
                         <div class="card">
-                            <b>${d.title}</b>
+                            <b>${d.title || 'Untitled'}</b>
                             <p style="font-size:14px;color:#666;margin:5px 0;">${d.desc || ''}</p>
-                            <a href="${d.fileName}" class="btn btn-blue" target="_blank">📥 Open PDF</a>
+                            <a href="${d.fileName}" class="btn btn-blue" target="_blank">📥 Open PDF Paper</a>
                         </div>`;
                 }
             });
-            document.getElementById("pdfBox").innerHTML = pdfHtml || "<div class='empty'>No PDF Found.</div>";
+            document.getElementById("pdfBox").innerHTML = pdfHtml || "<div class='empty'>इस कैटेगरी में कोई PDF नहीं मिली।</div>";
 
-            // Questions लाना
+            // Questions Fetch
             const qSnap = await getDocs(collection(db, "pyqQuestions"));
             questions = [];
             qSnap.forEach(doc => {
                 const d = doc.data();
-                if(String(d.category).trim() === year && String(d.post).trim() === post) {
+                if(String(d.category || "").trim() === year && String(d.post || "").trim() === post) {
                     questions.push(d);
                 }
             });
+            // Sort by serial if available
             questions.sort((a, b) => (a.serial || 0) - (b.serial || 0));
 
         } catch (error) {
             console.error("Firestore Error:", error);
-            document.getElementById("pdfBox").innerHTML = "<div class='empty' style='color:red;'>सर्वर से डेटा नहीं मिल सका।</div>";
+            document.getElementById("pdfBox").innerHTML = "<div class='empty' style='color:red;'>सर्वर से डेटा लोड करने में एरर आया!</div>";
         }
     }
 
-    // इवेंट लिसनर्स
+    // Dropdown change events
     document.getElementById("pyqSelect").onchange = loadData;
     document.getElementById("postSelect").onchange = loadData;
 
-    // Quiz Logics
+    // 5. Quiz Logic
     window.startQuiz = function() {
         if(questions.length === 0) return alert("इस कैटेगरी में सवाल उपलब्ध नहीं हैं।");
         currentIdx = 0;
@@ -149,19 +152,21 @@
         const q = questions[currentIdx];
         let html = `
             <div class="card">
-                <h4>सवाल ${currentIdx + 1} / ${questions.length}</h4>
+                <h4>प्रश्न ${currentIdx + 1} / ${questions.length}</h4>
                 <p style="margin:15px 0; font-size:18px;"><b>${q.question}</b></p>
-                ${q.options.map((opt, i) => `
-                    <button class="option ${answers[currentIdx] === opt ? 'selected' : ''}" 
-                            onclick="selectAns('${opt.replace(/'/g, "\\'")}')">
-                        ${String.fromCharCode(65+i)}. ${opt}
-                    </button>
-                `).join('')}
-                <div style="margin-top:20px;">
-                    ${currentIdx > 0 ? '<button class="btn btn-blue" style="width:auto;padding:10px 20px;" onclick="prevQ()">Pervious</button>' : ''}
+                <div id="optList">
+                    ${q.options.map((opt, i) => `
+                        <button class="option ${answers[currentIdx] === opt ? 'selected' : ''}" 
+                                onclick="selectAns('${opt.replace(/'/g, "\\'")}')">
+                            ${String.fromCharCode(65+i)}. ${opt}
+                        </button>
+                    `).join('')}
+                </div>
+                <div style="margin-top:20px; display: flex; gap: 10px;">
+                    ${currentIdx > 0 ? '<button class="btn btn-blue" onclick="prevQ()">Previous</button>' : ''}
                     ${currentIdx < questions.length - 1 ? 
-                        '<button class="btn btn-blue" style="width:auto;padding:10px 20px;margin-left:10px;" onclick="nextQ()">Next</button>' : 
-                        '<button class="btn btn-green" style="width:auto;padding:10px 25px;float:right;" onclick="submitQuiz()">Submit</button>'}
+                        '<button class="btn btn-blue" onclick="nextQ()">Next</button>' : 
+                        '<button class="btn btn-green" style="flex-grow: 1;" onclick="submitQuiz()">Submit Test</button>'}
                 </div>
             </div>`;
         document.getElementById("quizBox").innerHTML = html;
@@ -172,8 +177,10 @@
     window.prevQ = () => { currentIdx--; showQuestion(); }
 
     window.submitQuiz = function() {
+        if(!confirm("क्या आप क्विज़ सबमिट करना चाहते हैं?")) return;
         let score = 0;
-        let reviewHtml = "<h3>रिजल्ट और रिव्यू</h3>";
+        let reviewHtml = "<h3>रिजल्ट और रिव्यू (Review)</h3>";
+        
         questions.forEach((q, i) => {
             const isCorrect = answers[i] === q.answer;
             if(isCorrect) score++;
@@ -184,6 +191,7 @@
                     <p style="font-size:14px;color:green">सही जवाब: ${q.answer}</p>
                 </div>`;
         });
+
         document.getElementById("quizBox").style.display = "none";
         document.getElementById("resultBox").style.display = "block";
         document.getElementById("resultBox").innerHTML = `
