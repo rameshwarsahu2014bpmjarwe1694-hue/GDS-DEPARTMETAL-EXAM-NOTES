@@ -31,19 +31,7 @@ const db = getFirestore(app);
 window.app = app;
 window.auth = auth;
 window.db = db;
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-async function loadUserRole(user){
-  const snap = await getDoc(doc(db,"users",user.uid));
-
-  if(!snap.exists()){
-    return { isPaid:false, isTester:false, role:"user" };
-  }
-
-  return snap.data();
-}
-let currentUser = null;
-let currentRole = null;
 window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
 window.signInWithEmailAndPassword = signInWithEmailAndPassword;
 window.signOut = signOut;
