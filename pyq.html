@@ -220,7 +220,15 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("Login required");
+    return;
+  }
 
+  currentUser = user;
+  currentRole = await loadUserRole(user);
+});
 let questions = [];
 let current = 0;
 let answers = [];
