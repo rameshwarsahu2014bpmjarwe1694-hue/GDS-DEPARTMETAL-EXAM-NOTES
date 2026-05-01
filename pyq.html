@@ -1,21 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>PYQ System FIXED CORE</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PYQ Section</title>
+
 <style>
-body{font-family:Arial;background:#f5f6f7;padding:20px;}
-.card{padding:15px;background:#fff;margin:10px 0;border-radius:10px;}
-button{padding:10px 15px;background:#007bff;color:#fff;border:0;border-radius:8px;}
+body{
+font-family:Arial;
+background:#f4f6f9;
+padding:15px;
+}
+
+.container{
+max-width:1000px;
+margin:auto;
+background:#fff;
+padding:18px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+h1{text-align:center;}
+
+select{
+width:100%;
+padding:10px;
+margin:10px 0;
+border:1px solid #ccc;
+border-radius:8px;
+}
+
+.card{
+background:#fafafa;
+padding:12px;
+margin:10px 0;
+border-radius:8px;
+border:1px solid #ddd;
+}
+
+button{
+padding:10px 15px;
+margin-top:10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+.start-btn{background:green;color:#fff;}
+.option{
+display:block;
+padding:10px;
+margin:5px 0;
+background:#fff;
+border:1px solid #ccc;
+cursor:pointer;
+}
 </style>
+
 </head>
+
 <body>
 
-<h2>PYQ AUTO SYSTEM</h2>
+<div class="container">
 
-<div id="sets"></div>
-<div id="pdfs"></div>
-<div id="quiz"></div>
+<h1>Previous Year Questions</h1>
 
+<!-- DROPDOWNS -->
+<select id="pyqSelect">
+<option value="" disabled selected>Select PYQ Year</option>
+<option>PYQ 2020</option>
+<option>PYQ 2021</option>
+<option>PYQ 2022</option>
+<option>PYQ 2023</option>
+<option>PYQ 2024</option>
+</select>
+
+<select id="postSelect">
+<option value="" disabled selected>Select Post</option>
+<option>MTS</option>
+<option>POSTMAN</option>
+<option>PA-SA</option>
+</select>
+
+<h3>PDF Files</h3>
+<div id="pdfBox">Loading...</div>
+
+<h3>Quiz</h3>
+<button class="start-btn" id="startBtn">Start Quiz</button>
+
+<div id="quizBox"></div>
+
+</div>
+
+<!-- FIREBASE -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -23,76 +101,115 @@ import { getFirestore, collection, getDocs }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp({
-apiKey:"X",
-authDomain:"X",
-projectId:"X"
+apiKey:"AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+authDomain:"gds-departmental-exam-studyhub.firebaseapp.com",
+projectId:"gds-departmental-exam-studyhub"
 });
 
 const db = getFirestore(app);
 
-let DATA = {};
-let currentQuestions = [];
+let questions=[];
+let current=0;
+let answers=[];
 
-async function load(){
-
-const snap = await getDocs(collection(db,"pyqSets"));
-
-snap.forEach(d=>{
-DATA[d.id] = d.data();
-});
-
-render();
+/* GET VALUE */
+function val(id){
+const el=document.getElementById(id);
+return el?el.value.trim():"";
 }
 
-function render(){
+/* LOAD DATA */
+async function loadAll(){
 
-let html = "";
+document.getElementById("pdfBox").innerHTML="Loading...";
 
-Object.keys(DATA).forEach(id=>{
-html += `
+questions=[];
+current=0;
+answers=[];
+
+const year = val("pyqSelect").replace("PYQ ","").trim();
+const post = val("postSelect");
+
+/* PDF */
+let pdfHtml="";
+
+const pdfSnap = await getDocs(collection(db,"pyqFiles"));
+
+pdfSnap.forEach(doc=>{
+const d=doc.data();
+
+if(String(d.year).trim() !== String(year)) return;
+if(String(d.post).trim() !== String(post)) return;
+
+pdfHtml += `
 <div class="card">
-<h3>${id}</h3>
-<button onclick="openSet('${id}')">Open</button>
+<b>${d.title}</b>
+<p>${d.desc}</p>
+<a href="${d.fileName}" target="_blank">Open PDF</a>
 </div>
 `;
 });
 
-document.getElementById("sets").innerHTML = html;
+document.getElementById("pdfBox").innerHTML =
+pdfHtml || "No PDF Found";
+
+/* QUESTIONS */
+let temp=[];
+
+const qSnap = await getDocs(collection(db,"pyqQuestions"));
+
+qSnap.forEach(doc=>{
+const d=doc.data();
+
+if(String(d.year).trim() !== String(year)) return;
+if(String(d.post).trim() !== String(post)) return;
+
+temp.push(d);
+});
+
+questions = temp;
+
 }
 
-window.openSet = function(id){
+/* START QUIZ */
+function startQuiz(){
+if(!questions.length){
+alert("No Questions Found");
+return;
+}
+showQ();
+}
 
-const data = DATA[id];
+/* SHOW QUESTION */
+function showQ(){
 
-document.getElementById("pdfs").innerHTML =
-(data.pdfs||[]).map(p=>`
+const q = questions[current];
+
+let html = `
 <div class="card">
-<a href="${p}" target="_blank">Open PDF</a>
-</div>
-`).join("");
-
-currentQuestions = data.questions || [];
-
-document.getElementById("quiz").innerHTML = `
-<div class="card">
-<button onclick="startQuiz()">Start Quiz</button>
-</div>
-`;
-};
-
-window.startQuiz = function(){
-
-let q = currentQuestions[0];
-
-document.getElementById("quiz").innerHTML = `
-<div class="card">
-<h3>${q.question}</h3>
-</div>
+<h3>Q ${current+1}</h3>
+<p><b>${q.question}</b></p>
 `;
 
+(q.options||[]).forEach(op=>{
+html += `<button class="option" onclick="selectAns('${op}')">${op}</button>`;
+});
+
+html += `</div>`;
+
+document.getElementById("quizBox").innerHTML = html;
+}
+
+window.selectAns=function(v){
+answers[current]=v;
 };
 
-load();
+/* EVENTS */
+document.getElementById("pyqSelect").addEventListener("change",loadAll);
+document.getElementById("postSelect").addEventListener("change",loadAll);
+document.getElementById("startBtn").addEventListener("click",startQuiz);
+
+loadAll();
 
 </script>
 
