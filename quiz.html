@@ -267,14 +267,6 @@ onAuthStateChanged(auth, (u) => {
 
   document.getElementById("subjectBox").classList.remove("hide");
 });
-let user=null;
-let subject="";
-let questions=[];
-let current=0;
-let answers={};
-let submitted=false;
-let sec=1800;
-let timerInt=null;
 
 /* START QUIZ */
 window.startQuiz = async function(sub){
