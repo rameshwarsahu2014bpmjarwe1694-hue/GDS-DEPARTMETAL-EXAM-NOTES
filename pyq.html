@@ -138,17 +138,16 @@ const db = getFirestore(app);
 
 let questions=[], current=0, answers=[];
 
-/* SAFE NORMALIZER */
+/* SAFE NORMALIZER (FINAL FIX) */
 function norm(v){
-return String(v||"")
+return String(v || "")
 .toLowerCase()
-.replace(/\s+/g,"")
-.replace(/pyq/g,"")
-.trim();
+.replace(/[^a-z0-9]/g,""); // only keep letters + numbers
 }
 
 function val(id){
-return document.getElementById(id).value || "";
+const el = document.getElementById(id);
+return el ? el.value.trim() : "";
 }
 
 /* LOAD DATA */
