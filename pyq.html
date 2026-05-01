@@ -64,6 +64,20 @@
         appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
     };
 
+    <script type="module">
+    // 1. सही Firebase Links (इन्हें बदलना बहुत ज़रूरी था)
+    import { initializeApp } from "https://gstatic.com";
+    import { getFirestore, collection, getDocs } from "https://gstatic.com";
+
+    // 2. सही Config (AuthDomain को ठीक किया गया है)
+    const firebaseConfig = {
+        apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+        authDomain: "://firebaseapp.com",
+        projectId: "gds-departmental-exam-studyhub",
+        storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
+        appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+    };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -76,18 +90,17 @@
         const post = document.getElementById("postSelect").value;
         if(!year || !post) return;
 
-        document.getElementById("pdfBox").innerHTML = "<div class='loading'>Loading Data...</div>";
+        document.getElementById("pdfBox").innerHTML = "<div class='loading'>Data लोड हो रहा है...</div>";
         document.getElementById("quizBox").style.display = "none";
         document.getElementById("resultBox").style.display = "none";
         document.getElementById("startBtn").style.display = "block";
 
         try {
-            // 1. Load PDFs
+            // PDF Files लाना
             const pdfSnap = await getDocs(collection(db, "pyqFiles"));
             let pdfHtml = "";
             pdfSnap.forEach(doc => {
                 const d = doc.data();
-                // Admin code uses esc(), so we compare carefully
                 if(String(d.category).trim() === year && String(d.post).trim() === post) {
                     pdfHtml += `
                         <div class="card">
@@ -97,9 +110,9 @@
                         </div>`;
                 }
             });
-            document.getElementById("pdfBox").innerHTML = pdfHtml || "<div class='empty'>No PDF Found for this selection</div>";
+            document.getElementById("pdfBox").innerHTML = pdfHtml || "<div class='empty'>इस विषय के लिए कोई PDF नहीं मिली।</div>";
 
-            // 2. Load Questions
+            // सवाल लाना
             const qSnap = await getDocs(collection(db, "pyqQuestions"));
             questions = [];
             qSnap.forEach(doc => {
@@ -108,23 +121,21 @@
                     questions.push(d);
                 }
             });
-            
-            // Sort questions if serial exists
             questions.sort((a, b) => (a.serial || 0) - (b.serial || 0));
 
         } catch (error) {
             console.error("Error:", error);
-            document.getElementById("pdfBox").innerHTML = "<div class='empty' style='color:red;'>Error loading data!</div>";
+            document.getElementById("pdfBox").innerHTML = "<div class='empty' style='color:red;'>डेटा लोड करने में समस्या आई!</div>";
         }
     }
 
-    // Listeners for Selection
-    document.getElementById("pyqSelect").addEventListener("change", loadData);
-    document.getElementById("postSelect").addEventListener("change", loadData);
+    // इवेंट लिसनर्स
+    document.getElementById("pyqSelect").onchange = loadData;
+    document.getElementById("postSelect").onchange = loadData;
 
-    // Quiz Functions
+    // क्विज़ फंक्शन्स (window. पर डालना ज़रूरी है ताकि बटन काम करें)
     window.startQuiz = function() {
-        if(questions.length === 0) return alert("No questions available for this category.");
+        if(questions.length === 0) return alert("इस कैटेगरी में सवाल उपलब्ध नहीं हैं।");
         currentIdx = 0;
         answers = [];
         document.getElementById("startBtn").style.display = "none";
@@ -136,7 +147,7 @@
         const q = questions[currentIdx];
         let html = `
             <div class="card">
-                <h4>Question ${currentIdx + 1} of ${questions.length}</h4>
+                <h4>सवाल ${currentIdx + 1} / ${questions.length}</h4>
                 <p style="margin:15px 0; font-size:18px;"><b>${q.question}</b></p>
                 ${q.options.map((opt, i) => `
                     <button class="option ${answers[currentIdx] === opt ? 'selected' : ''}" 
@@ -160,23 +171,23 @@
 
     window.submitQuiz = function() {
         let score = 0;
-        let reviewHtml = "<h3>Results & Review</h3>";
+        let reviewHtml = "<h3>रिजल्ट और रिव्यू</h3>";
         questions.forEach((q, i) => {
             const isCorrect = answers[i] === q.answer;
             if(isCorrect) score++;
             reviewHtml += `
                 <div class="card" style="border-left:5px solid ${isCorrect ? 'green' : 'red'}">
                     <p><b>Q${i+1}. ${q.question}</b></p>
-                    <p style="color:${isCorrect ? 'green' : 'red'}">Your Answer: ${answers[i] || 'Not Answered'}</p>
-                    <p style="color:green">Correct Answer: ${q.answer}</p>
+                    <p style="color:${isCorrect ? 'green' : 'red'}">आपका जवाब: ${answers[i] || 'नहीं दिया'}</p>
+                    <p style="color:green">सही जवाब: ${q.answer}</p>
                 </div>`;
         });
         document.getElementById("quizBox").style.display = "none";
         document.getElementById("resultBox").style.display = "block";
         document.getElementById("resultBox").innerHTML = `
             <div class="card" style="text-align:center; background:#e7f3ff;">
-                <h2>Final Score: ${score} / ${questions.length}</h2>
-                <button class="btn btn-blue" onclick="location.reload()">Try Another Subject</button>
+                <h2>स्कोर: ${score} / ${questions.length}</h2>
+                <button class="btn btn-blue" onclick="location.reload()">Back</button>
             </div> ${reviewHtml}`;
     }
 </script>
