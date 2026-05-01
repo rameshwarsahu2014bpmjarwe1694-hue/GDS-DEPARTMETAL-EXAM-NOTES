@@ -9,8 +9,8 @@
 body{font-family:Arial;background:#f4f6f9;padding:15px}
 .container{max-width:900px;margin:auto;background:#fff;padding:20px;border-radius:12px}
 .card{padding:15px;border:1px solid #ddd;border-radius:10px;margin:10px 0}
-button{padding:10px;border:none;border-radius:8px;cursor:pointer;background:green;color:#fff}
-select{padding:10px;margin:5px 0;width:100%}
+select,button{padding:10px;margin:5px}
+button{background:green;color:#fff;border:none;border-radius:8px;cursor:pointer}
 </style>
 </head>
 
@@ -21,7 +21,7 @@ select{padding:10px;margin:5px 0;width:100%}
 <h2>📘 PYQ System</h2>
 
 <select id="category">
-<option value="">Select Category</option>
+<option value="">Select Year</option>
 <option>PYQ 2020</option>
 <option>PYQ 2021</option>
 <option>PYQ 2022</option>
@@ -40,22 +40,19 @@ select{padding:10px;margin:5px 0;width:100%}
 <option>PA-SA</option>
 </select>
 
-<button id="loadBtn">Load Data</button>
+<button onclick="loadData()">Load Data</button>
 
 <hr>
 
 <h3>📄 PDFs</h3>
-<div id="pdfBox">No Data</div>
-
-<h3>❓ Questions</h3>
-<div id="quizBox">No Data</div>
+<div id="pdfBox">Select filters</div>
 
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs }
+import { getFirestore, collection, getDocs } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -67,15 +64,13 @@ projectId: "gds-departmental-exam-studyhub"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* helpers */
+/* SAFE VALUE */
 function val(id){
 return document.getElementById(id).value.trim();
 }
 
-/* MAIN LOAD FUNCTION */
-async function loadData(){
-
-console.log("LOAD CLICKED");
+/* IMPORTANT FIX: EXACT MATCH (NO NORMALIZATION) */
+window.loadData = async function(){
 
 const category = val("category");
 const post = val("post");
@@ -85,19 +80,20 @@ alert("Select category & post");
 return;
 }
 
-/* ===== PDF LOAD ===== */
 let pdfHTML = "";
+
 const pdfSnap = await getDocs(collection(db,"pyqFiles"));
 
 pdfSnap.forEach(d=>{
 let data = d.data();
 
+/* EXACT MATCH (same as admin save) */
 if(data.category !== category) return;
 if(data.post !== post) return;
 
 pdfHTML += `
 <div class="card">
-<b>📌 ${data.title}</b><br>
+<b>📌 ${data.title}</b>
 <div>📄 ${data.fileName}</div>
 <div>📝 ${data.desc}</div>
 </div>
@@ -107,37 +103,7 @@ pdfHTML += `
 document.getElementById("pdfBox").innerHTML =
 pdfHTML || "No PDF Found";
 
-
-/* ===== QUESTION LOAD ===== */
-let qHTML = "";
-const qSnap = await getDocs(collection(db,"pyqQuestions"));
-
-qSnap.forEach(d=>{
-let data = d.data();
-
-if(data.category !== category) return;
-if(data.post !== post) return;
-
-qHTML += `
-<div class="card">
-<b>${data.question}</b><br><br>
-A. ${data.options[0]}<br>
-B. ${data.options[1]}<br>
-C. ${data.options[2]}<br>
-D. ${data.options[3]}<br><br>
-<b>Ans: ${data.answer}</b>
-</div>
-`;
-});
-
-document.getElementById("quizBox").innerHTML =
-qHTML || "No Questions Found";
-
-}
-
-/* BUTTON FIX */
-document.getElementById("loadBtn")
-.addEventListener("click", loadData);
+};
 
 </script>
 
