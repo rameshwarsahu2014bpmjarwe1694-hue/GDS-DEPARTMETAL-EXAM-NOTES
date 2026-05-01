@@ -101,20 +101,24 @@ const pdfSnap = await getDocs(collection(db,"pyqFiles"));
 pdfSnap.forEach(d=>{
 let data = d.data();
 
+/* FILTER */
 if(data.category !== category) return;
 if(data.post !== post) return;
 
+/* TEXT ONLY DISPLAY */
 pdfHTML += `
 <div class="card">
-<b>${data.title}</b><br>
-<div>${data.desc}</div>
-<a href="${data.fileName}" target="_blank">Open PDF</a>
+<b>📌 ${data.title}</b><br>
+<div>📄 ${data.fileName}</div>
+<div>📝 ${data.desc}</div>
 </div>
 `;
 });
 
-document.getElementById("pdfBox").innerHTML = pdfHTML || "No PDF Found";
+document.getElementById("pdfBox").innerHTML =
+pdfHTML || "No PDF Found";
 
+};
 /* QUESTIONS */
 questions = [];
 const qSnap = await getDocs(collection(db,"pyqQuestions"));
