@@ -122,7 +122,7 @@ await window.createUserWithEmailAndPassword(window.auth, email, password);
 const uid = userCredential.user.uid;
 
 const { doc, setDoc } = await import(
-"https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js"
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
 );
 
 await setDoc(doc(window.db, "candidates", uid), {
