@@ -1,78 +1,48 @@
 import { initializeApp } from "https://gstatic.com";
-
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged // <-- नया इम्पोर्ट
-} from "https://gstatic.com";
-
-import {
-  getFirestore,
-  doc,    // <-- नया इम्पोर्ट
-  getDoc  // <-- नया इम्पोर्ट
-} from "https://gstatic.com";
+import { getAuth, onAuthStateChanged, signOut } from "https://gstatic.com";
+import { getFirestore, doc, getDoc, collection, getDocs } from "https://gstatic.com";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
   authDomain: "://firebaseapp.com",
   projectId: "gds-departmental-exam-studyhub",
-  storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
+  storageBucket: "://appspot.com",
   messagingSenderId: "759916756080",
   appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
-// INIT
 const app = initializeApp(firebaseConfig);
-
-// SERVICES
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// GLOBAL EXPORTS (Window object for HTML access)
-window.app = app;
+// Global Exports
 window.auth = auth;
 window.db = db;
-window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+window.doc = doc;
+window.getDoc = getDoc;
+window.collection = collection;
+window.getDocs = getDocs;
 window.signOut = signOut;
 
-// --- PAID STATUS CHECK LOGIC ---
+// Strict Payment Check
+window.isPaidMember = false; 
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    console.log("User Logged In:", user.uid);
-    
     try {
-      // candidates कलेक्शन में यूजर का स्टेटस चेक करना
       const docRef = doc(db, "candidates", user.uid);
       const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        
-        // अगर यूजर 'paid' है
-        if (userData.status === "paid") {
-          console.log("Access Granted: Paid User");
-          // यहाँ हम एक ग्लोबल वेरिएबल सेट कर रहे हैं जिसे pyq.html पहचान लेगा
-          window.isPaidMember = true; 
-          
-          // अगर pyq.html में डेटा लोड करने का कोई फंक्शन है, तो उसे यहाँ कॉल करें
-          if (typeof loadPYQData === "function") {
-             loadPYQData();
-          }
-        } else {
-          console.log("Access Denied: Not a Paid User");
-          window.isPaidMember = false;
-          // अगर आप चाहें तो यहाँ अलर्ट दिखा सकते हैं
-        }
+      if (docSnap.exists() && docSnap.data().status === "paid") {
+        window.isPaidMember = true;
+        console.log("Strict Access: GRANTED");
+        // अगर pyq.html पर हैं, तो डेटा लोड करने का सिग्नल दें
+        if (typeof window.triggerLoad === "function") window.triggerLoad();
+      } else {
+        window.isPaidMember = false;
+        console.log("Strict Access: DENIED (Not Paid)");
       }
-    } catch (error) {
-      console.error("Error checking paid status:", error);
-    }
+    } catch (e) { console.error("Auth Error", e); }
   } else {
-    console.log("User Not Logged In");
     window.isPaidMember = false;
   }
 });
