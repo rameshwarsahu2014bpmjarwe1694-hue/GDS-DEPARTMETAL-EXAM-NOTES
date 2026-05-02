@@ -6,9 +6,29 @@
 </head>
 <body>
 
-<h2>UPI Payment Submit</h2>
+<h2>UPI Payment</h2>
+
+<p><b>Amount: ₹9</b></p>
+
+<p><b>UPI ID:</b></p>
+
+<div style="padding:10px;border:1px solid #ccc;border-radius:8px;background:#f9f9f9;">
+rameshwarsahu2014bpmjarwe1694@oksbi
+</div>
+<button onclick="copyUPI()">Copy UPI ID</button>
+
+<script>
+function copyUPI(){
+navigator.clipboard.writeText("rameshwarsahu2014bpmjarwe1694@oksbi");
+alert("UPI ID copied");
+}
+</script>
+<br>
+
+<p>⚠️ पहले ₹9 payment करें, फिर नीचे Transaction ID डालें</p>
 
 <input type="text" id="txnId" placeholder="Enter UPI Transaction ID / UTR">
+
 <button onclick="submitPayment()">Submit Payment</button>
 
 <script type="module">
