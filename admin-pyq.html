@@ -109,7 +109,7 @@ hr{margin:20px 0;border:none;border-top:1px solid #ddd}
 <textarea id="desc" placeholder="Description"></textarea>
 <button class="save-btn" onclick="savePdf()">Save PDF</button>
 </div>
-
+<div id="uploadedList"></div>
 <hr>
 
 <h3>Add Question</h3>
@@ -197,7 +197,43 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 const statusMsg = document.getElementById("statusMsg");
+<script>
+let uploadedPYQ = [];
 
+// 👉 Upload होते ही call करो इस function को
+function handleUpload(file, title) {
+  const item = {
+    id: Date.now(),
+    title: title,
+    file: file
+  };
+
+  uploadedPYQ.push(item);
+  renderUploadedList();
+}
+
+// 👉 List दिखाने के लिए
+function renderUploadedList() {
+  const container = document.getElementById("uploadedList");
+  container.innerHTML = "";
+
+  uploadedPYQ.forEach(item => {
+    container.innerHTML += `
+      <div style="margin:5px 0;">
+        <span>${item.title}</span>
+        <button onclick="deleteTemp(${item.id})">❌ Delete</button>
+      </div>
+    `;
+  });
+}
+
+// 👉 बिना save delete
+function deleteTemp(id) {
+  uploadedPYQ = uploadedPYQ.filter(item => item.id !== id);
+  renderUploadedList();
+}
+</script>
+  
 /* AUTO LOGIN */
 signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASS)
 .then(()=>{
@@ -231,7 +267,39 @@ function clearQ(){
 document.getElementById(id).value="";
 });
 }
+function renderUploadedList() {
+  const container = document.getElementById("uploadedList");
+  if(!container) return;
 
+  container.innerHTML = "";
+
+  uploadedPYQ.forEach(item => {
+    container.innerHTML += `
+      <div class="card">
+        <div class="row">
+          <div>
+            <b>${item.title}</b>
+            <div class="small">${item.fileName}</div>
+          </div>
+          <div>
+            <button class="delete-btn" onclick="deleteTemp(${item.id})">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  if(uploadedPYQ.length === 0){
+    container.innerHTML = "No Uploaded Items";
+  }
+}
+
+window.deleteTemp = function(id){
+  uploadedPYQ = uploadedPYQ.filter(x => x.id !== id);
+  renderUploadedList();
+};
 function esc(str){
 return String(str).replace(/[&<>"']/g,m=>({
 "&":"&amp;",
