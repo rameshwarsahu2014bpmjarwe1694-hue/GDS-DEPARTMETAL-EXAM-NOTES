@@ -150,9 +150,13 @@ data.forEach((d,i)=>{
 
 html += `
 <div class="card">
-<div class="name">${i+1}. ${d.name || "No Name"}</div>
-<div class="info">📱 ${d.mobile || "-"}</div>
-<div class="info">📧 ${d.email || "-"}</div>
+
+<div class="name">${i+1}. ${d.name || d.fullName || "No Name"}</div>
+
+<div class="info">📱 ${d.mobile || d.phone || "-"}</div>
+
+<div class="info">📧 ${d.email || d.userEmail || "-"}</div>
+
 </div>
 `;
 
