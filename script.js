@@ -111,7 +111,9 @@ if (!name || !mobile || !email || !password) {
 alert("Fill all fields");
 return;
 }
-
+if (!name.trim()) return alert("Name required");
+if (!mobile.trim()) return alert("Mobile required");
+if (!email.trim()) return alert("Email required");
 waitForFirebase(async function () {
 
 try {
