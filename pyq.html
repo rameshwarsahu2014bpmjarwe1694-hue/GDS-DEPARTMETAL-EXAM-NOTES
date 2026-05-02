@@ -90,6 +90,10 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
 const app = initializeApp(firebaseConfig);
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const auth = getAuth(app);
+window.auth = auth;
 const db = getFirestore(app);
 window.db = db;
 
