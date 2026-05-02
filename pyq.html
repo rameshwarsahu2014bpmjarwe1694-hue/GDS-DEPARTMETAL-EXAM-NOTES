@@ -202,7 +202,7 @@ color:#666;
 
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
+import { onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
 getFirestore,
 collection,
@@ -239,7 +239,33 @@ return String(v || "").replace(/'/g,"\\'");
 
 /* LOAD DATA */
 async function loadAll(){
+function listenUserStatus(){
 
+const user = window.auth.currentUser;
+
+if(!user) return;
+
+const ref = doc(window.db, "candidates", user.uid);
+
+onSnapshot(ref, (snap)=>{
+
+const data = snap.data();
+
+if(data && data.isPaidMember === true){
+
+// 🔥 AUTO UNLOCK MESSAGE
+alert("Payment Approved! Now you can access all PDFs");
+
+// optional reload
+location.reload();
+
+}
+
+});
+
+}
+
+listenUserStatus();
 document.getElementById("pdfBox").innerHTML="Loading...";
 document.getElementById("quizBox").style.display="none";
 document.getElementById("resultBox").style.display="none";
