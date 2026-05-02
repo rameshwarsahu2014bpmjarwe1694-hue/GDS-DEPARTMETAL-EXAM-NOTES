@@ -268,14 +268,60 @@ pdfHtml+=`
 <b>${safe(d.title)}</b>
 <div class="small">${safe(d.desc)}</div>
 <div class="small">${safe(d.fileName)}</div>
-<a href="${safe(d.fileName)}" target="_blank">Open PDF</a>
+
+<a href="#" onclick="openPDF('${safe(d.fileName)}')">
+Open PDF
+</a>
+
 </div>
 `;
 });
 
+document.getElementById("pdfBox").innerHTML =
+pdfHtml || "<div class='empty'>No PDF Found</div>";
 document.getElementById("pdfBox").innerHTML=
 pdfHtml || "<div class='empty'>No PDF Found</div>";
+<script type="module">
 
+async function openPDF(fileUrl){
+
+const user = window.auth.currentUser;
+
+if(!user){
+alert("Login required");
+return;
+}
+
+const { doc, getDoc } = await import(
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+);
+
+const ref = doc(window.db, "candidates", user.uid);
+const snap = await getDoc(ref);
+
+if(!snap.exists()){
+alert("User data not found");
+return;
+}
+
+const userData = snap.data();
+
+// 🔥 LOCK CHECK
+if(userData.isPaidMember === true){
+
+window.open(fileUrl, "_blank");
+
+}else{
+
+alert("Payment required to access PDF");
+
+}
+
+}
+
+window.openPDF = openPDF;
+
+</script>
 /* QUESTIONS */
 let temp=[];
 
