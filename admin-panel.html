@@ -32,11 +32,7 @@ display:grid;
 grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
 gap:15px;
 }
-<h2>📊 Analytics</h2>
 
-<div id="analyticsBox" style="margin-top:15px;">
-Loading...
-</div>
 .card{
 background:#fff;
 padding:25px 15px;
@@ -73,21 +69,14 @@ cursor:pointer;
 <div class="grid">
 
 <div class="card" onclick="location.href='candidates.html'">👥 Total Candidates</div>
-
 <div class="card" onclick="location.href='admin-notes.html'">📚 Manage Notes</div>
-
 <div class="card" onclick="location.href='admin-quiz.html'">📝 Add Quiz</div>
 <div class="card" onclick="location.href='admin-pyq.html'">📄 Add PYQ</div>
 <div class="card" onclick="location.href='admin-notification.html'">📢 Notifications</div>
-
 <div class="card" onclick="location.href='payments.html'">💳 Payments</div>
-
 <div class="card" onclick="location.href='settings.html'">⚙ Settings</div>
-
 <div class="card" onclick="location.href='reports.html'">📊 Reports</div>
-
 <div class="card" onclick="location.href='security.html'">🔒 Security</div>
-
 <div class="card" onclick="location.href='admin-syllabus.html'">📘 Syllabus</div>
 
 </div>
@@ -96,10 +85,13 @@ cursor:pointer;
 
 </div>
 
-<!-- 🔥 NEW ADD START -->
+<!-- ✅ ANALYTICS (CORRECT PLACE) -->
+<h2 style="text-align:center;margin-top:20px;">📊 Analytics</h2>
+<div id="analyticsBox" style="max-width:900px;margin:auto;">Loading...</div>
+
+<!-- ✅ PENDING PAYMENTS -->
 <h2 style="text-align:center;margin-top:20px;">Pending Payments</h2>
 <div id="paymentList" style="max-width:900px;margin:auto;">Loading...</div>
-<!-- 🔥 NEW ADD END -->
 
 <script type="module" src="firebase.js"></script>
 <script defer src="script.js"></script>
@@ -140,17 +132,19 @@ return;
 waitForFirebase();
 </script>
 
-<!-- 🔥 NEW ADD START -->
+<!-- ✅ MAIN SCRIPT -->
 <script>
 
 async function loadPayments(){
 
-const res = await fetch("http://localhost:3000/payments/pending");
+const res = await fetch("http://localhost:3000/payments");
 const data = await res.json();
 
 let html = "";
 
 data.forEach(p => {
+
+if(p.status !== "pending") return;
 
 html += `
 <div style="border:1px solid #ccc;padding:10px;margin:10px;border-radius:10px;">
@@ -158,7 +152,8 @@ html += `
 Email: ${p.email}<br>
 Txn ID: ${p.txnId}<br><br>
 
-<button onclick="approve('${p.uid}')" style="padding:8px 12px;background:green;color:#fff;border:none;border-radius:6px;">
+<button onclick="approve('${p.uid}')"
+style="padding:8px 12px;background:green;color:#fff;border:none;border-radius:6px;">
 Approve
 </button>
 </div>
@@ -173,7 +168,7 @@ html || "No Pending Payments";
 
 async function approve(uid){
 
-await fetch("http://localhost:3000/payments/approve", {
+await fetch("http://localhost:3000/approve-payment", {
 method: "POST",
 headers: {"Content-Type":"application/json"},
 body: JSON.stringify({ uid })
@@ -184,9 +179,6 @@ alert("Approved & User Unlocked");
 loadPayments();
 }
 
-loadPayments();
-
-<script>
 async function loadAnalytics(){
 
 const res = await fetch("http://localhost:3000/analytics");
@@ -211,7 +203,10 @@ document.getElementById("analyticsBox").innerHTML = `
 `;
 }
 
+loadPayments();
 loadAnalytics();
+
 </script>
+
 </body>
 </html>
