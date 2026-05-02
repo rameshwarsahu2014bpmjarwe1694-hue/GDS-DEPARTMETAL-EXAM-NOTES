@@ -15,6 +15,7 @@
 <div style="padding:10px;border:1px solid #ccc;border-radius:8px;background:#f9f9f9;">
 rameshwarsahu2014bpmjarwe1694@oksbi
 </div>
+
 <button onclick="copyUPI()">Copy UPI ID</button>
 
 <script>
@@ -23,6 +24,7 @@ navigator.clipboard.writeText("rameshwarsahu2014bpmjarwe1694@oksbi");
 alert("UPI ID copied");
 }
 </script>
+
 <br>
 
 <p>⚠️ पहले ₹9 payment करें, फिर नीचे Transaction ID डालें</p>
@@ -31,14 +33,90 @@ alert("UPI ID copied");
 
 <button onclick="submitPayment()">Submit Payment</button>
 
+<!-- 🔥 NEW ADD: STATUS -->
+<h3>Payment Status</h3>
+<div id="statusBox">Checking...</div>
+
 <script type="module">
+
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+doc,
+getDoc,
+onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const auth = getAuth();
 
+/* 🔥 LOAD STATUS */
+async function loadStatus(){
+
+const user = auth.currentUser;
+if(!user) return;
+
+const ref = doc(window.db, "payments", user.uid);
+const snap = await getDoc(ref);
+
+if(!snap.exists()){
+document.getElementById("statusBox").innerHTML = "No payment submitted";
+return;
+}
+
+const data = snap.data();
+
+if(data.status === "pending"){
+statusBox.innerHTML = "⏳ Pending Approval";
+}
+
+if(data.status === "approved"){
+statusBox.innerHTML = "✅ Payment Approved";
+}
+
+if(data.status === "rejected"){
+statusBox.innerHTML = "❌ Payment Rejected";
+}
+
+}
+
+/* 🔥 REALTIME STATUS */
+function listenStatus(){
+
+const user = auth.currentUser;
+if(!user) return;
+
+const ref = doc(window.db, "payments", user.uid);
+
+onSnapshot(ref,(snap)=>{
+if(!snap.exists()) return;
+
+const data = snap.data();
+
+if(data.status === "pending"){
+statusBox.innerHTML="⏳ Pending Approval";
+}
+
+if(data.status === "approved"){
+statusBox.innerHTML="✅ Payment Approved";
+}
+
+if(data.status === "rejected"){
+statusBox.innerHTML="❌ Payment Rejected";
+}
+
+});
+
+}
+
+/* 🔥 SUBMIT PAYMENT */
 async function submitPayment(){
 
-const txnId = document.getElementById("txnId").value;
+const txnId = document.getElementById("txnId").value.trim();
+
+if(!txnId){
+alert("Enter Transaction ID");
+return;
+}
+
 const user = auth.currentUser;
 
 if(!user){
@@ -46,6 +124,25 @@ alert("Login required");
 return;
 }
 
+/* 🔥 DUPLICATE CHECK */
+const ref = doc(window.db, "payments", user.uid);
+const snap = await getDoc(ref);
+
+if(snap.exists()){
+const data = snap.data();
+
+if(data.status === "pending"){
+alert("Already submitted. Wait for approval");
+return;
+}
+
+if(data.status === "approved"){
+alert("Already approved");
+return;
+}
+}
+
+/* 🔥 SUBMIT WITH AMOUNT */
 await fetch("http://localhost:3000/submit-upi", {
 method: "POST",
 headers: {"Content-Type":"application/json"},
@@ -54,14 +151,24 @@ uid: user.uid,
 name: user.displayName || "",
 email: user.email,
 mobile: "",
-txnId: txnId
+txnId: txnId,
+amount: "9"   // 🔥 ADD
 })
 });
 
 alert("Payment Submitted - Waiting for Approval");
+
+loadStatus();
+
 }
 
 window.submitPayment = submitPayment;
+
+/* INIT */
+setTimeout(()=>{
+loadStatus();
+listenStatus();
+},1000);
 
 </script>
 
