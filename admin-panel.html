@@ -92,6 +92,11 @@ cursor:pointer;
 
 </div>
 
+<!-- 🔥 NEW ADD START -->
+<h2 style="text-align:center;margin-top:20px;">Pending Payments</h2>
+<div id="paymentList" style="max-width:900px;margin:auto;">Loading...</div>
+<!-- 🔥 NEW ADD END -->
+
 <script type="module" src="firebase.js"></script>
 <script defer src="script.js"></script>
 
@@ -129,9 +134,9 @@ return;
 }
 
 waitForFirebase();
-</body>
-<h2>Pending Payments</h2>
-<div id="paymentList">Loading...</div>
+</script>
+
+<!-- 🔥 NEW ADD START -->
 <script>
 
 async function loadPayments(){
@@ -144,12 +149,12 @@ let html = "";
 data.forEach(p => {
 
 html += `
-<div style="border:1px solid #ccc;padding:10px;margin:10px;">
+<div style="border:1px solid #ccc;padding:10px;margin:10px;border-radius:10px;">
 <b>${p.name}</b><br>
 Email: ${p.email}<br>
-Txn ID: ${p.txnId}<br>
+Txn ID: ${p.txnId}<br><br>
 
-<button onclick="approve('${p.uid}')">
+<button onclick="approve('${p.uid}')" style="padding:8px 12px;background:green;color:#fff;border:none;border-radius:6px;">
 Approve
 </button>
 </div>
@@ -178,5 +183,7 @@ loadPayments();
 loadPayments();
 
 </script>
+<!-- 🔥 NEW ADD END -->
 
+</body>
 </html>
