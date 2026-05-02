@@ -22,6 +22,7 @@ doc,
 updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* FIREBASE */
 const firebaseConfig = {
 apiKey: "YOUR_KEY",
 authDomain: "YOUR_DOMAIN",
@@ -31,8 +32,21 @@ projectId: "YOUR_PROJECT_ID"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* WHATSAPP CONFIG */
+const PHONE = "91XXXXXXXXXX";   // admin number
+const API_KEY = "YOUR_API_KEY";
+
+/* WHATSAPP FUNCTION */
+function sendWhatsApp(message) {
+  fetch(
+    `https://api.callmebot.com/whatsapp.php?phone=${PHONE}&text=` +
+    encodeURIComponent(message) +
+    `&apikey=${API_KEY}`
+  );
+}
+
 /* LOAD PAYMENTS */
-async function loadPayments(){
+async function loadPayments() {
 
 const q = query(collection(db,"payments"), where("status","==","pending"));
 const snap = await getDocs(q);
@@ -45,48 +59,59 @@ const p = d.data();
 
 html += `
 <div style="border:1px solid #ccc;padding:10px;margin:10px;">
-<b>${p.name}</b><br>
-Txn: ${p.txnId}<br>
+<b>${p.name || "User"}</b><br>
 Amount: ₹${p.amount}<br>
+Txn ID: ${p.txnId || "-"}<br>
 
-<button onclick="approve('${d.id}','${p.uid}','${p.name}','${p.amount}')">
+<button onclick="approve('${d.id}','${p.uid}','${p.name}','${p.amount}')"
+style="background:green;color:#fff;padding:8px;border:none;border-radius:6px;">
 Approve
 </button>
 
 </div>
 `;
+
 });
 
-document.getElementById("paymentList").innerHTML = html;
+document.getElementById("paymentList").innerHTML =
+html || "No Pending Payments";
 }
 
-/* APPROVE + FIREBASE + WHATSAPP */
-window.approve = async function(paymentId, uid, name, amount){
+/* APPROVE FUNCTION */
+window.approve = async function(paymentId, uid, name, amount) {
 
+try {
+
+/* 1. UPDATE PAYMENT */
 await updateDoc(doc(db,"payments",paymentId),{
 status:"approved",
 approvedAt:Date.now()
 });
 
+/* 2. UPDATE USER */
 await updateDoc(doc(db,"candidates",uid),{
 isPaidMember:true
 });
 
-/* WHATSAPP ALERT */
-fetch("https://api.callmebot.com/whatsapp.php?phone=ADMIN_NUMBER&text=" +
-encodeURIComponent(
-`Payment Approved:
-Name:${name}
-Amount:${amount}
-UID:${uid}`
-) +
-"&apikey=YOUR_API_KEY");
+/* 3. WHATSAPP ALERT */
+sendWhatsApp(
+`Payment Approved ✅
+Name: ${name}
+Amount: ₹${amount}
+UID: ${uid}`
+);
 
-alert("User Unlocked + WhatsApp Sent");
+alert("Approved + WhatsApp Sent");
 
 loadPayments();
+
+} catch (err) {
+alert(err.message);
 }
 
+};
+
+/* INIT */
 loadPayments();
 
 </script>
