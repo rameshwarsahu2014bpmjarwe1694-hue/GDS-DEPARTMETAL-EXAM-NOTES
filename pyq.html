@@ -199,7 +199,7 @@ color:#666;
 
 </div>
 
-<script type="module">
+
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
@@ -311,10 +311,8 @@ if(userData.isPaidMember === true){
 
 window.open(fileUrl, "_blank");
 
-}else{
-
-alert("Payment required to access PDF");
-
+if(confirm("Payment required. Go to payment page?")){
+window.location.href = "payments.html";
 }
 
 }
