@@ -1,48 +1,37 @@
-import { initializeApp } from "https://gstatic.com";
-import { getAuth, onAuthStateChanged, signOut } from "https://gstatic.com";
-import { getFirestore, doc, getDoc, collection, getDocs } from "https://gstatic.com";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-  authDomain: "://firebaseapp.com",
+  authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
   projectId: "gds-departmental-exam-studyhub",
-  storageBucket: "://appspot.com",
+  storageBucket: "gds-departmental-exam-studyhub.firebasestorage.app",
   messagingSenderId: "759916756080",
   appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
+// INIT
 const app = initializeApp(firebaseConfig);
+
+// SERVICES
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Global Exports
+// GLOBAL EXPORTS (OLD STYLE ONLY)
+window.app = app;
 window.auth = auth;
 window.db = db;
-window.doc = doc;
-window.getDoc = getDoc;
-window.collection = collection;
-window.getDocs = getDocs;
+
+window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+window.signInWithEmailAndPassword = signInWithEmailAndPassword;
 window.signOut = signOut;
-
-// Strict Payment Check
-window.isPaidMember = false; 
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    try {
-      const docRef = doc(db, "candidates", user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists() && docSnap.data().status === "paid") {
-        window.isPaidMember = true;
-        console.log("Strict Access: GRANTED");
-        // अगर pyq.html पर हैं, तो डेटा लोड करने का सिग्नल दें
-        if (typeof window.triggerLoad === "function") window.triggerLoad();
-      } else {
-        window.isPaidMember = false;
-        console.log("Strict Access: DENIED (Not Paid)");
-      }
-    } catch (e) { console.error("Auth Error", e); }
-  } else {
-    window.isPaidMember = false;
-  }
-});
