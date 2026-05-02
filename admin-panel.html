@@ -27,20 +27,34 @@ max-width:1000px;
 margin:auto;
 }
 
-.card{
-background:#fff;
-padding:15px;
-margin:10px 0;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
 }
 
-button{
-padding:8px 12px;
-background:green;
+.card{
+background:#fff;
+padding:25px 15px;
+border-radius:14px;
+text-align:center;
+font-weight:bold;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+text-decoration:none;
+color:#111;
+cursor:pointer;
+}
+
+.logout{
+margin-top:25px;
+display:block;
+background:#b30000;
 color:#fff;
-border:none;
-border-radius:6px;
+padding:12px;
+text-align:center;
+border-radius:10px;
+text-decoration:none;
+font-weight:bold;
 cursor:pointer;
 }
 </style>
@@ -52,107 +66,69 @@ cursor:pointer;
 
 <div class="container">
 
-<h2>Pending Payments</h2>
-<div id="paymentList">Loading...</div>
+<div class="grid">
+
+<div class="card" onclick="location.href='candidates.html'">👥 Total Candidates</div>
+
+<div class="card" onclick="location.href='admin-notes.html'">📚 Manage Notes</div>
+
+<div class="card" onclick="location.href='admin-quiz.html'">📝 Add Quiz</div>
+<div class="card" onclick="location.href='admin-pyq.html'">📄 Add PYQ</div>
+<div class="card" onclick="location.href='admin-notification.html'">📢 Notifications</div>
+
+<div class="card" onclick="location.href='payments.html'">💳 Payments</div>
+
+<div class="card" onclick="location.href='settings.html'">⚙ Settings</div>
+
+<div class="card" onclick="location.href='reports.html'">📊 Reports</div>
+
+<div class="card" onclick="location.href='security.html'">🔒 Security</div>
+
+<div class="card" onclick="location.href='admin-syllabus.html'">📘 Syllabus</div>
 
 </div>
+
+<div class="logout" onclick="logout()">🚪 Logout</div>
+
+</div>
+
+<script type="module" src="firebase.js"></script>
+<script defer src="script.js"></script>
 
 <script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-getFirestore,
-collection,
-getDocs,
-query,
-where,
-doc,
-updateDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 
-/* FIREBASE */
-const firebaseConfig = {
-apiKey: "YOUR_KEY",
-authDomain: "YOUR_DOMAIN",
-projectId: "YOUR_PROJECT_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* WHATSAPP CONFIG */
-const PHONE = "91XXXXXXXXXX";
-const API_KEY = "YOUR_API_KEY";
-
-/* WHATSAPP ALERT */
-function sendWhatsApp(msg){
-fetch(
-`https://api.callmebot.com/whatsapp.php?phone=${PHONE}&text=`+
-encodeURIComponent(msg)+
-`&apikey=${API_KEY}`
-);
+function waitForFirebase(){
+if(window.auth){
+checkAdmin();
+}else{
+setTimeout(waitForFirebase,300);
+}
 }
 
-/* LOAD PENDING PAYMENTS */
-async function loadPayments(){
+function checkAdmin(){
 
-const q = query(collection(db,"payments"), where("status","==","pending"));
-const snap = await getDocs(q);
+onAuthStateChanged(window.auth, (user) => {
 
-let html = "";
-
-snap.forEach(d => {
-
-const p = d.data();
-
-html += `
-<div class="card">
-<b>${p.name || ""}</b><br>
-Email: ${p.email || ""}<br>
-Amount: ₹${p.amount || ""}<br>
-Txn: ${p.txnId || ""}<br><br>
-
-<button onclick="approve('${d.id}','${p.uid}','${p.name}','${p.amount}')">
-Approve
-</button>
-
-</div>
-`;
-});
-
-document.getElementById("paymentList").innerHTML =
-html || "No Pending Payments";
+if(!user){
+alert("Please login first.");
+window.location.href = "admin.html";
+return;
 }
 
-/* APPROVE PAYMENT */
-window.approve = async function(paymentId, uid, name, amount){
+if(user.email !== "rameshwarsahu2014bpmjarwe1694@gmail.com"){
+alert("Unauthorized Access");
+window.location.href = "login.html";
+return;
+}
 
-/* UPDATE PAYMENT */
-await updateDoc(doc(db,"payments",paymentId),{
-status:"approved",
-approvedAt:Date.now()
 });
 
-/* UPDATE USER */
-await updateDoc(doc(db,"candidates",uid),{
-isPaidMember:true
-});
+}
 
-/* WHATSAPP ALERT */
-sendWhatsApp(
-`Payment Approved
-Name: ${name}
-Amount: ₹${amount}
-UID: ${uid}`
-);
-
-alert("Approved Successfully");
-
-loadPayments();
-};
-
-loadPayments();
-
+waitForFirebase();
 </script>
 
 </body>
