@@ -3,152 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Total Candidates</title>
+<title>Candidates Admin</title>
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,Helvetica,sans-serif;
-}
-
 body{
-background:linear-gradient(135deg,#2193b0,#6dd5ed);
-min-height:100vh;
+margin:0;
+font-family:Arial;
+background:#f4f4f4;
 }
 
 .topbar{
 background:#111;
 color:#fff;
-padding:16px;
+padding:15px;
 text-align:center;
-font-size:24px;
-font-weight:700;
-}
-
-.container{
-max-width:1100px;
-margin:auto;
-padding:20px;
+font-size:20px;
+font-weight:bold;
 }
 
 .summary{
 background:#fff;
-padding:18px;
-border-radius:14px;
-text-align:center;
-font-size:24px;
+margin:15px;
+padding:15px;
+border-radius:10px;
 font-weight:bold;
-color:#2193b0;
-box-shadow:0 6px 15px rgba(0,0,0,.10);
-margin-bottom:16px;
+text-align:center;
 }
 
-.searchBox{
-margin-bottom:18px;
-}
-
-.searchBox input{
-width:100%;
-padding:14px;
-border:none;
-outline:none;
-border-radius:12px;
-font-size:16px;
-box-shadow:0 4px 10px rgba(0,0,0,.08);
-}
-
-.list{
-display:grid;
-gap:14px;
+.container{
+max-width:900px;
+margin:auto;
+padding:10px;
 }
 
 .card{
 background:#fff;
-padding:18px;
-border-radius:14px;
-box-shadow:0 5px 12px rgba(0,0,0,.08);
+padding:12px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
 .name{
-font-size:19px;
-font-weight:700;
-color:#111;
-margin-bottom:8px;
+font-weight:bold;
+font-size:18px;
+margin-bottom:5px;
 }
 
 .info{
-font-size:15px;
-color:#555;
-margin:4px 0;
+font-size:14px;
+color:#444;
 }
 
-.row{
-display:flex;
-gap:10px;
-margin-top:12px;
-flex-wrap:wrap;
-}
-
-.btn{
-flex:1;
-min-width:120px;
-padding:10px;
-border:none;
-border-radius:10px;
-cursor:pointer;
-font-weight:bold;
-}
-
-.deleteBtn{
-background:#e53935;
-color:#fff;
-}
-
-.deleteBtn:hover{
-background:#c62828;
-}
-
-.back{
-display:block;
-margin-top:22px;
-background:#111;
-color:#fff;
-padding:14px;
-text-align:center;
-border-radius:12px;
-text-decoration:none;
-font-weight:bold;
-}
-
-.empty{
-text-align:center;
-color:#fff;
-font-size:18px;
-padding:25px 10px;
-}
 </style>
 </head>
 
 <body>
 
-<div class="topbar">👥 Total Candidates (Real Time)</div>
-
-<div class="container">
+<div class="topbar">ADMIN - CANDIDATES</div>
 
 <div class="summary" id="countBox">Registered Candidates: 0</div>
 
-<div class="searchBox">
-<input type="text" id="searchInput" placeholder="Search by name / email / mobile">
-</div>
-
-<div class="list" id="candidateList">
-<div class="empty">Loading candidates...</div>
-</div>
-
-<a href="admin-panel.html" class="back">⬅ Back to Admin Panel</a>
-
+<div class="container" id="candidateList">
+Loading...
 </div>
 
 <script type="module" src="firebase.js"></script>
@@ -156,48 +73,33 @@ padding:25px 10px;
 <script type="module">
 
 import {
-onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+collection,
+onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
-collection,
-onSnapshot,
-deleteDoc,
-doc
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 let allCandidates = [];
 
-function safe(v){
-return String(v || "")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-}
+const ADMIN_EMAIL = "rameshwarsahu2014bpmjarwe1694@gmail.com";
 
-// ---------- AUTH CHECK ----------
-function waitForFirebase(){
-if(window.auth && window.db){
-checkAdmin();
-}else{
-setTimeout(waitForFirebase,300);
-}
-}
+function init(){
 
-function checkAdmin(){
+if(!window.auth || !window.db){
+setTimeout(init,300);
+return;
+}
 
 onAuthStateChanged(window.auth,(user)=>{
 
 if(!user){
-alert("Please login first");
 location.href="admin.html";
 return;
 }
 
-if(user.email !== "rameshwarsahu2014bpmjarwe1694@gmail.com"){
-alert("Unauthorized Access");
+if(user.email !== ADMIN_EMAIL){
 location.href="login.html";
 return;
 }
@@ -208,7 +110,6 @@ loadCandidates();
 
 }
 
-// ---------- REAL TIME LOAD ----------
 function loadCandidates(){
 
 const list = document.getElementById("candidateList");
@@ -218,53 +119,40 @@ onSnapshot(collection(window.db,"candidates"),(snap)=>{
 
 allCandidates = [];
 
-snap.forEach((d)=>{
-allCandidates.push({
-id:d.id,
-...d.data()
-});
+snap.forEach((doc)=>{
+allCandidates.push({id:doc.id,...doc.data()});
 });
 
-countBox.innerHTML = `Registered Candidates: ${snap.size}`;
+countBox.innerText = "Registered Candidates: " + snap.size;
 
-renderCandidates(allCandidates);
+render(allCandidates);
 
-},(error)=>{
-console.error(error);
-list.innerHTML = `<div class="empty">Failed to load candidates</div>`;
-countBox.innerHTML = `Registered Candidates: 0`;
+},()=>{
+
+list.innerHTML = "Error loading data";
+
 });
 
 }
 
-// ---------- RENDER ----------
-function renderCandidates(arr){
+function render(data){
 
 const list = document.getElementById("candidateList");
 
-if(arr.length === 0){
-list.innerHTML = `<div class="empty">No candidates found</div>`;
+if(data.length === 0){
+list.innerHTML = "No Candidates Found";
 return;
 }
 
 let html = "";
 
-arr.forEach((item,index)=>{
+data.forEach((d,i)=>{
 
 html += `
 <div class="card">
-
-<div class="name">${index+1}. ${safe(item.name || "No Name")}</div>
-
-<div class="info">📱 Mobile: ${safe(item.mobile || "-")}</div>
-<div class="info">📧 Email: ${safe(item.email || "-")}</div>
-
-<div class="row">
-<button class="btn deleteBtn" onclick="deleteCandidate('${item.id}')">
-Delete
-</button>
-</div>
-
+<div class="name">${i+1}. ${d.name || "No Name"}</div>
+<div class="info">📱 ${d.mobile || "-"}</div>
+<div class="info">📧 ${d.email || "-"}</div>
 </div>
 `;
 
@@ -274,44 +162,7 @@ list.innerHTML = html;
 
 }
 
-// ---------- DELETE ----------
-window.deleteCandidate = async function(id){
-
-if(!confirm("Delete this candidate?")) return;
-
-try{
-
-await deleteDoc(doc(window.db,"candidates",id));
-
-}catch(error){
-alert("Delete Failed");
-}
-
-}
-
-// ---------- SEARCH ----------
-document.getElementById("searchInput")
-.addEventListener("input",function(){
-
-const q = this.value.toLowerCase().trim();
-
-if(!q){
-renderCandidates(allCandidates);
-return;
-}
-
-const filtered = allCandidates.filter(item =>
-(item.name || "").toLowerCase().includes(q) ||
-(item.email || "").toLowerCase().includes(q) ||
-(item.mobile || "").toLowerCase().includes(q)
-);
-
-renderCandidates(filtered);
-
-});
-
-// ---------- START ----------
-waitForFirebase();
+init();
 
 </script>
 
