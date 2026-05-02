@@ -1,1 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Payment Submit</title>
+</head>
+<body>
 
+<h2>UPI Payment Submit</h2>
+
+<input type="text" id="txnId" placeholder="Enter UPI Transaction ID / UTR">
+<button onclick="submitPayment()">Submit Payment</button>
+
+<script type="module">
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const auth = getAuth();
+
+async function submitPayment(){
+
+const txnId = document.getElementById("txnId").value;
+const user = auth.currentUser;
+
+if(!user){
+alert("Login required");
+return;
+}
+
+await fetch("http://localhost:3000/submit-upi", {
+method: "POST",
+headers: {"Content-Type":"application/json"},
+body: JSON.stringify({
+uid: user.uid,
+name: user.displayName || "",
+email: user.email,
+mobile: "",
+txnId: txnId
+})
+});
+
+alert("Payment Submitted - Waiting for Approval");
+}
+
+window.submitPayment = submitPayment;
+
+</script>
+
+</body>
+</html>
