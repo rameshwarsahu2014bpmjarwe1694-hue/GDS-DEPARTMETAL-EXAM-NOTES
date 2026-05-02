@@ -2,12 +2,60 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#f4f4f4;
+}
+
+.topbar{
+background:#000;
+color:#fff;
+padding:15px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+}
+
+.container{
+padding:20px;
+max-width:1000px;
+margin:auto;
+}
+
+.card{
+background:#fff;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+
+button{
+padding:8px 12px;
+background:green;
+color:#fff;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+</style>
 </head>
+
 <body>
+
+<div class="topbar">Admin Control Panel</div>
+
+<div class="container">
 
 <h2>Pending Payments</h2>
 <div id="paymentList">Loading...</div>
+
+</div>
 
 <script type="module">
 
@@ -33,20 +81,20 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 /* WHATSAPP CONFIG */
-const PHONE = "91XXXXXXXXXX";   // admin number
+const PHONE = "91XXXXXXXXXX";
 const API_KEY = "YOUR_API_KEY";
 
-/* WHATSAPP FUNCTION */
-function sendWhatsApp(message) {
-  fetch(
-    `https://api.callmebot.com/whatsapp.php?phone=${PHONE}&text=` +
-    encodeURIComponent(message) +
-    `&apikey=${API_KEY}`
-  );
+/* WHATSAPP ALERT */
+function sendWhatsApp(msg){
+fetch(
+`https://api.callmebot.com/whatsapp.php?phone=${PHONE}&text=`+
+encodeURIComponent(msg)+
+`&apikey=${API_KEY}`
+);
 }
 
-/* LOAD PAYMENTS */
-async function loadPayments() {
+/* LOAD PENDING PAYMENTS */
+async function loadPayments(){
 
 const q = query(collection(db,"payments"), where("status","==","pending"));
 const snap = await getDocs(q);
@@ -58,60 +106,51 @@ snap.forEach(d => {
 const p = d.data();
 
 html += `
-<div style="border:1px solid #ccc;padding:10px;margin:10px;">
-<b>${p.name || "User"}</b><br>
-Amount: ₹${p.amount}<br>
-Txn ID: ${p.txnId || "-"}<br>
+<div class="card">
+<b>${p.name || ""}</b><br>
+Email: ${p.email || ""}<br>
+Amount: ₹${p.amount || ""}<br>
+Txn: ${p.txnId || ""}<br><br>
 
-<button onclick="approve('${d.id}','${p.uid}','${p.name}','${p.amount}')"
-style="background:green;color:#fff;padding:8px;border:none;border-radius:6px;">
+<button onclick="approve('${d.id}','${p.uid}','${p.name}','${p.amount}')">
 Approve
 </button>
 
 </div>
 `;
-
 });
 
 document.getElementById("paymentList").innerHTML =
 html || "No Pending Payments";
 }
 
-/* APPROVE FUNCTION */
-window.approve = async function(paymentId, uid, name, amount) {
+/* APPROVE PAYMENT */
+window.approve = async function(paymentId, uid, name, amount){
 
-try {
-
-/* 1. UPDATE PAYMENT */
+/* UPDATE PAYMENT */
 await updateDoc(doc(db,"payments",paymentId),{
 status:"approved",
 approvedAt:Date.now()
 });
 
-/* 2. UPDATE USER */
+/* UPDATE USER */
 await updateDoc(doc(db,"candidates",uid),{
 isPaidMember:true
 });
 
-/* 3. WHATSAPP ALERT */
+/* WHATSAPP ALERT */
 sendWhatsApp(
-`Payment Approved ✅
+`Payment Approved
 Name: ${name}
 Amount: ₹${amount}
 UID: ${uid}`
 );
 
-alert("Approved + WhatsApp Sent");
+alert("Approved Successfully");
 
 loadPayments();
-
-} catch (err) {
-alert(err.message);
-}
-
 };
 
-/* INIT */
 loadPayments();
 
 </script>
