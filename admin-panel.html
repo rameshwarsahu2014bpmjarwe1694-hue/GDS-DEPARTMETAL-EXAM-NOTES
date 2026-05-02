@@ -32,7 +32,11 @@ display:grid;
 grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
 gap:15px;
 }
+<h2>📊 Analytics</h2>
 
+<div id="analyticsBox" style="margin-top:15px;">
+Loading...
+</div>
 .card{
 background:#fff;
 padding:25px 15px;
@@ -182,8 +186,32 @@ loadPayments();
 
 loadPayments();
 
-</script>
-<!-- 🔥 NEW ADD END -->
+<script>
+async function loadAnalytics(){
 
+const res = await fetch("http://localhost:3000/analytics");
+const data = await res.json();
+
+document.getElementById("analyticsBox").innerHTML = `
+<div style="background:#fff;padding:15px;border-radius:10px;margin:10px 0;">
+👥 Total Users: <b>${data.totalUsers}</b>
+</div>
+
+<div style="background:#fff;padding:15px;border-radius:10px;margin:10px 0;">
+💳 Total Payments: <b>${data.totalPayments}</b>
+</div>
+
+<div style="background:#fff;padding:15px;border-radius:10px;margin:10px 0;">
+💰 Revenue: <b>₹${data.totalRevenue}</b>
+</div>
+
+<div style="background:#fff;padding:15px;border-radius:10px;margin:10px 0;">
+⏳ Pending: <b>${data.pending}</b>
+</div>
+`;
+}
+
+loadAnalytics();
+</script>
 </body>
 </html>
