@@ -1,12 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>PYQ</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PYQ Section</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+body{background:#f4f6f9;padding:15px;}
+.container{max-width:1000px;margin:auto;background:#fff;padding:18px;border-radius:12px;}
+h1{text-align:center;margin-bottom:18px;}
+
+select{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:1px solid #ccc;
+border-radius:8px;
+font-size:16px;
+}
+
+.card{
+border:1px solid #ddd;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+background:#fafafa;
+}
+
+.small{
+font-size:13px;
+color:#666;
+margin-top:5px;
+}
+
+a{
+display:inline-block;
+padding:10px 14px;
+background:#007bff;
+color:#fff;
+text-decoration:none;
+border-radius:8px;
+margin-top:10px;
+font-weight:bold;
+}
+</style>
 </head>
+
 <body>
 
-<h2>PYQ Files</h2>
-<div id="list">Loading...</div>
+<div class="container">
+
+<h1>Previous Year Questions</h1>
+
+<!-- FILTER -->
+<select id="pyqSelect">
+<option value="" selected disabled>Select PYQ Year</option>
+<option>PYQ 2020</option>
+<option>PYQ 2021</option>
+<option>PYQ 2022</option>
+<option>PYQ 2023</option>
+<option>PYQ 2024</option>
+<option>PYQ 2025</option>
+<option>PYQ 2026</option>
+<option>Model Paper</option>
+<option>Practice Set</option>
+</select>
+
+<select id="postSelect">
+<option value="" selected disabled>Select Post Category</option>
+<option>MTS</option>
+<option>POSTMAN</option>
+<option>PA-SA</option>
+</select>
+
+<!-- PDF LIST -->
+<div id="pdfBox">Loading...</div>
+
+</div>
 
 <script type="module">
 
@@ -28,20 +99,14 @@ projectId: "YOUR_PROJECT_ID"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const uid = "USER_UID"; // login se replace karna
+/* USER UID (replace after login integration) */
+const uid = "USER_UID";
 
-/* CHECK ACCESS */
-async function checkAccess(){
+/* LOAD PYQ FILES */
+async function loadAll(){
 
-const snap = await getDoc(doc(db,"candidates",uid));
-
-return snap.data().isPaidMember;
-}
-
-/* LOAD PYQ */
-async function loadPYQ(){
-
-const access = await checkAccess();
+const pyq = document.getElementById("pyqSelect").value;
+const post = document.getElementById("postSelect").value;
 
 const snap = await getDocs(collection(db,"pyqFiles"));
 
@@ -51,35 +116,46 @@ snap.forEach(d => {
 
 const data = d.data();
 
+/* FILTER */
+if(pyq && data.category !== pyq) return;
+if(post && data.post !== post) return;
+
 html += `
-<div style="border:1px solid #ddd;padding:10px;margin:10px;">
-<b>${data.title}</b><br>
+<div class="card">
+<b>${data.title || ""}</b>
+<div class="small">${data.desc || ""}</div>
 
-<button onclick="openPDF('${data.fileUrl}',${data.isPremium})">
+<a href="#" onclick="openPDF('${data.fileUrl}',${data.isPremium || false})">
 Open PDF
-</button>
-
+</a>
 </div>
 `;
 });
 
-document.getElementById("list").innerHTML = html;
+document.getElementById("pdfBox").innerHTML =
+html || "<div class='card'>No Files Found</div>";
 }
 
-/* OPEN PDF */
+/* OPEN PDF WITH PAYMENT CHECK */
 window.openPDF = async function(fileUrl,isPremium){
 
-const access = await checkAccess();
+const userSnap = await getDoc(doc(db,"candidates",uid));
 
-if(isPremium && !access){
-alert("Payment Required");
-return;
-}
-
+if(userSnap.data().isPaidMember || !isPremium){
 window.open(fileUrl,"_blank");
+}else{
+alert("Payment Required");
+window.location.href="payments.html";
 }
 
-loadPYQ();
+};
+
+/* EVENTS */
+document.getElementById("pyqSelect").addEventListener("change",loadAll);
+document.getElementById("postSelect").addEventListener("change",loadAll);
+
+/* INIT */
+loadAll();
 
 </script>
 
