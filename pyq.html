@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>PYQ Section - Secure</title>
 <style>
-/* ... (आपका पूरा पुराना CSS यहाँ पेस्ट करें) ... */
+/* --- आपका सारा CSS --- */
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
 body{background:#f4f6f9;padding:15px;}
 .container{max-width:1000px;margin:auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08);}
@@ -40,10 +40,10 @@ a{background:#007bff;color:#fff;}
     <div id="paymentOverlay">
         <h2 style="color:red;">Premium Access Required</h2>
         <p style="margin:10px 0;">यह कंटेंट केवल Paid मेंबर्स के लिए है।</p>
-        <a href="index.html" style="background:#333; color:#fff; padding:10px 20px; text-decoration:none; border-radius:8px;">Home जाएँ</a>
+        <a href="dashboard.html" style="background:#333; color:#fff; padding:10px 20px; text-decoration:none; border-radius:8px;">Back to Dashboard</a>
     </div>
 
-    <!-- MAIN CONTENT (FULL OLD MENU RESTORED) -->
+    <!-- MAIN CONTENT -->
     <div id="mainContent">
         <div class="grid">
             <select id="pyqSelect">
@@ -79,13 +79,40 @@ a{background:#007bff;color:#fff;}
 </div>
 
 <script type="module">
-// firebase.js से सिग्नल का इंतज़ार
-window.triggerLoad = function() {
-    if (window.isPaidMember) {
-        document.getElementById("paymentOverlay").style.display = "none";
-        document.getElementById("mainContent").style.display = "block";
+import { doc, getDoc, collection, getDocs } from "https://gstatic.com";
+import { onAuthStateChanged } from "https://gstatic.com";
+
+// --- ACCESS CONTROL (PREMIUM LOGIC) ---
+window.isPaidMember = false;
+
+onAuthStateChanged(window.auth, async (user) => {
+    if (!user) {
+        alert("Please login first");
+        window.location.href = "login.html";
+        return;
     }
-};
+
+    const adminEmail = "rameshwarsahu2014bpmjarwe1694@gmail.com";
+    
+    try {
+        const userRef = doc(window.db, "candidates", user.uid);
+        const snap = await getDoc(userRef);
+        const userData = snap.data();
+
+        // Admin check OR Paid status check
+        if (user.email === adminEmail || (snap.exists() && (userData.isPaidMember === true || userData.isTester === true))) {
+            window.isPaidMember = true;
+            document.getElementById("paymentOverlay").style.display = "none";
+            document.getElementById("mainContent").style.display = "block";
+        } else {
+            window.isPaidMember = false;
+            document.getElementById("paymentOverlay").style.display = "block";
+            document.getElementById("mainContent").style.display = "none";
+        }
+    } catch (e) {
+        console.error("Access Check Error:", e);
+    }
+});
 
 // --- आपकी पुरानी कोडिंग (STRICTLY RESTORED) ---
 let questions = []; let current = 0; let answers = [];
@@ -105,8 +132,8 @@ async function loadAll() {
     const post=val("postSelect");
     if(!category || !post) return;
 
-    /* LOAD PDF (pyqFiles) */
-    const pdfSnap = await getDocs(collection(db, "pyqFiles"));
+    /* LOAD PDF */
+    const pdfSnap = await getDocs(collection(window.db, "pyqFiles"));
     let pdfHtml = "";
     pdfSnap.forEach(doc => {
         const d = doc.data();
@@ -116,8 +143,8 @@ async function loadAll() {
     });
     document.getElementById("pdfBox").innerHTML = pdfHtml || "<div class='empty'>No PDF Found</div>";
 
-    /* LOAD QUESTIONS (pyqQuestions) */
-    const qSnap = await getDocs(collection(db, "pyqQuestions"));
+    /* LOAD QUESTIONS */
+    const qSnap = await getDocs(collection(window.db, "pyqQuestions"));
     let temp = [];
     qSnap.forEach(doc => {
         const d = doc.data();
