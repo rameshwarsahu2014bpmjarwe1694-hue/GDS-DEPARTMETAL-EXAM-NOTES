@@ -129,7 +129,54 @@ return;
 }
 
 waitForFirebase();
+</body>
+<h2>Pending Payments</h2>
+<div id="paymentList">Loading...</div>
+<script>
+
+async function loadPayments(){
+
+const res = await fetch("http://localhost:3000/payments/pending");
+const data = await res.json();
+
+let html = "";
+
+data.forEach(p => {
+
+html += `
+<div style="border:1px solid #ccc;padding:10px;margin:10px;">
+<b>${p.name}</b><br>
+Email: ${p.email}<br>
+Txn ID: ${p.txnId}<br>
+
+<button onclick="approve('${p.uid}')">
+Approve
+</button>
+</div>
+`;
+
+});
+
+document.getElementById("paymentList").innerHTML =
+html || "No Pending Payments";
+
+}
+
+async function approve(uid){
+
+await fetch("http://localhost:3000/payments/approve", {
+method: "POST",
+headers: {"Content-Type":"application/json"},
+body: JSON.stringify({ uid })
+});
+
+alert("Approved & User Unlocked");
+
+loadPayments();
+}
+
+loadPayments();
+
 </script>
 
-</body>
 </html>
