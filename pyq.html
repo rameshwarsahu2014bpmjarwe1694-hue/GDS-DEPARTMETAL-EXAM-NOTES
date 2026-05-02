@@ -1,15 +1,11 @@
-<!-- =========================
-FILE : pyq.html
-SECURE OLD CODING VERSION
-========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PYQ Section</title>
+<title>PYQ Section - Secure</title>
 <style>
-/* ... (आपका पूरा पुराना CSS यहाँ रहेगा) ... */
+/* ... (आपका पूरा पुराना CSS यहाँ पेस्ट करें) ... */
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
 body{background:#f4f6f9;padding:15px;}
 .container{max-width:1000px;margin:auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08);}
@@ -31,102 +27,74 @@ a{background:#007bff;color:#fff;}
 .selected{background:#eaf3ff !important;border-color:#0d6efd !important;color:#0d6efd !important;}
 .selected::before{border-color:#0d6efd;background:#0d6efd;box-shadow:inset 0 0 0 4px #fff;}
 .empty{padding:20px;text-align:center;font-weight:bold;color:#666;}
+#paymentOverlay { display: block; text-align: center; padding: 50px; }
+#mainContent { display: none; }
 </style>
 </head>
 <body>
 
 <div class="container">
-<h1>Previous Year Questions</h1>
+    <h1>Previous Year Questions</h1>
 
-<!-- CONTENT BOX - यह तभी दिखेगा जब पेमेंट होगा -->
-<div id="paymentGuard" style="display:none;">
-    <div class="grid">
-    <select id="pyqSelect">
-    <option value="" selected disabled>Select PYQ Year</option>
-    <option>PYQ 2020</option>
-    <option>PYQ 2021</option>
-    <option>PYQ 2022</option>
-    <option>PYQ 2023</option>
-    <option>PYQ 2024</option>
-    <option>PYQ 2025</option>
-    <option>PYQ 2026</option>
-    <option>Model Paper</option>
-    <option>Practice Set</option>
-    </select>
-
-    <select id="postSelect">
-    <option value="" selected disabled>Select Post Category</option>
-    <option>MTS</option>
-    <option>POSTMAN</option>
-    <option>PA-SA</option>
-    </select>
+    <!-- RESTRICTED VIEW -->
+    <div id="paymentOverlay">
+        <h2 style="color:red;">Premium Access Required</h2>
+        <p style="margin:10px 0;">यह कंटेंट केवल Paid मेंबर्स के लिए है।</p>
+        <a href="index.html" style="background:#333; color:#fff; padding:10px 20px; text-decoration:none; border-radius:8px;">Home जाएँ</a>
     </div>
 
-    <h3>PDF Files</h3>
-    <div id="pdfBox">Select Year and Category...</div>
+    <!-- MAIN CONTENT (FULL OLD MENU RESTORED) -->
+    <div id="mainContent">
+        <div class="grid">
+            <select id="pyqSelect">
+                <option value="" selected disabled>Select PYQ Year</option>
+                <option>PYQ 2020</option>
+                <option>PYQ 2021</option>
+                <option>PYQ 2022</option>
+                <option>PYQ 2023</option>
+                <option>PYQ 2024</option>
+                <option>PYQ 2025</option>
+                <option>PYQ 2026</option>
+                <option>Model Paper</option>
+                <option>Practice Set</option>
+            </select>
 
-    <h3>Quiz</h3>
-    <button class="start-btn" id="startBtn">Start Quiz</button>
+            <select id="postSelect">
+                <option value="" selected disabled>Select Post Category</option>
+                <option>MTS</option>
+                <option>POSTMAN</option>
+                <option>PA-SA</option>
+            </select>
+        </div>
 
-    <div id="quizBox" style="display:none;"></div>
-    <div id="resultBox" style="display:none;"></div>
-</div>
+        <h3>PDF Files</h3>
+        <div id="pdfBox">Select Year and Category...</div>
 
-<!-- RESTRICTED MESSAGE -->
-<div id="restrictedMsg" style="display:none; text-align:center; padding:30px;">
-    <h2 style="color:red;">Premium Content!</h2>
-    <p>कृपया इस सेक्शन को देखने के लिए सब्सक्रिप्शन लें।</p>
-    <a href="index.html" style="background:#333;">Home पर जाएँ</a>
-</div>
+        <h3>Quiz</h3>
+        <button class="start-btn" id="startBtn" onclick="startQuiz()">Start Quiz</button>
 
+        <div id="quizBox" style="display:none;"></div>
+        <div id="resultBox" style="display:none;"></div>
+    </div>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://gstatic.com";
-import { getAuth, onAuthStateChanged } from "https://gstatic.com";
-import { getFirestore, collection, getDocs, doc, getDoc } from "https://gstatic.com";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-    authDomain: "://firebaseapp.com",
-    projectId: "gds-departmental-exam-studyhub",
-    storageBucket: "://appspot.com",
-    messagingSenderId: "759916756080",
-    appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+// firebase.js से सिग्नल का इंतज़ार
+window.triggerLoad = function() {
+    if (window.isPaidMember) {
+        document.getElementById("paymentOverlay").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+    }
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// --- OLD GLOBAL VARIABLES ---
-let questions = [];
-let current = 0;
-let answers = [];
-
+// --- आपकी पुरानी कोडिंग (STRICTLY RESTORED) ---
+let questions = []; let current = 0; let answers = [];
 function val(id){ return document.getElementById(id).value.trim(); }
 function safe(v){ return v || ""; }
 function esc(v){ return String(v || "").replace(/'/g,"\\'"); }
 
-// --- AUTH & PAYMENT CHECK ---
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        const docSnap = await getDoc(doc(db, "candidates", user.uid));
-        if (docSnap.exists() && docSnap.data().status === "paid") {
-            document.getElementById("paymentGuard").style.display = "block";
-            document.getElementById("restrictedMsg").style.display = "none";
-        } else {
-            document.getElementById("paymentGuard").style.display = "none";
-            document.getElementById("restrictedMsg").style.display = "block";
-        }
-    } else {
-        alert("Please Login First");
-        window.location.href = "login.html";
-    }
-});
-
-/* OLD LOAD DATA FUNCTION */
-async function loadAll(){
+async function loadAll() {
+    if (!window.isPaidMember) return;
     document.getElementById("pdfBox").innerHTML="Loading...";
     document.getElementById("quizBox").style.display="none";
     document.getElementById("resultBox").style.display="none";
@@ -135,28 +103,30 @@ async function loadAll(){
     questions=[]; current=0; answers=[];
     const category=val("pyqSelect");
     const post=val("postSelect");
+    if(!category || !post) return;
 
-    /* PDF */
-    const pdfSnap=await getDocs(collection(db,"pyqFiles"));
-    let pdfHtml="";
-    pdfSnap.forEach(doc=>{
-        const d=doc.data();
-        if(d.category!==category || d.post!==post) return;
-        pdfHtml+=`<div class="card"><b>${safe(d.title)}</b><div class="small">${safe(d.desc)}</div><a href="${safe(d.fileName)}" target="_blank">Open PDF</a></div>`;
+    /* LOAD PDF (pyqFiles) */
+    const pdfSnap = await getDocs(collection(db, "pyqFiles"));
+    let pdfHtml = "";
+    pdfSnap.forEach(doc => {
+        const d = doc.data();
+        if(d.category === category && d.post === post) {
+            pdfHtml += `<div class="card"><b>${safe(d.title)}</b><div class="small">${safe(d.desc)}</div><a href="${safe(d.fileName)}" target="_blank">Open PDF</a></div>`;
+        }
     });
-    document.getElementById("pdfBox").innerHTML= pdfHtml || "<div class='empty'>No PDF Found</div>";
+    document.getElementById("pdfBox").innerHTML = pdfHtml || "<div class='empty'>No PDF Found</div>";
 
-    /* QUESTIONS */
-    const qSnap=await getDocs(collection(db,"pyqQuestions"));
-    let temp=[];
-    qSnap.forEach(doc=>{
-        const d=doc.data();
-        if(d.category===category && d.post===post) temp.push(d);
+    /* LOAD QUESTIONS (pyqQuestions) */
+    const qSnap = await getDocs(collection(db, "pyqQuestions"));
+    let temp = [];
+    qSnap.forEach(doc => {
+        const d = doc.data();
+        if(d.category === category && d.post === post) temp.push(d);
     });
 
-    questions=temp.sort((a,b)=>{
-        const na=parseInt(String(a.question).match(/^\d+/)?.[0] || 9999);
-        const nb=parseInt(String(b.question).match(/^\d+/)?.[0] || 9999);
+    questions = temp.sort((a,b)=>{
+        const na=parseInt(String(a.question).match(/^\d+/)?. [0] || 9999);
+        const nb=parseInt(String(b.question).match(/^\d+/)?. [0] || 9999);
         return na-nb;
     }).map((item,index)=>{
         let cleanQ=String(item.question || "").replace(/^\d+[\).\-\s:]*/,"").trim();
@@ -164,50 +134,44 @@ async function loadAll(){
     });
 }
 
-/* OLD START QUIZ */
-window.startQuiz = function(){
+window.startQuiz = function() {
     if(questions.length===0){ alert("No Questions Found"); return; }
     document.getElementById("startBtn").style.display="none";
     document.getElementById("quizBox").style.display="block";
     showQuestion();
-}
+};
 
-/* OLD SHOW QUESTION */
-function showQuestion(){
-    const q=questions[current];
-    let html=`<div class="card"><h3>Question ${q.serial} / ${questions.length}</h3><p><b>${safe(q.question)}</b></p>`;
-    for(let i=0;i<4;i++){
-        const op=safe(q.options?.[i]);
-        const active=answers[current]===op ? "selected":"";
-        html+=`<button class="option ${active}" onclick="selectAns('${esc(op)}')">${String.fromCharCode(65+i)}. ${op}</button>`;
+function showQuestion() {
+    const q = questions[current];
+    let html = `<div class="card"><h3>Question ${q.serial} / ${questions.length}</h3><p style="margin:15px 0;"><b>${safe(q.question)}</b></p>`;
+    for(let i=0; i<4; i++){
+        const op = safe(q.options?.[i]);
+        const active = answers[current] === op ? "selected" : "";
+        html += `<button class="option ${active}" onclick="selectAns('${esc(op)}')">${String.fromCharCode(65+i)}. ${op}</button>`;
     }
-    html+=`<br>${current>0 ? '<button class="nav-btn" onclick="prevQ()">Previous</button>':''} ${current<questions.length-1 ? '<button class="nav-btn" onclick="nextQ()">Next</button>':''} <button class="submit-btn" onclick="submitQuiz()">Submit</button></div>`;
-    document.getElementById("quizBox").innerHTML=html;
+    html += `<br>${current>0 ? '<button class="nav-btn" onclick="prevQ()">Previous</button>':''} ${current<questions.length-1 ? '<button class="nav-btn" onclick="nextQ()">Next</button>':''} <button class="submit-btn" onclick="submitQuiz()">Submit</button></div>`;
+    document.getElementById("quizBox").innerHTML = html;
 }
 
-// --- GLOBAL ACTIONS (OLD STYLE) ---
-window.selectAns=function(v){ answers[current]=v; showQuestion(); };
-window.nextQ=function(){ current++; showQuestion(); };
-window.prevQ=function(){ current--; showQuestion(); };
+window.selectAns=v=>{ answers[current]=v; showQuestion(); };
+window.nextQ=()=>{ if(current<questions.length-1){ current++; showQuestion(); } };
+window.prevQ=()=>{ if(current>0){ current--; showQuestion(); } };
 
-window.submitQuiz=function(){
+window.submitQuiz=()=>{
     let score=0; let review="";
     questions.forEach((q,i)=>{
         const user=answers[i] || "Not Answered";
-        const ok=user===safe(q.answer);
+        const ok = user === safe(q.answer);
         if(ok) score++;
-        review+=`<div class="card" style="border-left:6px solid ${ok?'#28a745':'#dc3545'};"><b>Q${q.serial}. ${safe(q.question)}</b><div class="small">Correct: ${safe(q.answer)} | Yours: ${user}</div></div>`;
+        review += `<div class="card" style="border-left:6px solid ${ok?'#28a745':'#dc3545'};"><b>Q${q.serial}. ${safe(q.question)}</b><div class="small">Correct: ${safe(q.answer)} | Your Answer: ${user}</div></div>`;
     });
     document.getElementById("quizBox").style.display="none";
     document.getElementById("resultBox").style.display="block";
-    document.getElementById("resultBox").innerHTML=`<div class="card"><h2>Score: ${score}/${questions.length}</h2><button class="start-btn" onclick="location.reload()">Restart</button></div>${review}`;
+    document.getElementById("resultBox").innerHTML = `<div class="card" style="text-align:center;"><h2>Score: ${score}/${questions.length}</h2><button class="start-btn" onclick="location.reload()">Restart Quiz</button></div>` + review;
 };
 
-// --- EVENTS ---
-document.getElementById("pyqSelect").addEventListener("change",loadAll);
-document.getElementById("postSelect").addEventListener("change",loadAll);
-document.getElementById("startBtn").addEventListener("click", window.startQuiz);
-
+document.getElementById("pyqSelect").addEventListener("change", loadAll);
+document.getElementById("postSelect").addEventListener("change", loadAll);
 </script>
 </body>
 </html>
