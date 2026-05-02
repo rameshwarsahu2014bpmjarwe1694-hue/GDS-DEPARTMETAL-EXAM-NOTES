@@ -1,3 +1,8 @@
+<!-- =========================
+FILE : pyq.html
+ULTRA STRICT FINAL VERSION
+PDF + Quiz + Same Firebase Config
+========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,54 +11,161 @@
 <title>PYQ Section</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
-body{background:#f4f6f9;padding:15px;}
-.container{max-width:1000px;margin:auto;background:#fff;padding:18px;border-radius:12px;}
-h1{text-align:center;margin-bottom:18px;}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f4f6f9;
+padding:15px;
+}
+
+.container{
+max-width:1000px;
+margin:auto;
+background:#fff;
+padding:18px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+h1{
+text-align:center;
+margin-bottom:18px;
+font-size:28px;
+}
+
+h3{
+margin:18px 0 10px;
+}
+
+.grid{
+display:grid;
+gap:12px;
+}
 
 select{
 width:100%;
 padding:12px;
-margin:8px 0;
 border:1px solid #ccc;
 border-radius:8px;
 font-size:16px;
 }
 
 .card{
-border:1px solid #ddd;
-padding:15px;
-margin:10px 0;
-border-radius:10px;
 background:#fafafa;
+border:1px solid #ddd;
+border-radius:10px;
+padding:15px;
+margin-bottom:12px;
 }
 
 .small{
-font-size:13px;
+font-size:14px;
 color:#666;
-margin-top:5px;
+margin-top:6px;
+line-height:1.5;
+}
+
+a,button{
+display:inline-block;
+padding:10px 14px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+text-decoration:none;
+font-weight:bold;
+margin-top:10px;
 }
 
 a{
-display:inline-block;
-padding:10px 14px;
 background:#007bff;
 color:#fff;
-text-decoration:none;
-border-radius:8px;
-margin-top:10px;
+}
+
+.start-btn,.nav-btn,.submit-btn{
+margin-right:10px;
+padding:10px 16px;
+border-radius:10px;
+}
+
+.start-btn{
+background:#28a745;
+color:#fff;
+}
+
+.nav-btn{
+background:#007bff;
+color:#fff;
+}
+
+.submit-btn{
+background:#dc3545;
+color:#fff;
+}
+
+.option{
+display:flex;
+align-items:center;
+gap:12px;
+width:100%;
+text-align:left;
+background:#fff;
+color:#111;
+margin:10px 0;
+padding:14px 16px;
+border:2px solid #dfe3e8;
+border-radius:14px;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+transition:.18s;
+}
+
+.option::before{
+content:"";
+width:20px;
+height:20px;
+border:2px solid #9aa0a6;
+border-radius:50%;
+background:#fff;
+}
+
+.option:hover{
+border-color:#0d6efd;
+background:#f5f9ff;
+}
+
+.selected{
+background:#eaf3ff !important;
+border-color:#0d6efd !important;
+color:#0d6efd !important;
+}
+
+.selected::before{
+border-color:#0d6efd;
+background:#0d6efd;
+box-shadow:inset 0 0 0 4px #fff;
+}
+
+.empty{
+padding:20px;
+text-align:center;
 font-weight:bold;
+color:#666;
 }
 </style>
 </head>
-
 <body>
 
 <div class="container">
 
 <h1>Previous Year Questions</h1>
 
-<!-- FILTER -->
+<div class="grid">
 <select id="pyqSelect">
 <option value="" selected disabled>Select PYQ Year</option>
 <option>PYQ 2020</option>
@@ -67,94 +179,286 @@ font-weight:bold;
 <option>Practice Set</option>
 </select>
 
+<!-- Post Category -->
 <select id="postSelect">
 <option value="" selected disabled>Select Post Category</option>
 <option>MTS</option>
 <option>POSTMAN</option>
 <option>PA-SA</option>
 </select>
+</div>
 
-<!-- PDF LIST -->
+<h3>PDF Files</h3>
 <div id="pdfBox">Loading...</div>
+
+<h3>Quiz</h3>
+<button class="start-btn" id="startBtn">Start Quiz</button>
+
+<div id="quizBox" style="display:none;"></div>
+<div id="resultBox" style="display:none;"></div>
 
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
 getFirestore,
 collection,
-getDocs,
-doc,
-getDoc
+getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "YOUR_KEY",
-authDomain: "YOUR_DOMAIN",
-projectId: "YOUR_PROJECT_ID"
+apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+projectId: "gds-departmental-exam-studyhub",
+storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+messagingSenderId: "759916756080",
+appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* USER UID (replace after login integration) */
-const uid = "USER_UID";
+let questions = [];
+let current = 0;
+let answers = [];
 
-/* LOAD PYQ FILES */
+function val(id){
+return document.getElementById(id).value.trim();
+}
+
+function safe(v){
+return v || "";
+}
+
+function esc(v){
+return String(v || "").replace(/'/g,"\\'");
+}
+
+/* LOAD DATA */
 async function loadAll(){
 
-const pyq = document.getElementById("pyqSelect").value;
-const post = document.getElementById("postSelect").value;
+document.getElementById("pdfBox").innerHTML="Loading...";
+document.getElementById("quizBox").style.display="none";
+document.getElementById("resultBox").style.display="none";
+document.getElementById("startBtn").style.display="inline-block";
 
-const snap = await getDocs(collection(db,"pyqFiles"));
+questions=[];
+current=0;
+answers=[];
 
-let html = "";
+const category=val("pyqSelect");
+const post=val("postSelect");
 
-snap.forEach(d => {
+/* PDF */
+let pdfHtml="";
 
-const data = d.data();
+const pdfSnap=await getDocs(collection(db,"pyqFiles"));
 
-/* FILTER */
-if(pyq && data.category !== pyq) return;
-if(post && data.post !== post) return;
+pdfSnap.forEach(doc=>{
+const d=doc.data();
 
-html += `
+if(d.category!==category) return;
+if(d.post!==post) return;
+
+pdfHtml+=`
 <div class="card">
-<b>${data.title || ""}</b>
-<div class="small">${data.desc || ""}</div>
-
-<a href="#" onclick="openPDF('${data.fileUrl}',${data.isPremium || false})">
-Open PDF
-</a>
+<b>${safe(d.title)}</b>
+<div class="small">${safe(d.desc)}</div>
+<div class="small">${safe(d.fileName)}</div>
+<a href="${safe(d.fileName)}" target="_blank">Open PDF</a>
 </div>
 `;
 });
 
-document.getElementById("pdfBox").innerHTML =
-html || "<div class='card'>No Files Found</div>";
+document.getElementById("pdfBox").innerHTML=
+pdfHtml || "<div class='empty'>No PDF Found</div>";
+
+/* QUESTIONS */
+let temp=[];
+
+const qSnap=await getDocs(collection(db,"pyqQuestions"));
+
+qSnap.forEach(doc=>{
+const d=doc.data();
+
+if(d.category!==category) return;
+if(d.post!==post) return;
+
+temp.push(d);
+});
+
+questions=temp.sort((a,b)=>{
+const na=parseInt(String(a.question).match(/^\d+/)?.[0] || 9999);
+const nb=parseInt(String(b.question).match(/^\d+/)?.[0] || 9999);
+return na-nb;
+}).map((item,index)=>{
+
+let cleanQ=String(item.question || "")
+.replace(/^\d+[\).\-\s:]*/,"")
+.trim();
+
+return{
+...item,
+question:cleanQ,
+serial:index+1
+};
+
+});
+
 }
 
-/* OPEN PDF WITH PAYMENT CHECK */
-window.openPDF = async function(fileUrl,isPremium){
+/* START QUIZ */
+function startQuiz(){
 
-const userSnap = await getDoc(doc(db,"candidates",uid));
-
-if(userSnap.data().isPaidMember || !isPremium){
-window.open(fileUrl,"_blank");
-}else{
-alert("Payment Required");
-window.location.href="payments.html";
+if(questions.length===0){
+alert("No Questions Found");
+return;
 }
 
+document.getElementById("startBtn").style.display="none";
+document.getElementById("resultBox").style.display="none";
+document.getElementById("quizBox").style.display="block";
+
+showQuestion();
+}
+
+/* SHOW QUESTION */
+function showQuestion(){
+
+const q=questions[current];
+
+let html=`
+<div class="card">
+<h3>Question ${q.serial} / ${questions.length}</h3>
+<p style="margin:15px 0;"><b>${safe(q.question)}</b></p>
+`;
+
+for(let i=0;i<4;i++){
+
+const op=safe(q.options?.[i]);
+const active=answers[current]===op ? "selected":"";
+
+html+=`
+<button class="option ${active}" onclick="selectAns('${esc(op)}')">
+${String.fromCharCode(65+i)}. ${op}
+</button>
+`;
+}
+
+html+="<br>";
+
+if(current>0){
+html+=`<button class="nav-btn" onclick="prevQ()">Previous</button>`;
+}
+
+if(current<questions.length-1){
+html+=`<button class="nav-btn" onclick="nextQ()">Next</button>`;
+}
+  
+/* EVERY QUESTION PAGE */
+html += `<button class="submit-btn" onclick="submitQuiz()">Submit</button>`;
+
+html += "</div>";
+
+
+html+="</div>";
+
+document.getElementById("quizBox").innerHTML=html;
+}
+
+/* ACTIONS */
+window.selectAns=function(v){
+answers[current]=v;
+showQuestion();
+};
+
+window.nextQ=function(){
+if(current<questions.length-1){
+current++;
+showQuestion();
+}
+};
+
+window.prevQ=function(){
+if(current>0){
+current--;
+showQuestion();
+}
+};
+
+/* SUBMIT */
+window.submitQuiz=function(){
+
+let score=0;
+let attempted=0;
+let review="";
+
+for(let i=0;i<questions.length;i++){
+
+const q=questions[i];
+const user=answers[i] || "Not Answered";
+const ans=safe(q.answer);
+
+const ok=user===ans;
+
+if(user!=="Not Answered") attempted++;
+if(ok) score++;
+
+review+=`
+<div class="card" style="border-left:6px solid ${ok ? '#28a745':'#dc3545'};">
+<b>Q${q.serial}. ${safe(q.question)}</b>
+
+<div class="small">
+Your Answer:
+<span style="color:${ok ? 'green':'red'};font-weight:bold;">
+${user}
+</span>
+</div>
+
+<div class="small">
+Correct Answer:
+<span style="color:green;font-weight:bold;">
+${ans}
+</span>
+</div>
+
+<div class="small" style="font-weight:bold;color:${ok ? 'green':'red'};">
+${ok ? '✔ Correct':'✘ Wrong'}
+</div>
+</div>
+`;
+}
+
+document.getElementById("quizBox").style.display="none";
+document.getElementById("resultBox").style.display="block";
+
+document.getElementById("resultBox").innerHTML=`
+<div class="card" style="text-align:center;">
+<h2>Quiz Result</h2>
+
+<p><b>Total Questions:</b> ${questions.length}</p>
+<p><b>Attempted:</b> ${attempted}</p>
+<p><b>Correct:</b> ${score}</p>
+<p><b>Wrong:</b> ${attempted-score}</p>
+<p><b>Score:</b> ${score}/${questions.length}</p>
+
+<button class="start-btn" onclick="location.reload()">
+Restart Quiz
+</button>
+</div>
+
+${review}
+`;
 };
 
 /* EVENTS */
 document.getElementById("pyqSelect").addEventListener("change",loadAll);
 document.getElementById("postSelect").addEventListener("change",loadAll);
+document.getElementById("startBtn").addEventListener("click",startQuiz);
 
-/* INIT */
 loadAll();
 
 </script>
