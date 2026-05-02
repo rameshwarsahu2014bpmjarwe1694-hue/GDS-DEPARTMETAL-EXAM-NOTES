@@ -1,73 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PYQ Section</title>
-
-<style>
-/* ===== SAME STYLE (UNCHANGED) ===== */
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
-body{background:#f4f6f9;padding:15px;}
-.container{max-width:1000px;margin:auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08);}
-h1{text-align:center;margin-bottom:18px;font-size:28px;}
-h3{margin:18px 0 10px;}
-.grid{display:grid;gap:12px;}
-select{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px;}
-.card{background:#fafafa;border:1px solid #ddd;border-radius:10px;padding:15px;margin-bottom:12px;}
-.small{font-size:14px;color:#666;margin-top:6px;line-height:1.5;}
-a,button{display:inline-block;padding:10px 14px;border:none;border-radius:8px;cursor:pointer;text-decoration:none;font-weight:bold;margin-top:10px;}
-a{background:#007bff;color:#fff;}
-.start-btn,.nav-btn,.submit-btn{margin-right:10px;padding:10px 16px;border-radius:10px;}
-.start-btn{background:#28a745;color:#fff;}
-.nav-btn{background:#007bff;color:#fff;}
-.submit-btn{background:#dc3545;color:#fff;}
-.option{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;color:#111;margin:10px 0;padding:14px 16px;border:2px solid #dfe3e8;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;}
-.selected{background:#eaf3ff !important;border-color:#0d6efd !important;color:#0d6efd !important;}
-.empty{padding:20px;text-align:center;font-weight:bold;color:#666;}
-</style>
+<title>PYQ</title>
 </head>
-
 <body>
 
-<div class="container">
+<h2>PYQ Files</h2>
+<div id="list">Loading...</div>
 
-<h1>Previous Year Questions</h1>
-
-<div class="grid">
-<select id="pyqSelect">
-<option value="" selected disabled>Select PYQ Year</option>
-<option>PYQ 2020</option>
-<option>PYQ 2021</option>
-<option>PYQ 2022</option>
-<option>PYQ 2023</option>
-<option>PYQ 2024</option>
-<option>PYQ 2025</option>
-<option>PYQ 2026</option>
-<option>Model Paper</option>
-<option>Practice Set</option>
-</select>
-
-<select id="postSelect">
-<option value="" selected disabled>Select Post Category</option>
-<option>MTS</option>
-<option>POSTMAN</option>
-<option>PA-SA</option>
-</select>
-</div>
-
-<h3>PDF Files</h3>
-<div id="pdfBox">Loading...</div>
-
-<h3>Quiz</h3>
-<button class="start-btn" id="startBtn">Start Quiz</button>
-
-<div id="quizBox" style="display:none;"></div>
-<div id="resultBox" style="display:none;"></div>
-
-</div>
-
-<!-- 🔥 MAIN SCRIPT -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -76,110 +16,70 @@ getFirestore,
 collection,
 getDocs,
 doc,
-getDoc,
-onSnapshot
+getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-projectId: "gds-departmental-exam-studyhub",
-storageBucket: "gds-departmental-exam-studyhub.appspot.com",
-messagingSenderId: "759916756080",
-appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+apiKey: "YOUR_KEY",
+authDomain: "YOUR_DOMAIN",
+projectId: "YOUR_PROJECT_ID"
 };
 
 const app = initializeApp(firebaseConfig);
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-const auth = getAuth(app);
-window.auth = auth;
 const db = getFirestore(app);
-window.db = db;
 
-/* 🔥 AUTO UNLOCK */
-function listenUserStatus(){
-const user = window.auth?.currentUser;
-if(!user) return;
+const uid = "USER_UID"; // login se replace karna
 
-const ref = doc(db,"candidates",user.uid);
+/* CHECK ACCESS */
+async function checkAccess(){
 
-onSnapshot(ref,(snap)=>{
-const data = snap.data();
-if(data && data.isPaidMember === true){
-alert("Payment Approved! Access unlocked");
-location.reload();
+const snap = await getDoc(doc(db,"candidates",uid));
+
+return snap.data().isPaidMember;
 }
+
+/* LOAD PYQ */
+async function loadPYQ(){
+
+const access = await checkAccess();
+
+const snap = await getDocs(collection(db,"pyqFiles"));
+
+let html = "";
+
+snap.forEach(d => {
+
+const data = d.data();
+
+html += `
+<div style="border:1px solid #ddd;padding:10px;margin:10px;">
+<b>${data.title}</b><br>
+
+<button onclick="openPDF('${data.fileUrl}',${data.isPremium})">
+Open PDF
+</button>
+
+</div>
+`;
 });
+
+document.getElementById("list").innerHTML = html;
 }
 
-/* 🔥 PDF LOCK */
-async function openPDF(fileUrl){
+/* OPEN PDF */
+window.openPDF = async function(fileUrl,isPremium){
 
-const user = window.auth?.currentUser;
+const access = await checkAccess();
 
-if(!user){
-alert("Login required");
+if(isPremium && !access){
+alert("Payment Required");
 return;
 }
 
-const ref = doc(db,"candidates",user.uid);
-const snap = await getDoc(ref);
-
-if(!snap.exists()){
-alert("User data not found");
-return;
-}
-
-const userData = snap.data();
-
-if(userData.isPaidMember === true){
 window.open(fileUrl,"_blank");
-}else{
-if(confirm("Payment required. Go to payment page?")){
-window.location.href="payments.html";
-}
 }
 
-}
-
-window.openPDF = openPDF;
-
-/* LOAD DATA */
-async function loadAll(){
-
-listenUserStatus();
-
-const category=document.getElementById("pyqSelect").value;
-const post=document.getElementById("postSelect").value;
-
-let html="";
-const snap=await getDocs(collection(db,"pyqFiles"));
-
-snap.forEach(d=>{
-const data=d.data();
-
-if(data.category!==category) return;
-if(data.post!==post) return;
-
-html+=`
-<div class="card">
-<b>${data.title||""}</b>
-<div class="small">${data.desc||""}</div>
-<div class="small">${data.fileName||""}</div>
-
-<a href="#" onclick="openPDF('${data.fileName}')">Open PDF</a>
-</div>`;
-});
-
-document.getElementById("pdfBox").innerHTML =
-html || "<div class='empty'>No PDF Found</div>";
-
-}
-
-/* EVENTS */
-document.getElementById("pyqSelect").addEventListener("change",loadAll);
-document.getElementById("postSelect").addEventListener("change",loadAll);
+loadPYQ();
 
 </script>
 
