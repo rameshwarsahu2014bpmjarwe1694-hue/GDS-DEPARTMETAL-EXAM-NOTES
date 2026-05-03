@@ -187,6 +187,22 @@ color:#666;
 <option>PA-SA</option>
 </select>
 </div>
+<!-- PYQ डिस्प्ले एरिया -->
+<div id="pyqDisplayGrid" class="grid-container"></div>
+
+<!-- Payment Modal (जब यूजर 'Unlock' दबाएगा) -->
+<div id="paymentModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border:2px solid #000; z-index:1000; width:90%; max-width:400px;">
+    <h3>Unlock PYQ</h3>
+    <p>Amount: <b>₹9</b></p>
+    <!-- UPI Button: यह सीधे UPI App खोलेगा -->
+    <a id="upiLink" href="#" style="display:block; background:green; color:white; padding:10px; text-align:center; text-decoration:none; margin-bottom:15px;">Pay via UPI (PhonePe/GPay)</a>
+    
+    <hr>
+    <p>पमेंट करने के बाद Transaction ID यहाँ डालें:</p>
+    <input type="text" id="txnIdInput" placeholder="Enter Transaction ID" style="width:100%; padding:8px; margin-bottom:10px;">
+    <button onclick="submitPaymentDetails()" style="width:100%; background:blue; color:white; padding:10px;">Submit Payment</button>
+    <button onclick="closeModal()" style="width:100%; background:grey; color:white; padding:5px; margin-top:5px;">Cancel</button>
+</div>
 
 <h3>PDF Files</h3>
 <div id="pdfBox">Loading...</div>
