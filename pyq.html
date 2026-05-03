@@ -559,9 +559,10 @@ function viewSecurePDF() {
         alert("ईमेल डालें!");
         return;
     }
-    const url = `https://payment-2-g6go.onrender.com{encodeURIComponent(emailInput)}`;
+    const url = `https://payment-backend-2-g6go.onrender.com{encodeURIComponent(emailInput)}`;
     window.open(url, '_blank');
 }
+window.requestAccess = requestAccess;  
 </script>
 
 </body>
