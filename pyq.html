@@ -189,20 +189,30 @@ color:#666;
 </div>
 
 <!-- PDF एक्सेस सेक्शन -->
-<div id="pdf-lock-section" style="text-align: center; margin: 20px auto; padding: 20px; border: 2px solid #007bff; border-radius: 12px; max-width: 400px; background-color: #f9f9f9;">
-    <h3 style="color: #333; margin-bottom: 15px;">🔒 PDF सुरक्षित है</h3>
-    <p style="font-size: 14px; color: #666; margin-bottom: 15px;">PDF खोलने के लिए अपना पेमेंट वाला ईमेल डालें:</p>
+<div id="pdfBox" style="border: 2px solid #007bff; padding: 15px; border-radius: 10px; text-align: center; background: #fff;">
+    <h3 style="color: #333;">🔒 PDF सुरक्षित है</h3>
+    <p>एक्सेस पाने के लिए ₹9 पे करें और डिटेल्स भरें</p>
     
-    <input type="email" id="userEmail" placeholder="example@gmail.com" required 
-           style="padding: 12px; width: 80%; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 15px; outline: none;">
+    <a href="upi://pay?pa=7489956942@postbank&pn=Rameshwar_SAHU&am=9&cu=INR" 
+       style="display:inline-block; padding: 10px 20px; background: orange; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+       Pay ₹9 via UPI
+    </a>
+
+    <div style="margin-top: 20px;">
+        <input type="email" id="userEmail" placeholder="अपना ईमेल डालें" style="width: 80%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;">
+        <input type="text" id="txnId" placeholder="Transaction ID (UTR No.)" style="width: 80%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;">
+        
+        <button onclick="requestAccess()" style="width: 85%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            Access के लिए Request भेजें
+        </button>
+    </div>
     
-    <br>
-    
-    <button onclick="viewSecurePDF()" 
-            style="padding: 12px 25px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 85%;">
-        Open PDF
+    <p style="margin-top: 15px; font-size: 14px; color: #555;">या अगर आपने पहले पेमेंट कर दी है और अप्रूव हो गया है:</p>
+    <button onclick="viewSecurePDF()" style="width: 85%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Open PDF (Check Access)
     </button>
 </div>
+
 
 <script>
 function viewSecurePDF() {
