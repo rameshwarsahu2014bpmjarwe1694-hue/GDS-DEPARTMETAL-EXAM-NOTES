@@ -188,24 +188,35 @@ color:#666;
 </select>
 </div>
 
-<!-- PDF एक्सेस सेक्शन -->
-<div id="pdfBox" style="border: 2px solid #007bff; padding: 15px; border-radius: 10px; text-align: center; background: #fff;">
-    <h3 style="color: #333;">🔒 PDF सुरक्षित है</h3>
-    <p>एक्सेस पाने के लिए ₹9 पे करें और डिटेल्स भरें</p>
-    
-    <a href="upi://pay?pa=7489956942@postbank&pn=Rameshwar_SAHU&am=9&cu=INR" 
-       style="display:inline-block; padding: 10px 20px; background: orange; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-       Pay ₹9 via UPI
+<!-- लॉक वाला हिस्सा (जो आप रखना चाहते थे) -->
+<div class="lock-container" style="text-align: center; border: 2px solid #333; padding: 20px; border-radius: 15px; background: #fdfdfd;">
+    <span style="font-size: 50px;">🔒</span>
+    <h2 style="margin: 10px 0;">Content Locked</h2>
+    <p style="color: #666;">इस PDF को अनलॉक करने के लिए ₹19 का भुगतान करें</p>
+
+    <!-- पेमेंट बटन -->
+    <a href="upi://pay?pa=7489956942@postbank&pn=Rameshwar_SAHU&am=19&cu=INR" 
+       style="display:inline-block; padding: 12px 25px; background: #ff9800; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin-bottom: 20px;">
+       Pay ₹19 via UPI
     </a>
 
-    <div style="margin-top: 20px;">
-        <input type="email" id="userEmail" placeholder="अपना ईमेल डालें" style="width: 80%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;">
-        <input type="text" id="txnId" placeholder="Transaction ID (UTR No.)" style="width: 80%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;">
+    <div style="background: #f1f1f1; padding: 15px; border-radius: 10px;">
+        <p style="font-size: 14px; font-weight: bold;">पेमेंट के बाद डिटेल्स यहाँ भरें:</p>
+        <input type="email" id="userEmail" placeholder="अपना ईमेल डालें" style="width: 85%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;">
+        <input type="text" id="txnId" placeholder="Transaction ID (UTR No.)" style="width: 85%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;">
         
-        <button onclick="requestAccess()" style="width: 85%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-            Access के लिए Request भेजें
+        <button onclick="requestAccess()" style="width: 90%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 10px;">
+            Request Access
+        </button>
+        
+        <p style="font-size: 12px; color: #888;">--- या अगर अप्रूव हो चुका है ---</p>
+        
+        <button onclick="viewSecurePDF()" style="width: 90%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Open PDF
         </button>
     </div>
+</div>
+
     
     <p style="margin-top: 15px; font-size: 14px; color: #555;">या अगर आपने पहले पेमेंट कर दी है और अप्रूव हो गया है:</p>
     <button onclick="viewSecurePDF()" style="width: 85%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
