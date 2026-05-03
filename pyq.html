@@ -219,11 +219,12 @@ color:#666;
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-import {
-getFirestore,
-collection,
-getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { 
+    getFirestore, 
+    collection, 
+    getDocs, 
+    addDoc  // <--- यह यहाँ जोड़ना ज़रूरी है
+} from "https://gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
@@ -234,8 +235,10 @@ messagingSenderId: "759916756080",
 appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// लाइन 237 को ऐसे बदलें:
+const app = initializeApp(firebaseConfig); 
+const db = getFirestore(app); // यहाँ 'app' पास करना अच्छी प्रैक्टिस है
+
 
 let questions = [];
 let current = 0;
@@ -247,6 +250,30 @@ return document.getElementById(id).value.trim();
 
 function safe(v){
 return v || "";
+}
+async function submitPaymentDetails() {
+    const txnId = document.getElementById('txnIdInput').value;
+    
+    if(!txnId) {
+        alert("कृपया Transaction ID डालें!");
+        return;
+    }
+
+    try {
+        // 'payments' नाम के कलेक्शन में डेटा सेव करना
+        const docRef = await addDoc(collection(db, "payments"), {
+            transactionId: txnId,
+            status: "pending",
+            timestamp: new Date(),
+            userEmail: "user@example.com" // यहाँ आप एक्चुअल यूजर ईमेल डाल सकते हैं
+        });
+        
+        alert("विवरण भेज दिया गया है! वेरिफिकेशन के बाद अनलॉक हो जाएगा।");
+        closeModal();
+    } catch (e) {
+        console.error("Error adding document: ", e);
+        alert("डेटा सेव करने में समस्या आई!");
+    }
 }
 
 function esc(v){
@@ -476,7 +503,42 @@ document.getElementById("postSelect").addEventListener("change",loadAll);
 document.getElementById("startBtn").addEventListener("click",startQuiz);
 
 loadAll();
+// --- Payment System Logic Start ---
+const MY_UPI_ID = "Jaanbpm97@ybl"; 
 
+window.openPaymentModal = function(pyqName) {
+    const amount = "49.00"; 
+    const upiUrl = `upi://pay?pa=${MY_UPI_ID}&pn=Rameshwar&am=${amount}&cu=INR&tn=Unlock_${pyqName}`;
+    
+    document.getElementById('upiLink').href = upiUrl;
+    document.getElementById('paymentModal').style.display = 'block';
+    window.selectedPyqId = pyqName; 
+};
+
+window.submitPaymentDetails = async function() {
+    const txnId = document.getElementById('txnIdInput').value;
+    if(!txnId) return alert("कृपया Transaction ID डालें");
+
+    try {
+        // सुनिश्चित करें कि db और addDoc ऊपर इम्पोर्टेड हैं
+        await addDoc(collection(db, "payment_requests"), {
+            pyqId: window.selectedPyqId,
+            transactionId: txnId,
+            status: "pending",
+            timestamp: new Date()
+        });
+        alert("डिटेल्स भेज दी गई हैं! एडमिन अप्रूवल का इंतज़ार करें।");
+        closeModal();
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
+};
+
+window.closeModal = function() {
+    document.getElementById('paymentModal').style.display = 'none';
+};
+// --- Payment System Logic End ---
+    
 </script>
 
 </body>
