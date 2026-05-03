@@ -188,8 +188,42 @@ color:#666;
 </select>
 </div>
 
-<h3>PDF Files</h3>
-<div id="pdfBox">Loading...</div>
+<!-- PDF एक्सेस सेक्शन -->
+<div id="pdf-lock-section" style="text-align: center; margin: 20px auto; padding: 20px; border: 2px solid #007bff; border-radius: 12px; max-width: 400px; background-color: #f9f9f9;">
+    <h3 style="color: #333; margin-bottom: 15px;">🔒 PDF सुरक्षित है</h3>
+    <p style="font-size: 14px; color: #666; margin-bottom: 15px;">PDF खोलने के लिए अपना पेमेंट वाला ईमेल डालें:</p>
+    
+    <input type="email" id="userEmail" placeholder="example@gmail.com" required 
+           style="padding: 12px; width: 80%; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 15px; outline: none;">
+    
+    <br>
+    
+    <button onclick="viewSecurePDF()" 
+            style="padding: 12px 25px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 85%;">
+        Open PDF
+    </button>
+</div>
+
+<script>
+function viewSecurePDF() {
+    const emailInput = document.getElementById('userEmail').value.trim();
+    
+    if (!emailInput) {
+        alert("कृपया वह ईमेल डालें जिससे आपने पेमेंट की थी!");
+        return;
+    }
+
+    // आपका सही Render URL और एंडपॉइंट
+    const backendURL = "https://onrender.com";
+
+    // ईमेल को URL के साथ जोड़ना
+    const finalURL = `${backendURL}?email=${encodeURIComponent(emailInput)}`;
+
+    // नए टैब में PDF के लिए रिक्वेस्ट भेजना
+    window.open(finalURL, '_blank');
+}
+</script>
+
 <a href="upi://pay?pa=7489956942@postbank&pn=Rameshwar_SAHU&am=9&cu=INR" class="payment-btn">
    Pay ₹9 via UPI
 </a>
