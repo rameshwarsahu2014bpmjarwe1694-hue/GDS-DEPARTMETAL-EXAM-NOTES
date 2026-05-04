@@ -196,16 +196,30 @@
         window.open(url, "_blank");
     }
 
-    // Event Bindings
+       // --- Updated Event Bindings ---
+    
+    // Year ya Post select karne par sirf data load hoga, button gayab nahi hoga
     document.getElementById("yearSelect").onchange = fetchQuestions;
     document.getElementById("postSelect").onchange = fetchQuestions;
+    
     document.getElementById("reqBtn").onclick = requestAccess;
     document.getElementById("openPdfBtn").onclick = openPdf;
+
+    // Start button par click karne ka sahi logic
     document.getElementById("startQuizBtn").onclick = () => {
+        // Pehle check karein ki data load hua hai ya nahi
+        if (allQuestions.length === 0) {
+            alert("कृपया पहले साल और पोस्ट चुनें और डेटा लोड होने का इंतज़ार करें!");
+            return;
+        }
+        
+        // Agar data hai, tabhi quiz dikhao aur button chhupao
         document.getElementById("quizDisplay").style.display = "block";
         document.getElementById("startQuizBtn").style.display = "none";
+        currentIdx = 0; // Shuruat se shuru karne ke liye
         renderQuiz();
     };
+
 
 </script>
 </body>
