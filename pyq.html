@@ -1,26 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>PYQ Section - Fixed</title>
+    <title>PYQ Hub - Official Exam Study</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { background: #f4f6f9; padding: 15px; }
-        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.1); }
-        h1 { text-align: center; margin-bottom: 20px; color: #333; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        select, input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; }
-        .card { background: #fafafa; border: 1px solid #ddd; padding: 15px; border-radius: 10px; margin-top: 15px; }
-        .option { display: block; width: 100%; text-align: left; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; background: #fff; font-weight: bold; }
-        .option:hover { border-color: #007bff; background: #f0f7ff; }
-        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #fff; margin-top: 10px; width: 100%; transition: 0.3s; }
-        .btn-pay { background: #ff9800; text-decoration: none; display: inline-block; text-align: center; }
-        .btn-request { background: #28a745; }
-        .btn-open { background: #007bff; }
-        .btn-start { background: #6f42c1; }
-        .btn-nav { background: #333; width: auto; margin-right: 10px; padding: 8px 20px; }
-        #pdfBox { text-align: center; font-weight: bold; color: #007bff; margin: 10px 0; }
+        :root { --primary: #007bff; --success: #28a745; --warning: #ff9800; --dark: #2c3e50; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #f0f2f5; padding: 15px; color: #333; line-height: 1.6; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        
+        h1 { text-align: center; color: var(--dark); margin-bottom: 20px; font-size: 22px; border-bottom: 3px solid var(--primary); display: inline-block; width: 100%; padding-bottom: 10px; }
+        
+        .selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        select, input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; outline: none; font-size: 15px; }
+        select:focus, input:focus { border-color: var(--primary); }
+
+        .status-bar { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 15px; padding: 8px; border-radius: 5px; display: none; }
+        
+        .card { background: #fafafa; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-top: 15px; }
+        .card h3 { font-size: 18px; margin-bottom: 10px; color: var(--dark); }
+
+        .btn { padding: 13px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #fff; width: 100%; font-size: 16px; transition: 0.3s; margin-top: 8px; }
+        .btn-pay { background: var(--warning); text-decoration: none; display: block; text-align: center; }
+        .btn-request { background: var(--success); }
+        .btn-open { background: var(--primary); }
+        .btn-start { background: #6f42c1; margin-top: 20px; }
+
+        .option { display: block; width: 100%; text-align: left; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; font-weight: 500; }
+        .option:hover { background: #eef2f7; border-color: var(--primary); }
+        
+        .q-num { color: #e74c3c; font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px; }
+        .loading { color: #777; font-style: italic; }
     </style>
 </head>
 <body>
@@ -28,49 +39,48 @@
 <div class="container">
     <h1>Previous Year Questions</h1>
 
-    <div class="grid">
-        <select id="pyqSelect">
-            <option value="" selected disabled>Select Year</option>
+    <div class="selector-grid">
+        <select id="yearSelect">
+            <option value="" disabled selected>वर्ष चुनें</option>
             <option value="PYQ 2020">PYQ 2020</option>
             <option value="PYQ 2021">PYQ 2021</option>
             <option value="PYQ 2022">PYQ 2022</option>
             <option value="PYQ 2023">PYQ 2023</option>
             <option value="PYQ 2024">PYQ 2024</option>
-            <option value="Model Paper">Model Paper</option>
         </select>
         <select id="postSelect">
-            <option value="" selected disabled>Select Post</option>
+            <option value="" disabled selected>पोस्ट चुनें</option>
             <option value="MTS">MTS</option>
             <option value="POSTMAN">POSTMAN</option>
             <option value="PA-SA">PA-SA</option>
         </select>
     </div>
 
-    <div id="pdfBox">Select Year and Post to load questions</div>
+    <div id="statusBox" class="status-bar"></div>
 
-    <div class="card" style="text-align: center;">
-        <h2>🔒 Content Locked</h2>
-        <p style="margin: 10px 0;">Unlock PDF for ₹9</p>
+    <div class="card">
+        <h3>🔒 Unlock PDF Section</h3>
+        <p style="font-size: 13px; color: #666; margin-bottom: 10px;">PDF अनलॉक करने के लिए ₹9 का भुगतान करें और UTR दर्ज करें।</p>
         <a href="upi://pay?pa=7489956942@postbank&pn=Rameshwar_SAHU&am=9&cu=INR" class="btn btn-pay">Pay ₹9 via UPI</a>
-        <div style="margin-top:15px;">
-            <input type="email" id="userEmail" placeholder="Enter your Email">
-            <input type="text" id="txnId" placeholder="Transaction ID (UTR)">
-            <button class="btn btn-request" id="reqBtn">Request Access</button>
-            <button class="btn btn-open" id="openBtn">Open PDF (Check Access)</button>
-        </div>
+        
+        <input type="email" id="userEmail" placeholder="अपना रजिस्टर्ड ईमेल डालें" style="margin-top:15px;">
+        <input type="text" id="txnId" placeholder="Transaction UTR / ID">
+        
+        <button class="btn btn-request" id="reqBtn">Request Access</button>
+        <button class="btn btn-open" id="openPdfBtn">Open PDF (Check Access)</button>
     </div>
 
-    <hr style="margin: 25px 0;">
-    <h3>Quiz Section</h3>
-    <button class="btn btn-start" id="startBtn">Start Quiz</button>
-    <div id="quizBox" style="display:none;"></div>
+    <button class="btn btn-start" id="startQuizBtn">Start MCQ Practice</button>
+    
+    <div id="quizDisplay" style="display:none; margin-top:20px;">
+        </div>
 </div>
 
 <script type="module">
-    // Firebase SDK standard CDN links
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
         authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
@@ -82,115 +92,121 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
 
-    let questions = [];
-    let current = 0;
+    let allQuestions = [];
+    let currentIdx = 0;
 
-    // Load Data Function
-    async function loadAll() {
-        const category = document.getElementById("pyqSelect").value;
+    // 1. Data Loading Logic (With Sorting)
+    async function fetchQuestions() {
+        const year = document.getElementById("yearSelect").value;
         const post = document.getElementById("postSelect").value;
-        if (!category || !post) return;
+        const status = document.getElementById("statusBox");
 
-        document.getElementById("pdfBox").innerHTML = "Searching Data...";
-        questions = [];
+        if (!year || !post) return;
+
+        status.style.display = "block";
+        status.style.background = "#e1f5fe";
+        status.innerHTML = "<span class='loading'>डेटा लोड हो रहा है...</span>";
 
         try {
-            // Optimized query for better performance
-            const q = query(collection(db, "pyqQuestions"), 
-                            where("category", "==", category), 
-                            where("post", "==", post));
-            
-            const qSnap = await getDocs(q);
-            qSnap.forEach(doc => {
-                questions.push(doc.data());
+            // Firestore Query with Sorting
+            const q = query(
+                collection(db, "pyqQuestions"),
+                where("category", "==", year),
+                where("post", "==", post),
+                orderBy("q_no", "asc") // Ensure 'q_no' is a NUMBER in Firestore
+            );
+
+            const querySnapshot = await getDocs(q);
+            allQuestions = [];
+            querySnapshot.forEach((doc) => {
+                allQuestions.push(doc.data());
             });
 
-            if(questions.length > 0) {
-                document.getElementById("pdfBox").innerHTML = `✅ ${questions.length} Questions Loaded!`;
+            if (allQuestions.length > 0) {
+                status.style.background = "#d4edda";
+                status.innerHTML = `✅ ${allQuestions.length} सवाल क्रम में मिले!`;
             } else {
-                document.getElementById("pdfBox").innerHTML = "❌ No Data Found.";
+                status.style.background = "#fff3cd";
+                status.innerHTML = "❌ इस कैटेगरी में कोई सवाल नहीं मिला।";
             }
-        } catch (e) { 
-            console.error(e); 
-            document.getElementById("pdfBox").innerHTML = "Error loading data.";
+        } catch (error) {
+            console.error("Firestore Error:", error);
+            status.innerHTML = "⚠️ Sorting Error: Firestore Index बनाना होगा या q_no चेक करें।";
         }
     }
 
-    // Quiz Functions
-    function startQuiz() {
-        if (questions.length === 0) { alert("Please select Year/Post first!"); return; }
-        current = 0;
-        document.getElementById("startBtn").style.display = "none";
-        document.getElementById("quizBox").style.display = "block";
-        showQuestion();
-    }
+    // 2. Quiz Rendering
+    function renderQuiz() {
+        if (allQuestions.length === 0) return alert("पहले साल और पोस्ट चुनें!");
+        
+        const quizDisplay = document.getElementById("quizDisplay");
+        const q = allQuestions[currentIdx];
 
-    function showQuestion() {
-        const q = questions[current];
-        const quizBox = document.getElementById("quizBox");
-        quizBox.innerHTML = `
+        quizDisplay.innerHTML = `
             <div class="card">
-                <h3>Q${current + 1}: ${q.question}</h3>
-                <button class="option" id="optA">A. ${q.option_a || q.a}</button>
-                <button class="option" id="optB">B. ${q.option_b || q.b}</button>
-                <button class="option" id="optC">C. ${q.option_c || q.c}</button>
-                <button class="option" id="optD">D. ${q.option_d || q.d}</button>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn btn-nav" id="nextBtn">Next Question</button>
-                </div>
-            </div>`;
+                <span class="q-num">प्रश्न संख्या: ${q.q_no || currentIdx + 1}</span>
+                <p style="font-weight:bold; font-size:16px;">${q.question}</p>
+                <button class="option" onclick="this.style.background='#d1ecf1'">A. ${q.option_a || q.a}</button>
+                <button class="option" onclick="this.style.background='#d1ecf1'">B. ${q.option_b || q.b}</button>
+                <button class="option" onclick="this.style.background='#d1ecf1'">C. ${q.option_c || q.c}</button>
+                <button class="option" onclick="this.style.background='#d1ecf1'">D. ${q.option_d || q.d}</button>
+                <button class="btn btn-open" id="nextQBtn" style="background:#333;">अगला सवाल →</button>
+            </div>
+        `;
 
-        // Add event listeners to new elements
-        document.getElementById("optA").onclick = () => alert("Selected A");
-        document.getElementById("optB").onclick = () => alert("Selected B");
-        document.getElementById("optC").onclick = () => alert("Selected C");
-        document.getElementById("optD").onclick = () => alert("Selected D");
-        document.getElementById("nextBtn").onclick = nextQ;
+        document.getElementById("nextQBtn").onclick = () => {
+            if (currentIdx < allQuestions.length - 1) {
+                currentIdx++;
+                renderQuiz();
+            } else {
+                alert("अभ्यास पूर्ण हुआ!");
+                location.reload();
+            }
+        };
     }
 
-    function nextQ() {
-        if (current < questions.length - 1) { 
-            current++; 
-            showQuestion(); 
-        } else { 
-            alert("Quiz Finished!"); 
-            location.reload(); 
-        }
-    }
-
-    // Request Access
+    // 3. Backend Functions
     async function requestAccess() {
-        const email = document.getElementById('userEmail').value.trim();
-        const txnId = document.getElementById('txnId').value.trim();
-        if (!email || !txnId) { alert("Fill Email and Txn ID!"); return; }
+        const email = document.getElementById("userEmail").value.trim();
+        const txnId = document.getElementById("txnId").value.trim();
+
+        if (!email || !txnId) return alert("ईमेल और UTR भरें!");
 
         try {
-            const res = await fetch('https://payment-backend-2-g6go.onrender.com/request-access', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const response = await fetch(`${BACKEND_URL}/request-access`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, txnId })
             });
-            if (res.ok) alert("✅ Request Sent to Admin!");
-            else alert("❌ Server Error!");
-        } catch (e) { alert("⚠️ Connection Error!"); }
+            if (response.ok) alert("✅ रिक्वेस्ट भेज दी गई है! एडमिन अप्रूवल का इंतज़ार करें।");
+            else alert("❌ सर्वर एरर! बाद में प्रयास करें।");
+        } catch (err) {
+            alert("⚠️ कनेक्शन फेल! Render सर्वर शुरू हो रहा हो सकता है, 1 मिनट बाद फिर दबाएं।");
+        }
     }
 
-    function viewSecurePDF() {
-        const email = document.getElementById('userEmail').value.trim();
-        if (!email) { alert("Enter Email!"); return; }
-        // Corrected URL syntax
-        window.open(`https://payment-backend-2-g6go.onrender.com/view-pdf?email=${encodeURIComponent(email)}`, '_blank');
+    function openPdf() {
+        const email = document.getElementById("userEmail").value.trim();
+        if (!email) return alert("चेक करने के लिए ईमेल डालें!");
+
+        // Aapke server.js ke route /get-pdf ke anusar
+        const url = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(email)}`;
+        window.open(url, "_blank");
     }
 
-    // Assigning events correctly for modules
-    document.getElementById("pyqSelect").addEventListener("change", loadAll);
-    document.getElementById("postSelect").addEventListener("change", loadAll);
-    document.getElementById("startBtn").addEventListener("click", startQuiz);
-    document.getElementById("reqBtn").addEventListener("click", requestAccess);
-    document.getElementById("openBtn").addEventListener("click", viewSecurePDF);
+    // Event Bindings
+    document.getElementById("yearSelect").onchange = fetchQuestions;
+    document.getElementById("postSelect").onchange = fetchQuestions;
+    document.getElementById("reqBtn").onclick = requestAccess;
+    document.getElementById("openPdfBtn").onclick = openPdf;
+    document.getElementById("startQuizBtn").onclick = () => {
+        document.getElementById("quizDisplay").style.display = "block";
+        document.getElementById("startQuizBtn").style.display = "none";
+        renderQuiz();
+    };
 
 </script>
-
 </body>
 </html>
