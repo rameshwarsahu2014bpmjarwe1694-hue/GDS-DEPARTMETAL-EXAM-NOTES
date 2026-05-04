@@ -1,379 +1,159 @@
-<!-- =========================
-FILE : pyq.html
-ULTRA STRICT FINAL VERSION
-PDF + Quiz + Same Firebase Config
-========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PYQ Section</title>
-
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-body{
-background:#f4f6f9;
-padding:15px;
-}
-
-.container{
-max-width:1000px;
-margin:auto;
-background:#fff;
-padding:18px;
-border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,.08);
-}
-
-h1{
-text-align:center;
-margin-bottom:18px;
-font-size:28px;
-}
-
-h3{
-margin:18px 0 10px;
-}
-
-.grid{
-display:grid;
-gap:12px;
-}
-
-select{
-width:100%;
-padding:12px;
-border:1px solid #ccc;
-border-radius:8px;
-font-size:16px;
-}
-
-.card{
-background:#fafafa;
-border:1px solid #ddd;
-border-radius:10px;
-padding:15px;
-margin-bottom:12px;
-}
-
-.small{
-font-size:14px;
-color:#666;
-margin-top:6px;
-line-height:1.5;
-}
-
-a,button{
-display:inline-block;
-padding:10px 14px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-text-decoration:none;
-font-weight:bold;
-margin-top:10px;
-}
-
-a{
-background:#007bff;
-color:#fff;
-}
-
-.start-btn,.nav-btn,.submit-btn{
-margin-right:10px;
-padding:10px 16px;
-border-radius:10px;
-}
-
-.start-btn{
-background:#28a745;
-color:#fff;
-}
-
-.nav-btn{
-background:#007bff;
-color:#fff;
-}
-
-.submit-btn{
-background:#dc3545;
-color:#fff;
-}
-
-.option{
-display:flex;
-align-items:center;
-gap:12px;
-width:100%;
-text-align:left;
-background:#fff;
-color:#111;
-margin:10px 0;
-padding:14px 16px;
-border:2px solid #dfe3e8;
-border-radius:14px;
-font-size:15px;
-font-weight:600;
-cursor:pointer;
-transition:.18s;
-}
-
-.option::before{
-content:"";
-width:20px;
-height:20px;
-border:2px solid #9aa0a6;
-border-radius:50%;
-background:#fff;
-}
-
-.option:hover{
-border-color:#0d6efd;
-background:#f5f9ff;
-}
-
-.selected{
-background:#eaf3ff !important;
-border-color:#0d6efd !important;
-color:#0d6efd !important;
-}
-
-.selected::before{
-border-color:#0d6efd;
-background:#0d6efd;
-box-shadow:inset 0 0 0 4px #fff;
-}
-
-.empty{
-padding:20px;
-text-align:center;
-font-weight:bold;
-color:#666;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>PYQ Section - Final</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f4f6f9; padding: 15px; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.1); }
+        h1 { text-align: center; margin-bottom: 20px; }
+        .grid { display: grid; gap: 10px; margin-bottom: 20px; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; }
+        .card { background: #fafafa; border: 1px solid #ddd; padding: 15px; border-radius: 10px; margin-top: 15px; }
+        .option { display: block; width: 100%; text-align: left; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; background: #fff; font-weight: bold; }
+        .option:hover { border-color: #007bff; }
+        .selected { background: #e7f3ff !important; border-color: #007bff !important; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #fff; margin-top: 10px; width: 100%; }
+        .btn-pay { background: #ff9800; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-request { background: #28a745; }
+        .btn-open { background: #007bff; }
+        .btn-start { background: #6f42c1; }
+        .btn-nav { background: #333; width: auto; margin-right: 10px; }
+    </style>
 </head>
 <body>
 
 <div class="container">
+    <h1>Previous Year Questions</h1>
 
-<h1>Previous Year Questions</h1>
-
-<div class="grid">
-<select id="pyqSelect">
-<option value="" selected disabled>Select PYQ Year</option>
-<option>PYQ 2020</option>
-<option>PYQ 2021</option>
-<option>PYQ 2022</option>
-<option>PYQ 2023</option>
-<option>PYQ 2024</option>
-<option>PYQ 2025</option>
-<option>PYQ 2026</option>
-<option>Model Paper</option>
-<option>Practice Set</option>
-</select>
-
-<!-- Post Category -->
-<select id="postSelect">
-<option value="" selected disabled>Select Post Category</option>
-<option>MTS</option>
-<option>POSTMAN</option>
-<option>PA-SA</option>
-</select>
-</div>
-
-<!-- लॉक वाला हिस्सा (जो आप रखना चाहते थे) -->
-<div class="lock-container" style="text-align: center; border: 2px solid #333; padding: 20px; border-radius: 15px; background: #fdfdfd;">
-    <span style="font-size: 50px;">🔒</span>
-    <h2 style="margin: 10px 0;">Content Locked</h2>
-    <p style="color: #666;">इस PDF को अनलॉक करने के लिए ₹9 का भुगतान करें</p>
-
-    <!-- पेमेंट बटन -->
-    <a href="upi://pay?pa=7489956942@postbank&pn=Rameshwar_SAHU&am=9&cu=INR" 
-       style="display:inline-block; padding: 12px 25px; background: #ff9800; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin-bottom: 20px;">
-       Pay ₹9 via UPI
-    </a>
-    
-
-    <div style="background: #f1f1f1; padding: 15px; border-radius: 10px;">
-        <p style="font-size: 14px; font-weight: bold;">पेमेंट के बाद डिटेल्स यहाँ भरें:</p>
-        <input type="email" id="userEmail" placeholder="अपना ईमेल डालें" style="width: 85%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px;">
-        <input type="text" id="txnId" placeholder="Transaction ID (UTR No.)" style="width: 85%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;">
-        
-        <button onclick="requestAccess()" style="width: 90%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 10px;">
-            Request Access
-        </button>
-        
-        <p style="font-size: 12px; color: #888;">--- या अगर अप्रूव हो चुका है ---</p>
-        
-        <button onclick="viewSecurePDF()" style="width: 90%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Open PDF
-        </button>
+    <div class="grid">
+        <select id="pyqSelect">
+            <option value="" selected disabled>Select Year</option>
+            <option>PYQ 2020</option><option>PYQ 2021</option><option>PYQ 2022</option>
+            <option>PYQ 2023</option><option>PYQ 2024</option><option>Model Paper</option>
+        </select>
+        <select id="postSelect">
+            <option value="" selected disabled>Select Post</option>
+            <option>MTS</option><option>POSTMAN</option><option>PA-SA</option>
+        </select>
     </div>
+
+    <div id="pdfBox"></div>
+
+    <div class="card" style="text-align: center;">
+        <h2>🔒 Content Locked</h2>
+        <p>Unlock PDF for ₹9</p>
+        <a href="upi://pay?pa=7489956942@postbank&pn=Rameshwar_SAHU&am=9&cu=INR" class="btn btn-pay">Pay ₹9 via UPI</a>
+        <div style="margin-top:15px;">
+            <input type="email" id="userEmail" placeholder="Enter your Email">
+            <input type="text" id="txnId" placeholder="Transaction ID (UTR)">
+            <button class="btn btn-request" onclick="requestAccess()">Request Access</button>
+            <button class="btn btn-open" onclick="viewSecurePDF()">Open PDF (Check Access)</button>
+        </div>
+    </div>
+
+    <hr style="margin: 25px 0;">
+    <h3>Quiz Section</h3>
+    <button class="btn btn-start" id="startBtn">Start Quiz</button>
+    <div id="quizBox" style="display:none;"></div>
 </div>
 
-    
-    <p style="margin-top: 15px; font-size: 14px; color: #555;">या अगर आपने पहले पेमेंट कर दी है और अप्रूव हो गया है:</p>
-    <button onclick="viewSecurePDF()" style="width: 85%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-        Open PDF (Check Access)
-    </button>
-</div>
-
-
-<script>
-function viewSecurePDF() {
-    const emailInput = document.getElementById('userEmail').value.trim();
-    
-    if (!emailInput) {
-        alert("कृपया वह ईमेल डालें जिससे आपने पेमेंट की थी!");
-        return;
-    }
-
-    // आपका सही Render URL और एंडपॉइंट
-    const backendURL = "https://payment-backend-2-g6go.onrender.com"/request-access;
-
-    // ईमेल को URL के साथ जोड़ना
-    const finalURL = `${backendURL}?email=${encodeURIComponent(emailInput)}`;
-
-    // नए टैब में PDF के लिए रिक्वेस्ट भेजना
-    window.open(finalURL, '_blank');
-}
-</script>
-
-<a href="upi://pay?pa=7489956942@postbank&pn=Rameshwar_SAHU&am=9&cu=INR" class="payment-btn">
-   Pay ₹9 via UPI
-</a>
-
-  
-<h3>Quiz</h3>
-<button class="start-btn" id="startBtn">Start Quiz</button>
-
-<div id="quizBox" style="display:none;"></div>
-<div id="resultBox" style="display:none;"></div>
-
-</div>
 <script type="module">
-// 1. सही Firebase लिंक्स
-import { initializeApp } from "https://gstatic.com";
-import { getFirestore, collection, getDocs } from "https://gstatic.com";
+    import { initializeApp } from "https://gstatic.com";
+    import { getFirestore, collection, getDocs } from "https://gstatic.com";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-    authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-    projectId: "gds-departmental-exam-studyhub",
-    storageBucket: "gds-departmental-exam-studyhub.appspot.com",
-    messagingSenderId: "759916756080",
-    appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
-};
+    const firebaseConfig = {
+        apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+        authDomain: "://firebaseapp.com",
+        projectId: "gds-departmental-exam-studyhub",
+        storageBucket: "://appspot.com",
+        messagingSenderId: "759916756080",
+        appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+    };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-let questions = [];
-let current = 0;
-let answers = [];
+    let questions = [];
+    let current = 0;
+    let answers = [];
 
-async function loadAll() {
-    const category = document.getElementById("pyqSelect").value;
-    const post = document.getElementById("postSelect").value;
-    if(!category || !post) return;
+    // डेटा लोड करने का फंक्शन
+    async function loadAll() {
+        const category = document.getElementById("pyqSelect").value;
+        const post = document.getElementById("postSelect").value;
+        if (!category || !post) return;
 
-    questions = []; 
-    try {
-        const qSnap = await getDocs(collection(db, "pyqQuestions"));
-        qSnap.forEach(doc => {
-            const d = doc.data();
-            // स्पेलिंग चेक: MTS, POSTMAN, PA-SA एकदम सेम होनी चाहिए
-            if(d.category === category && d.post === post) questions.push(d);
-        });
-        console.log("Questions Loaded:", questions.length);
-    } catch(e) { console.error("Firebase Error:", e); }
-}
+        document.getElementById("pdfBox").innerHTML = "Searching Data...";
+        questions = [];
 
-async function startQuiz() {
-    if (questions.length === 0) {
-        alert("इस कैटेगरी में प्रश्न नहीं मिले! कृपया Year और Post सही चुनें।");
-        return;
+        try {
+            const qSnap = await getDocs(collection(db, "pyqQuestions"));
+            qSnap.forEach(doc => {
+                const d = doc.data();
+                if (d.category === category && d.post === post) questions.push(d);
+            });
+            document.getElementById("pdfBox").innerHTML = questions.length > 0 ? "Data Loaded Successfully!" : "No Data Found.";
+        } catch (e) { console.error(e); }
     }
-    current = 0;
-    document.getElementById("startBtn").style.display = "none";
-    document.getElementById("quizBox").style.display = "block";
-    showQuestion();
-}
 
-function showQuestion() {
-    const q = questions[current];
-    document.getElementById("quizBox").innerHTML = `
-        <div class="card">
-            <h3>Question ${current + 1} of ${questions.length}</h3>
-            <p><b>${q.question}</b></p>
-            <div class="grid">
-                <button class="option" onclick="selectOpt('a')">A. ${q.option_a || q.a || ''}</button>
-                <button class="option" onclick="selectOpt('b')">B. ${q.option_b || q.b || ''}</button>
-                <button class="option" onclick="selectOpt('c')">C. ${q.option_c || q.c || ''}</button>
-                <button class="option" onclick="selectOpt('d')">D. ${q.option_d || q.d || ''}</button>
-            </div>
-            <button class="nav-btn" onclick="nextQ()" style="background:#007bff; color:white; padding:10px; border-radius:5px; margin-top:10px;">Next Question</button>
-        </div>`;
-}
-
-async function requestAccess() {
-    const email = document.getElementById('userEmail').value.trim();
-    const txnId = document.getElementById('txnId').value.trim();
-    if (!email || !txnId) { alert("ईमेल और Transaction ID भरें!"); return; }
-
-    try {
-        // यहाँ आपका सही Render URL एंडपॉइंट के साथ
-        const res = await fetch('https://onrender.com', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, txnId })
-        });
-        if (res.ok) alert("✅ रिक्वेस्ट एडमिन को भेज दी गई!");
-        else alert("❌ सर्वर एरर!");
-    } catch (e) { alert("⚠️ सर्वर डाउन है!"); }
-}
-
-function viewSecurePDF() {
-    const emailInput = document.getElementById('userEmail').value.trim();
-    if (!emailInput) {
-        alert("कृपया ईमेल डालें!");
-        return;
+    // क्विज शुरू करना
+    function startQuiz() {
+        if (questions.length === 0) { alert("No Questions Found!"); return; }
+        current = 0;
+        document.getElementById("startBtn").style.display = "none";
+        document.getElementById("quizBox").style.display = "block";
+        showQuestion();
     }
-    // सही URL फॉर्मेट
-    const url = `https://onrender.com{encodeURIComponent(emailInput)}`;
-    window.open(url, '_blank');
-}
 
-// इवेंट लिसनर्स
-document.getElementById("pyqSelect").addEventListener("change", loadAll);
-document.getElementById("postSelect").addEventListener("change", loadAll);
-document.getElementById("startBtn").addEventListener("click", startQuiz);
+    function showQuestion() {
+        const q = questions[current];
+        document.getElementById("quizBox").innerHTML = `
+            <div class="card">
+                <h3>Q${current + 1}: ${q.question}</h3>
+                <button class="option" onclick="selectOpt('a')">A. ${q.option_a || q.a}</button>
+                <button class="option" onclick="selectOpt('b')">B. ${q.option_b || q.b}</button>
+                <button class="option" onclick="selectOpt('c')">C. ${q.option_c || q.c}</button>
+                <button class="option" onclick="selectOpt('d')">D. ${q.option_d || q.d}</button>
+                <button class="btn btn-nav" onclick="nextQ()">Next</button>
+            </div>`;
+    }
 
-window.selectOpt = (opt) => { 
-    answers[current] = opt; 
-    alert("आपने चुना: " + opt.toUpperCase()); 
-};
+    // रिक्वेस्ट भेजने का फंक्शन (सही URL के साथ)
+    window.requestAccess = async () => {
+        const email = document.getElementById('userEmail').value.trim();
+        const txnId = document.getElementById('txnId').value.trim();
+        if (!email || !txnId) { alert("Fill Email and Txn ID!"); return; }
 
-window.nextQ = () => { 
-    if (current < questions.length - 1) { 
-        current++; 
-        showQuestion(); 
-    } else { 
-        alert("क्विज समाप्त!"); 
-        location.reload(); 
-    } 
-};
+        try {
+            const res = await fetch('https://payment-backend-2-g6go.onrender.com/request-access', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, txnId })
+            });
+            if (res.ok) alert("✅ Request Sent to Admin!");
+            else alert("❌ Server Error!");
+        } catch (e) { alert("⚠️ Connection Error!"); }
+    };
 
-window.requestAccess = requestAccess;
-window.viewSecurePDF = viewSecurePDF;
+    window.viewSecurePDF = () => {
+        const email = document.getElementById('userEmail').value.trim();
+        if (!email) { alert("Enter Email!"); return; }
+        window.open(`https://onrender.com{encodeURIComponent(email)}`, '_blank');
+    };
 
+    // इवेंट्स
+    document.getElementById("pyqSelect").addEventListener("change", loadAll);
+    document.getElementById("postSelect").addEventListener("change", loadAll);
+    document.getElementById("startBtn").addEventListener("click", startQuiz);
+
+    window.selectOpt = (opt) => { alert("Selected: " + opt.toUpperCase()); };
+    window.nextQ = () => { 
+        if (current < questions.length - 1) { current++; showQuestion(); } 
+        else { alert("Quiz Finished!"); location.reload(); }
+    };
 </script>
 
 </body>
