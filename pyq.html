@@ -258,24 +258,18 @@ function viewSecurePDF() {
 <div id="resultBox" style="display:none;"></div>
 
 </div>
-
 <script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-getFirestore,
-collection,
-getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// 1. सही Firebase लिंक्स
+import { initializeApp } from "https://gstatic.com";
+import { getFirestore, collection, getDocs } from "https://gstatic.com";
 
 const firebaseConfig = {
-apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-projectId: "gds-departmental-exam-studyhub",
-storageBucket: "gds-departmental-exam-studyhub.appspot.com",
-messagingSenderId: "759916756080",
-appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+    apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+    authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+    projectId: "gds-departmental-exam-studyhub",
+    storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+    messagingSenderId: "759916756080",
+    appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -285,287 +279,102 @@ let questions = [];
 let current = 0;
 let answers = [];
 
-function val(id){
-return document.getElementById(id).value.trim();
+async function loadAll() {
+    const category = document.getElementById("pyqSelect").value;
+    const post = document.getElementById("postSelect").value;
+    if(!category || !post) return;
+
+    questions = []; 
+    try {
+        const qSnap = await getDocs(collection(db, "pyqQuestions"));
+        qSnap.forEach(doc => {
+            const d = doc.data();
+            // स्पेलिंग चेक: MTS, POSTMAN, PA-SA एकदम सेम होनी चाहिए
+            if(d.category === category && d.post === post) questions.push(d);
+        });
+        console.log("Questions Loaded:", questions.length);
+    } catch(e) { console.error("Firebase Error:", e); }
 }
 
-function safe(v){
-return v || "";
+async function startQuiz() {
+    if (questions.length === 0) {
+        alert("इस कैटेगरी में प्रश्न नहीं मिले! कृपया Year और Post सही चुनें।");
+        return;
+    }
+    current = 0;
+    document.getElementById("startBtn").style.display = "none";
+    document.getElementById("quizBox").style.display = "block";
+    showQuestion();
 }
 
-function esc(v){
-return String(v || "").replace(/'/g,"\\'");
+function showQuestion() {
+    const q = questions[current];
+    document.getElementById("quizBox").innerHTML = `
+        <div class="card">
+            <h3>Question ${current + 1} of ${questions.length}</h3>
+            <p><b>${q.question}</b></p>
+            <div class="grid">
+                <button class="option" onclick="selectOpt('a')">A. ${q.option_a || q.a || ''}</button>
+                <button class="option" onclick="selectOpt('b')">B. ${q.option_b || q.b || ''}</button>
+                <button class="option" onclick="selectOpt('c')">C. ${q.option_c || q.c || ''}</button>
+                <button class="option" onclick="selectOpt('d')">D. ${q.option_d || q.d || ''}</button>
+            </div>
+            <button class="nav-btn" onclick="nextQ()" style="background:#007bff; color:white; padding:10px; border-radius:5px; margin-top:10px;">Next Question</button>
+        </div>`;
 }
 
-/* LOAD DATA */
-async function loadAll(){
-
-document.getElementById("pdfBox").innerHTML="Loading...";
-document.getElementById("quizBox").style.display="none";
-document.getElementById("resultBox").style.display="none";
-document.getElementById("startBtn").style.display="inline-block";
-
-questions=[];
-current=0;
-answers=[];
-
-const category=val("pyqSelect");
-const post=val("postSelect");
-
-/* PDF */
-let pdfHtml="";
-
-const pdfSnap=await getDocs(collection(db,"pyqFiles"));
-
-pdfSnap.forEach(doc=>{
-const d=doc.data();
-
-if(d.category!==category) return;
-if(d.post!==post) return;
-
-pdfHtml+=`
-<div class="card">
-<b>${safe(d.title)}</b>
-<div class="small">${safe(d.desc)}</div>
-<div class="small">${safe(d.fileName)}</div>
-<a href="${safe(d.fileName)}" target="_blank">Open PDF</a>
-</div>
-`;
-});
-
-document.getElementById("pdfBox").innerHTML=
-pdfHtml || "<div class='empty'>No PDF Found</div>";
-
-/* QUESTIONS */
-let temp=[];
-
-const qSnap=await getDocs(collection(db,"pyqQuestions"));
-
-qSnap.forEach(doc=>{
-const d=doc.data();
-
-if(d.category!==category) return;
-if(d.post!==post) return;
-
-temp.push(d);
-});
-
-questions=temp.sort((a,b)=>{
-const na=parseInt(String(a.question).match(/^\d+/)?.[0] || 9999);
-const nb=parseInt(String(b.question).match(/^\d+/)?.[0] || 9999);
-return na-nb;
-}).map((item,index)=>{
-
-let cleanQ=String(item.question || "")
-.replace(/^\d+[\).\-\s:]*/,"")
-.trim();
-
-return{
-...item,
-question:cleanQ,
-serial:index+1
-};
-
-});
-
-}
-
-/* START QUIZ */
-function startQuiz(){
-
-if(questions.length===0){
-alert("No Questions Found");
-return;
-}
-
-document.getElementById("startBtn").style.display="none";
-document.getElementById("resultBox").style.display="none";
-document.getElementById("quizBox").style.display="block";
-
-showQuestion();
-}
-
-/* SHOW QUESTION */
-function showQuestion(){
-
-const q=questions[current];
-
-let html=`
-<div class="card">
-<h3>Question ${q.serial} / ${questions.length}</h3>
-<p style="margin:15px 0;"><b>${safe(q.question)}</b></p>
-`;
-
-for(let i=0;i<4;i++){
-
-const op=safe(q.options?.[i]);
-const active=answers[current]===op ? "selected":"";
-
-html+=`
-<button class="option ${active}" onclick="selectAns('${esc(op)}')">
-${String.fromCharCode(65+i)}. ${op}
-</button>
-`;
-}
-
-html+="<br>";
-
-if(current>0){
-html+=`<button class="nav-btn" onclick="prevQ()">Previous</button>`;
-}
-
-if(current<questions.length-1){
-html+=`<button class="nav-btn" onclick="nextQ()">Next</button>`;
-}
-  
-/* EVERY QUESTION PAGE */
-html += `<button class="submit-btn" onclick="submitQuiz()">Submit</button>`;
-
-html += "</div>";
-
-
-html+="</div>";
-
-document.getElementById("quizBox").innerHTML=html;
-}
-
-/* ACTIONS */
-window.selectAns=function(v){
-answers[current]=v;
-showQuestion();
-};
-
-window.nextQ=function(){
-if(current<questions.length-1){
-current++;
-showQuestion();
-}
-};
-
-window.prevQ=function(){
-if(current>0){
-current--;
-showQuestion();
-}
-};
-
-/* SUBMIT */
-window.submitQuiz=function(){
-
-let score=0;
-let attempted=0;
-let review="";
-
-for(let i=0;i<questions.length;i++){
-
-const q=questions[i];
-const user=answers[i] || "Not Answered";
-const ans=safe(q.answer);
-
-const ok=user===ans;
-
-if(user!=="Not Answered") attempted++;
-if(ok) score++;
-
-review+=`
-<div class="card" style="border-left:6px solid ${ok ? '#28a745':'#dc3545'};">
-<b>Q${q.serial}. ${safe(q.question)}</b>
-
-<div class="small">
-Your Answer:
-<span style="color:${ok ? 'green':'red'};font-weight:bold;">
-${user}
-</span>
-</div>
-
-<div class="small">
-Correct Answer:
-<span style="color:green;font-weight:bold;">
-${ans}
-</span>
-</div>
-
-<div class="small" style="font-weight:bold;color:${ok ? 'green':'red'};">
-${ok ? '✔ Correct':'✘ Wrong'}
-</div>
-</div>
-`;
-}
-
-document.getElementById("quizBox").style.display="none";
-document.getElementById("resultBox").style.display="block";
-
-document.getElementById("resultBox").innerHTML=`
-<div class="card" style="text-align:center;">
-<h2>Quiz Result</h2>
-
-<p><b>Total Questions:</b> ${questions.length}</p>
-<p><b>Attempted:</b> ${attempted}</p>
-<p><b>Correct:</b> ${score}</p>
-<p><b>Wrong:</b> ${attempted-score}</p>
-<p><b>Score:</b> ${score}/${questions.length}</p>
-
-<button class="start-btn" onclick="location.reload()">
-Restart Quiz
-</button>
-</div>
-
-${review}
-`;
-};
-
-/* EVENTS */
-document.getElementById("pyqSelect").addEventListener("change",loadAll);
-document.getElementById("postSelect").addEventListener("change",loadAll);
-document.getElementById("startBtn").addEventListener("click",startQuiz);
-
-loadAll();
-
-
-    
-<!-- ... ऊपर का सारा कोड ... -->
-
-<script>
-// 1. रिक्वेस्ट भेजने वाला फंक्शन
 async function requestAccess() {
     const email = document.getElementById('userEmail').value.trim();
     const txnId = document.getElementById('txnId').value.trim();
-
-    if (!email || !txnId) {
-        alert("ईमेल और Transaction ID भरें!");
-        return;
-    }
+    if (!email || !txnId) { alert("ईमेल और Transaction ID भरें!"); return; }
 
     try {
-        const response = await fetch('https://payment-backend-2-g6go.onrender.com/request-access', {
+        // यहाँ आपका सही Render URL एंडपॉइंट के साथ
+        const res = await fetch('https://onrender.com', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, txnId })
         });
-
-        if (response.ok) {
-            alert("✅ रिक्वेस्ट भेज दी गई! एडमिन के अप्रूव करते ही PDF खुल जाएगी।");
-        } else {
-            alert("❌ समस्या आई! शायद सर्वर रिस्पोंड नहीं कर रहा।");
-        }
-    } catch (e) {
-        alert("⚠️ सर्वर से कनेक्ट नहीं हो पाया।");
-    }
+        if (res.ok) alert("✅ रिक्वेस्ट एडमिन को भेज दी गई!");
+        else alert("❌ सर्वर एरर!");
+    } catch (e) { alert("⚠️ सर्वर डाउन है!"); }
 }
 
-// 2. PDF खोलने वाला फंक्शन
 function viewSecurePDF() {
     const emailInput = document.getElementById('userEmail').value.trim();
     if (!emailInput) {
-        alert("ईमेल डालें!");
+        alert("कृपया ईमेल डालें!");
         return;
     }
-    const url = `https://payment-backend-2-g6go.onrender.com/request-access{encodeURIComponent(emailInput)}`;
+    // सही URL फॉर्मेट
+    const url = `https://onrender.com{encodeURIComponent(emailInput)}`;
     window.open(url, '_blank');
 }
-window.requestAccess = requestAccess;  
+
+// इवेंट लिसनर्स
+document.getElementById("pyqSelect").addEventListener("change", loadAll);
+document.getElementById("postSelect").addEventListener("change", loadAll);
+document.getElementById("startBtn").addEventListener("click", startQuiz);
+
+window.selectOpt = (opt) => { 
+    answers[current] = opt; 
+    alert("आपने चुना: " + opt.toUpperCase()); 
+};
+
+window.nextQ = () => { 
+    if (current < questions.length - 1) { 
+        current++; 
+        showQuestion(); 
+    } else { 
+        alert("क्विज समाप्त!"); 
+        location.reload(); 
+    } 
+};
+
+window.requestAccess = requestAccess;
+window.viewSecurePDF = viewSecurePDF;
+
 </script>
 
 </body>
 </html>
-
