@@ -111,14 +111,23 @@
 
         try {
             // Firestore Query with Sorting
+                        // 1. Pehle bina sorting ke data mangaiye (Index error nahi aayega)
             const q = query(
                 collection(db, "pyqQuestions"),
                 where("category", "==", year),
-                where("post", "==", post),
-                orderBy("q_no", "asc") // Ensure 'q_no' is a NUMBER in Firestore
+                where("post", "==", post)
             );
 
             const querySnapshot = await getDocs(q);
+            allQuestions = [];
+            
+            querySnapshot.forEach((doc) => {
+                allQuestions.push({ id: doc.id, ...doc.data() });
+            });
+
+            // 2. Ab JavaScript se questions ko q_no ke hisaab se line mein lagaiye
+            allQuestions.sort((a, b) => (parseInt(a.q_no) || 0) - (parseInt(b.q_no) || 0));
+
             allQuestions = [];
             querySnapshot.forEach((doc) => {
                 allQuestions.push(doc.data());
