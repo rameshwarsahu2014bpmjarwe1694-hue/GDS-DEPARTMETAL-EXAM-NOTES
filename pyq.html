@@ -80,8 +80,9 @@
     let allQuestions = [];
     let currentIdx = 0;
     let score = 0;
-    let history = {}; 
+    let quizHistory = {}; 
 
+    // --- FETCH QUESTIONS ---
     async function fetchQuestions() {
         const year = document.getElementById("yearSelect").value;
         const post = document.getElementById("postSelect").value;
@@ -108,6 +109,7 @@
         } catch (error) { status.innerHTML = "⚠️ Error loading data."; }
     }
 
+    // --- RENDER QUIZ (Includes Submit & Previous) ---
     window.renderQuiz = function() {
         const quizDisplay = document.getElementById("quizDisplay");
         const q = allQuestions[currentIdx];
@@ -135,11 +137,11 @@
             </div>
         `;
 
-        if(history[currentIdx]) {
+        if(quizHistory[currentIdx]) {
             const btns = document.querySelectorAll('.option');
             btns.forEach(b => {
                 b.disabled = true;
-                if(b.innerText.includes(history[currentIdx].selected)) b.classList.add(history[currentIdx].isCorrect ? 'correct' : 'wrong');
+                if(b.innerText.includes(quizHistory[currentIdx].selected)) b.classList.add(quizHistory[currentIdx].isCorrect ? 'correct' : 'wrong');
                 if(b.innerText.includes(correct)) b.classList.add('correct');
             });
         }
@@ -151,7 +153,7 @@
         const isCorrect = (selected === correct);
         if(isCorrect) { btn.classList.add('correct'); score++; }
         else { btn.classList.add('wrong'); btns.forEach(b => { if(b.innerText.includes(correct)) b.classList.add('correct'); }); }
-        history[currentIdx] = { selected, isCorrect };
+        quizHistory[currentIdx] = { selected, isCorrect };
     };
 
     window.nav = function(dir) {
@@ -163,10 +165,11 @@
         document.getElementById("quizDisplay").style.display = "none";
         const rb = document.getElementById("resultBox");
         rb.style.display = "block";
-        rb.innerHTML = `<h3>📊 Result</h3><p style="font-size:24px; margin:15px 0;">Score: ${score} / ${allQuestions.length}</p>
-                        <button class="btn btn-open" onclick="location.reload()">Restart Quiz</button>`;
+        rb.innerHTML = `<h3>📊 Your Final Score</h3><p style="font-size:35px; color:#007bff; margin:15px 0;">${score} / ${allQuestions.length}</p>
+                        <button class="btn" style="background:var(--primary); width:100%;" onclick="location.reload()">Restart Quiz</button>`;
     };
 
+    // --- RENDER BACKEND REQUEST ---
     document.getElementById("reqBtn").onclick = async () => {
         const email = document.getElementById("userEmail").value.trim();
         const txnId = document.getElementById("txnId").value.trim();
@@ -185,12 +188,12 @@
                 alert("✅ Request Sent Successfully! Admin jald hi ise approve karenge.");
                 reqBtn.innerText = "Request Sent";
             } else {
-                alert("❌ Request Fail ho gayi.");
+                alert("❌ Request Fail ho gayi. Server Error.");
                 reqBtn.innerText = "Request Access";
                 reqBtn.disabled = false;
             }
         } catch(err) {
-            alert("⚠️ Backend Server Error!");
+            alert("⚠️ Backend Server Connection Failed!");
             reqBtn.innerText = "Request Access";
             reqBtn.disabled = false;
         }
@@ -198,14 +201,14 @@
 
     document.getElementById("openPdfBtn").onclick = () => {
         const email = document.getElementById("userEmail").value.trim();
-        if(!email) return alert("Email dalein!");
+        if(!email) return alert("Pehle email dalein!");
         window.open(`${BACKEND_URL}/get-pdf?email=${encodeURIComponent(email)}`, "_blank");
     };
 
     document.getElementById("yearSelect").onchange = fetchQuestions;
     document.getElementById("postSelect").onchange = fetchQuestions;
     document.getElementById("startQuizBtn").onclick = () => {
-        if(allQuestions.length === 0) return alert("Pehle Year/Post select karein!");
+        if(allQuestions.length === 0) return alert("Pehle Year aur Post select karke load hone dein!");
         document.getElementById("paymentUI").style.display = "none";
         document.getElementById("startQuizBtn").style.display = "none";
         document.getElementById("quizDisplay").style.display = "block";
