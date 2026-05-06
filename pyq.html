@@ -80,7 +80,7 @@
     let allQuestions = [];
     let currentIdx = 0;
     let score = 0;
-    let history = {}; // To store user's selected answers
+    let history = {}; 
 
     async function fetchQuestions() {
         const year = document.getElementById("yearSelect").value;
@@ -108,165 +108,109 @@
         } catch (error) { status.innerHTML = "⚠️ Error loading data."; }
     }
 
-    function renderQuiz() {
+    window.renderQuiz = function() {
         const quizDisplay = document.getElementById("quizDisplay");
         const q = allQuestions[currentIdx];
-        
-        // Admin Panel Array Logic
         const options = q.options || []; 
         const correct = q.answer;
 
         quizDisplay.innerHTML = `
-            <div class="card" style="border-left: 5px solid var(--primary);">
-                <span style="font-weight:bold; color:red;">प्रश्न: ${currentIdx + 1} / ${allQuestions.length}</span>
-                <p style="font-weight:bold; margin: 15px 0;">${q.question}</p>
-                <div id="optionsGroup">
+            <div class="card">
+                <span style="color:red; font-weight:bold;">प्रश्न: ${currentIdx + 1} / ${allQuestions.length}</span>
+                <p style="margin:15px 0; font-weight:bold;">${q.question}</p>
+                <div id="optArea">
                     ${options.map((opt, i) => `
-                        <button class="option" id="opt${i}" onclick="window.checkAns(this, \`${opt}\`, \`${correct}\`)">
+                        <button class="option" onclick="window.checkAns(this, \`${opt}\`, \`${correct}\`)">
                             ${String.fromCharCode(65+i)}. ${opt}
                         </button>
                     `).join('')}
                 </div>
                 <div class="btn-row">
-                    <button class="btn" style="background:#6c757d; ${currentIdx === 0 ? 'display:none' : ''}" onclick="window.nav(-1)">Piche</button>
+                    <button class="btn" style="background:#6c757d; flex:1; ${currentIdx===0?'display:none':''}" onclick="window.nav(-1)">Previous</button>
                     ${currentIdx === allQuestions.length - 1 
-                        ? `<button class="btn" style="background:var(--success);" onclick="window.showFinal()">Submit Result</button>`
-                        : `<button class="btn" style="background:var(--dark);" onclick="window.nav(1)">Next</button>`
+                        ? `<button class="btn" style="background:var(--success); flex:1;" onclick="window.showFinal()">Submit Result</button>` 
+                        : `<button class="btn" style="background:var(--dark); flex:1;" onclick="window.nav(1)">Next</button>`
                     }
                 </div>
             </div>
         `;
 
-        // Restore selection if already answered
         if(history[currentIdx]) {
             const btns = document.querySelectorAll('.option');
             btns.forEach(b => {
                 b.disabled = true;
-                if(b.innerText.includes(history[currentIdx].selected)) {
-                    b.classList.add(history[currentIdx].isCorrect ? 'correct' : 'wrong');
-                }
+                if(b.innerText.includes(history[currentIdx].selected)) b.classList.add(history[currentIdx].isCorrect ? 'correct' : 'wrong');
                 if(b.innerText.includes(correct)) b.classList.add('correct');
             });
         }
-    }
+    };
 
-    window.checkAns = (btn, selected, correct) => {
+    window.checkAns = function(btn, selected, correct) {
         const btns = document.querySelectorAll('.option');
         btns.forEach(b => b.disabled = true);
-        
         const isCorrect = (selected === correct);
-        if(isCorrect) {
-            btn.classList.add('correct');
-            score++;
-        } else {
-            btn.classList.add('wrong');
-            btns.forEach(b => { if(b.innerText.includes(correct)) b.classList.add('correct'); });
-        }
+        if(isCorrect) { btn.classList.add('correct'); score++; }
+        else { btn.classList.add('wrong'); btns.forEach(b => { if(b.innerText.includes(correct)) b.classList.add('correct'); }); }
         history[currentIdx] = { selected, isCorrect };
     };
 
-    window.nav = (dir) => {
+    window.nav = function(dir) {
         currentIdx += dir;
-        renderQuiz();
+        window.renderQuiz();
     };
 
-    window.showFinal = () => {
+    window.showFinal = function() {
         document.getElementById("quizDisplay").style.display = "none";
         const rb = document.getElementById("resultBox");
         rb.style.display = "block";
-        rb.innerHTML = `<h3>📊 Result</h3><p style="font-size:22px; margin:15px 0;">Score: ${score} / ${allQuestions.length}</p>
-                        <button class="btn btn-open" onclick="location.reload()">Restart</button>`;
+        rb.innerHTML = `<h3>📊 Result</h3><p style="font-size:24px; margin:15px 0;">Score: ${score} / ${allQuestions.length}</p>
+                        <button class="btn btn-open" onclick="location.reload()">Restart Quiz</button>`;
     };
 
-  // --- RENDER BACKEND INTEGRATION (With Alert Message) ---
-window.requestAccess = async () => {
-    const email = document.getElementById("userEmail").value.trim();
-    const txnId = document.getElementById("txnId").value.trim();
-    const reqBtn = document.getElementById("reqBtn");
-
-    if(!email || !txnId) return alert("Email aur Transaction ID bharein!");
-
-    reqBtn.innerText = "Sending...";
-    reqBtn.disabled = true;
-
-    try {
-        const res = await fetch(`${BACKEND_URL}/request-access`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, txnId })
-        });
+    document.getElementById("reqBtn").onclick = async () => {
+        const email = document.getElementById("userEmail").value.trim();
+        const txnId = document.getElementById("txnId").value.trim();
+        const reqBtn = document.getElementById("reqBtn");
+        if(!email || !txnId) return alert("Email aur Transaction ID bharein!");
         
-        if(res.ok) {
-            // Ye message user ko confirm karega ki request chali gayi hai
-            alert("✅ Request Sent Successfully! Admin jald hi ise approve karenge.");
-            reqBtn.innerText = "Request Sent";
-        } else {
-            alert("❌ Request Fail ho gayi. Details check karein.");
+        reqBtn.innerText = "Sending...";
+        reqBtn.disabled = true;
+        try {
+            const res = await fetch(`${BACKEND_URL}/request-access`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, txnId })
+            });
+            if(res.ok) {
+                alert("✅ Request Sent Successfully! Admin jald hi ise approve karenge.");
+                reqBtn.innerText = "Request Sent";
+            } else {
+                alert("❌ Request Fail ho gayi.");
+                reqBtn.innerText = "Request Access";
+                reqBtn.disabled = false;
+            }
+        } catch(err) {
+            alert("⚠️ Backend Server Error!");
             reqBtn.innerText = "Request Access";
             reqBtn.disabled = false;
         }
-    } catch(err) {
-        alert("⚠️ Backend Server se connect nahi ho paa raha hai!");
-        reqBtn.innerText = "Request Access";
-        reqBtn.disabled = false;
-    }
-};
+    };
 
-// --- UPDATED RENDER QUIZ (With Previous & Submit) ---
-function renderQuiz() {
-    const quizDisplay = document.getElementById("quizDisplay");
-    const q = allQuestions[currentIdx];
-    const options = q.options || []; 
-    const correct = q.answer;
+    document.getElementById("openPdfBtn").onclick = () => {
+        const email = document.getElementById("userEmail").value.trim();
+        if(!email) return alert("Email dalein!");
+        window.open(`${BACKEND_URL}/get-pdf?email=${encodeURIComponent(email)}`, "_blank");
+    };
 
-    quizDisplay.innerHTML = `
-        <div class="card">
-            <span style="color:red; font-weight:bold;">प्रश्न: ${currentIdx + 1} / ${allQuestions.length}</span>
-            <p style="margin:15px 0; font-weight:bold;">${q.question}</p>
-            <div id="optArea">
-                ${options.map((opt, i) => `
-                    <button class="option" onclick="window.handleAns(this, '${opt}', '${correct}')">
-                        ${String.fromCharCode(65+i)}. ${opt}
-                    </button>
-                `).join('')}
-            </div>
-            <div class="btn-row" style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn" style="background:#6c757d; flex:1; ${currentIdx===0?'display:none':''}" onclick="window.nav(-1)">Previous</button>
-                
-                ${currentIdx === allQuestions.length - 1 
-                    ? `<button class="btn" style="background:#28a745; flex:1;" onclick="window.submitQuiz()">Submit Result</button>` 
-                    : `<button class="btn" style="background:#2c3e50; flex:1;" onclick="window.nav(1)">Next</button>`
-                }
-            </div>
-        </div>
-    `;
-
-    // Answer History Restore Logic
-    if(userAnswers[currentIdx]) {
-        const btns = document.querySelectorAll('.option');
-        btns.forEach(b => {
-            b.disabled = true;
-            if(b.innerText.includes(userAnswers[currentIdx].selected)) b.classList.add(userAnswers[currentIdx].isCorrect ? 'correct' : 'wrong');
-            if(b.innerText.includes(correct)) b.classList.add('correct');
-        });
-    }
-}
-
-// --- SCORE & RESULT LOGIC ---
-window.submitQuiz = () => {
-    document.getElementById("quizDisplay").style.display = "none";
-    const resultBox = document.getElementById("resultBox");
-    resultBox.style.display = "block";
-    resultBox.innerHTML = `
-        <div class="card" style="text-align:center;">
-            <h2>📊 Your Final Score</h2>
-            <div style="font-size:35px; color:#007bff; margin:20px 0;">${score} / ${allQuestions.length}</div>
-            <p>Aapne successfully quiz complete kar liya hai.</p>
-            <button class="btn" style="background:#007bff; width:100%; margin-top:15px;" onclick="location.reload()">Restart Quiz</button>
-        </div>
-    `;
-};
-
+    document.getElementById("yearSelect").onchange = fetchQuestions;
+    document.getElementById("postSelect").onchange = fetchQuestions;
+    document.getElementById("startQuizBtn").onclick = () => {
+        if(allQuestions.length === 0) return alert("Pehle Year/Post select karein!");
+        document.getElementById("paymentUI").style.display = "none";
+        document.getElementById("startQuizBtn").style.display = "none";
+        document.getElementById("quizDisplay").style.display = "block";
+        window.renderQuiz();
+    };
 </script>
 </body>
 </html>
