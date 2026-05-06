@@ -170,34 +170,53 @@
     };
 
     // --- RENDER BACKEND REQUEST ---
-    document.getElementById("reqBtn").onclick = async () => {
-        const email = document.getElementById("userEmail").value.trim();
-        const txnId = document.getElementById("txnId").value.trim();
-        const reqBtn = document.getElementById("reqBtn");
-        if(!email || !txnId) return alert("Email aur Transaction ID bharein!");
-        
-        reqBtn.innerText = "Sending...";
-        reqBtn.disabled = true;
-        try {
-            const res = await fetch(`${BACKEND_URL}/request-access`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, txnId })
-            });
-            if(res.ok) {
-                alert("✅ Request Sent Successfully! Admin jald hi ise approve karenge.");
-                reqBtn.innerText = "Request Sent";
-            } else {
-                alert("❌ Request Fail ho gayi. Server Error.");
-                reqBtn.innerText = "Request Access";
-                reqBtn.disabled = false;
-            }
-        } catch(err) {
-            alert("⚠️ Backend Server Connection Failed!");
-            reqBtn.innerText = "Request Access";
+    // --- RENDER BACKEND REQUEST (FIXED FOR CONNECTION) ---
+document.getElementById("reqBtn").onclick = async () => {
+    const email = document.getElementById("userEmail").value.trim();
+    const txnId = document.getElementById("txnId").value.trim();
+    const reqBtn = document.getElementById("reqBtn");
+
+    if(!email || !txnId) return alert("Email aur Transaction ID bharein!");
+    
+    reqBtn.innerText = "Connecting..."; // Step 1: Connecting dikhayega
+    reqBtn.disabled = true;
+
+    try {
+        // Render free tier kabhi-kabhi sleep ho jata hai, isliye timeout badha diya hai
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds wait
+
+        const res = await fetch(`${BACKEND_URL}/request-access`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({ email: email, txnId: txnId }),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if(res.ok) {
+            alert("✅ Request Sent Successfully! Admin jald hi ise approve karenge.");
+            reqBtn.innerText = "Request Sent";
+            reqBtn.style.background = "#28a745"; // Success color
+        } else {
+            const errorText = await res.text();
+            alert("❌ Server Error: " + errorText);
+            reqBtn.innerText = "Retry Access";
             reqBtn.disabled = false;
         }
-    };
+    } catch(err) {
+        console.error("Backend Error:", err);
+        // Agar Render server band hai ya slow hai toh ye alert aayega
+        alert("⚠️ Backend Server se connection nahi ho paa raha hai. Kripya 30 seconds baad phir se koshish karein kyunki Render server 'Wake up' ho raha hai.");
+        reqBtn.innerText = "Request Access";
+        reqBtn.disabled = false;
+    }
+};
+
 
     document.getElementById("openPdfBtn").onclick = () => {
         const email = document.getElementById("userEmail").value.trim();
