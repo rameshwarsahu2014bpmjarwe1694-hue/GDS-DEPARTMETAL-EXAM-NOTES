@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>PYQ Hub - Official Exam Study</title>
+    <title>PYQ Hub - Official Study</title>
     <style>
         :root { --primary: #007bff; --success: #28a745; --warning: #ff9800; --dark: #2c3e50; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
@@ -18,11 +18,11 @@
         .btn-pay { background: var(--warning); text-decoration: none; display: block; text-align: center; }
         .btn-request { background: var(--success); }
         .btn-open { background: var(--primary); }
-        .btn-start { background: #6f42c1; }
-        .option { display: block; width: 100%; text-align: left; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; transition: 0.2s; }
-        .q-num { color: #e74c3c; font-weight: bold; font-size: 14px; }
-        .correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
-        .wrong { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
+        .btn-start { background: #6f42c1; width: 100%; margin-top: 15px; }
+        .option { display: block; width: 100%; text-align: left; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; }
+        .correct { background: #d4edda !important; border-color: #28a745 !important; font-weight: bold; }
+        .wrong { background: #f8d7da !important; border-color: #dc3545 !important; }
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -32,18 +32,13 @@
 
     <div class="selector-grid">
         <select id="yearSelect">
-            <option value="" disabled selected>वर्ष चुनें</option>
-            <option>PYQ 2020</option>
-            <option>PYQ 2021</option>
-            <option>PYQ 2022</option>
-            <option>PYQ 2023</option>
-            <option>PYQ 2024</option>
+            <option value="">वर्ष चुनें</option>
+            <option>PYQ 2020</option><option>PYQ 2021</option><option>PYQ 2022</option>
+            <option>PYQ 2023</option><option>PYQ 2024</option>
         </select>
         <select id="postSelect">
-            <option value="" disabled selected>पोस्ट चुनें</option>
-            <option>MTS</option>
-            <option>POSTMAN</option>
-            <option>PA-SA</option>
+            <option value="">पोस्ट चुनें</option>
+            <option>MTS</option><option>POSTMAN</option><option>PA-SA</option>
         </select>
     </div>
 
@@ -51,6 +46,7 @@
 
     <div class="card" id="paymentUI">
         <h3>🔒 Unlock PDF Section</h3>
+        <p style="font-size:12px; margin-bottom:10px;">PDF अनलॉक करने के लिए ₹9 भुगतान करें।</p>
         <a href="upi://pay?pa=7489956942@postbank&pn=Rameshwar_SAHU&am=9&cu=INR" class="btn btn-pay">Pay ₹9 via UPI</a>
         <input type="email" id="userEmail" placeholder="रजिस्टर्ड ईमेल डालें" style="margin-top:10px;">
         <input type="text" id="txnId" placeholder="UTR / Transaction ID">
@@ -58,7 +54,7 @@
         <button class="btn btn-open" id="openPdfBtn">Open PDF</button>
     </div>
 
-    <button class="btn btn-start" id="startQuizBtn" style="margin-top:20px;">Start MCQ Practice</button>
+    <button class="btn btn-start" id="startQuizBtn">Start MCQ Practice</button>
     
     <div id="quizDisplay" style="display:none; margin-top:20px;"></div>
     <div id="resultBox" style="display:none; margin-top:20px; text-align:center;" class="card"></div>
@@ -66,7 +62,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
@@ -84,6 +80,7 @@
     let allQuestions = [];
     let currentIdx = 0;
     let score = 0;
+    let history = {}; // To store user's selected answers
 
     async function fetchQuestions() {
         const year = document.getElementById("yearSelect").value;
@@ -96,99 +93,98 @@
         status.innerHTML = "लोड हो रहा है...";
 
         try {
-            const q = query(
-                collection(db, "pyqQuestions"), 
-                where("category", "==", year), 
-                where("post", "==", post),
-                orderBy("createdAt", "asc") // Admin panel ke order ke mutabik
-            );
+            const q = query(collection(db, "pyqQuestions"), where("category", "==", year), where("post", "==", post));
             const querySnapshot = await getDocs(q);
-            
             allQuestions = [];
-            querySnapshot.forEach((doc) => {
-                allQuestions.push({ id: doc.id, ...doc.data() });
-            });
+            querySnapshot.forEach((doc) => { allQuestions.push({ id: doc.id, ...doc.data() }); });
 
             if (allQuestions.length > 0) {
                 status.style.background = "#d4edda";
                 status.innerHTML = `✅ ${allQuestions.length} सवाल मिले!`;
             } else {
                 status.style.background = "#fff3cd";
-                status.innerHTML = "❌ सवाल नहीं मिले।";
+                status.innerHTML = "❌ डेटा नहीं मिला।";
             }
-        } catch (error) {
-            console.log(error);
-            status.innerHTML = "⚠️ Error: Firestore Indexing pending?";
-        }
+        } catch (error) { status.innerHTML = "⚠️ Error loading data."; }
     }
 
     function renderQuiz() {
         const quizDisplay = document.getElementById("quizDisplay");
         const q = allQuestions[currentIdx];
-
-        // ADMIN-PYQ COMPATIBLE MAPPING
-        // Admin Panel 'options' naam ke Array mein data save karta hai
-        const optA = q.options ? q.options : "Data Missing";
-        const optB = q.options ? q.options : "Data Missing";
-        const optC = q.options ? q.options : "Data Missing";
-        const optD = q.options ? q.options : "Data Missing";
-        const correctValue = q.answer; // Seedha sahi option ka text
+        
+        // Admin Panel Array Logic
+        const options = q.options || []; 
+        const correct = q.answer;
 
         quizDisplay.innerHTML = `
             <div class="card" style="border-left: 5px solid var(--primary);">
-                <span class="q-num">प्रश्न: ${currentIdx + 1} / ${allQuestions.length}</span>
-                <p style="font-weight:bold; font-size:16px; margin: 10px 0;">${q.question}</p>
-                
-                <button class="option" onclick="window.checkAns(this, \`${optA}\`, \`${correctValue}\`)">A. ${optA}</button>
-                <button class="option" onclick="window.checkAns(this, \`${optB}\`, \`${correctValue}\`)">B. ${optB}</button>
-                <button class="option" onclick="window.checkAns(this, \`${optC}\`, \`${correctValue}\`)">C. ${optC}</button>
-                <button class="option" onclick="window.checkAns(this, \`${optD}\`, \`${correctValue}\`)">D. ${optD}</button>
-
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="btn" id="prevBtn" style="background:#6c757d; flex: 1; ${currentIdx === 0 ? 'display:none' : ''}">← पीछे</button>
-                    <button class="btn" id="nextBtn" style="background:var(--dark); flex: 2;">
-                        ${currentIdx === allQuestions.length - 1 ? 'सबमिट करें' : 'अगला सवाल →'}
-                    </button>
+                <span style="font-weight:bold; color:red;">प्रश्न: ${currentIdx + 1} / ${allQuestions.length}</span>
+                <p style="font-weight:bold; margin: 15px 0;">${q.question}</p>
+                <div id="optionsGroup">
+                    ${options.map((opt, i) => `
+                        <button class="option" id="opt${i}" onclick="window.checkAns(this, \`${opt}\`, \`${correct}\`)">
+                            ${String.fromCharCode(65+i)}. ${opt}
+                        </button>
+                    `).join('')}
+                </div>
+                <div class="btn-row">
+                    <button class="btn" style="background:#6c757d; ${currentIdx === 0 ? 'display:none' : ''}" onclick="window.nav(-1)">Piche</button>
+                    ${currentIdx === allQuestions.length - 1 
+                        ? `<button class="btn" style="background:var(--success);" onclick="window.showFinal()">Submit Result</button>`
+                        : `<button class="btn" style="background:var(--dark);" onclick="window.nav(1)">Next</button>`
+                    }
                 </div>
             </div>
         `;
 
-        document.getElementById("nextBtn").onclick = () => {
-            if (currentIdx < allQuestions.length - 1) { currentIdx++; renderQuiz(); }
-            else { showResult(); }
-        };
-        if(currentIdx > 0) document.getElementById("prevBtn").onclick = () => { currentIdx--; renderQuiz(); };
+        // Restore selection if already answered
+        if(history[currentIdx]) {
+            const btns = document.querySelectorAll('.option');
+            btns.forEach(b => {
+                b.disabled = true;
+                if(b.innerText.includes(history[currentIdx].selected)) {
+                    b.classList.add(history[currentIdx].isCorrect ? 'correct' : 'wrong');
+                }
+                if(b.innerText.includes(correct)) b.classList.add('correct');
+            });
+        }
     }
 
     window.checkAns = (btn, selected, correct) => {
-        const options = btn.parentElement.querySelectorAll('.option');
-        options.forEach(opt => opt.disabled = true);
-
-        if (selected === correct) {
+        const btns = document.querySelectorAll('.option');
+        btns.forEach(b => b.disabled = true);
+        
+        const isCorrect = (selected === correct);
+        if(isCorrect) {
             btn.classList.add('correct');
             score++;
         } else {
             btn.classList.add('wrong');
-            options.forEach(opt => {
-                if(opt.innerText.includes(correct)) opt.classList.add('correct');
-            });
+            btns.forEach(b => { if(b.innerText.includes(correct)) b.classList.add('correct'); });
         }
+        history[currentIdx] = { selected, isCorrect };
     };
 
-    function showResult() {
+    window.nav = (dir) => {
+        currentIdx += dir;
+        renderQuiz();
+    };
+
+    window.showFinal = () => {
         document.getElementById("quizDisplay").style.display = "none";
         const rb = document.getElementById("resultBox");
         rb.style.display = "block";
-        rb.innerHTML = `<h3>📊 स्कोर: ${score} / ${allQuestions.length}</h3><button class="btn btn-open" onclick="location.reload()">Restart</button>`;
-    }
+        rb.innerHTML = `<h3>📊 Result</h3><p style="font-size:22px; margin:15px 0;">Score: ${score} / ${allQuestions.length}</p>
+                        <button class="btn btn-open" onclick="location.reload()">Restart</button>`;
+    };
 
-    // PAYMENT & BACKEND LOGIC
+    // Render Backend Logic RESTORED
     document.getElementById("reqBtn").onclick = async () => {
         const email = document.getElementById("userEmail").value.trim();
         const txnId = document.getElementById("txnId").value.trim();
-        if(!email || !txnId) return alert("Details bharein!");
+        if(!email || !txnId) return alert("Email/UTR Bharein!");
         const res = await fetch(`${BACKEND_URL}/request-access`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({email, txnId}) });
-        alert(res.ok ? "Request Sent!" : "Error!");
+        alert(res.ok ? "Request Sent Success!" : "Error!");
     };
 
     document.getElementById("openPdfBtn").onclick = () => {
@@ -199,10 +195,10 @@
     document.getElementById("yearSelect").onchange = fetchQuestions;
     document.getElementById("postSelect").onchange = fetchQuestions;
     document.getElementById("startQuizBtn").onclick = () => {
-        if (allQuestions.length === 0) return alert("Pehle data load hone dein!");
-        document.getElementById("quizDisplay").style.display = "block";
-        document.getElementById("startQuizBtn").style.display = "none";
+        if (allQuestions.length === 0) return alert("Data load hone dein!");
         document.getElementById("paymentUI").style.display = "none";
+        document.getElementById("startQuizBtn").style.display = "none";
+        document.getElementById("quizDisplay").style.display = "block";
         renderQuiz();
     };
 </script>
