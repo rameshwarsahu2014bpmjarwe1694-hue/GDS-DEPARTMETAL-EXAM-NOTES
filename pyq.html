@@ -178,29 +178,95 @@
                         <button class="btn btn-open" onclick="location.reload()">Restart</button>`;
     };
 
-    // Render Backend Logic RESTORED
-    document.getElementById("reqBtn").onclick = async () => {
-        const email = document.getElementById("userEmail").value.trim();
-        const txnId = document.getElementById("txnId").value.trim();
-        if(!email || !txnId) return alert("Email/UTR Bharein!");
-        const res = await fetch(`${BACKEND_URL}/request-access`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({email, txnId}) });
-        alert(res.ok ? "Request Sent Success!" : "Error!");
-    };
+  // --- RENDER BACKEND INTEGRATION (With Alert Message) ---
+window.requestAccess = async () => {
+    const email = document.getElementById("userEmail").value.trim();
+    const txnId = document.getElementById("txnId").value.trim();
+    const reqBtn = document.getElementById("reqBtn");
 
-    document.getElementById("openPdfBtn").onclick = () => {
-        const email = document.getElementById("userEmail").value.trim();
-        window.open(`${BACKEND_URL}/get-pdf?email=${encodeURIComponent(email)}`, "_blank");
-    };
+    if(!email || !txnId) return alert("Email aur Transaction ID bharein!");
 
-    document.getElementById("yearSelect").onchange = fetchQuestions;
-    document.getElementById("postSelect").onchange = fetchQuestions;
-    document.getElementById("startQuizBtn").onclick = () => {
-        if (allQuestions.length === 0) return alert("Data load hone dein!");
-        document.getElementById("paymentUI").style.display = "none";
-        document.getElementById("startQuizBtn").style.display = "none";
-        document.getElementById("quizDisplay").style.display = "block";
-        renderQuiz();
-    };
+    reqBtn.innerText = "Sending...";
+    reqBtn.disabled = true;
+
+    try {
+        const res = await fetch(`${BACKEND_URL}/request-access`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, txnId })
+        });
+        
+        if(res.ok) {
+            // Ye message user ko confirm karega ki request chali gayi hai
+            alert("✅ Request Sent Successfully! Admin jald hi ise approve karenge.");
+            reqBtn.innerText = "Request Sent";
+        } else {
+            alert("❌ Request Fail ho gayi. Details check karein.");
+            reqBtn.innerText = "Request Access";
+            reqBtn.disabled = false;
+        }
+    } catch(err) {
+        alert("⚠️ Backend Server se connect nahi ho paa raha hai!");
+        reqBtn.innerText = "Request Access";
+        reqBtn.disabled = false;
+    }
+};
+
+// --- UPDATED RENDER QUIZ (With Previous & Submit) ---
+function renderQuiz() {
+    const quizDisplay = document.getElementById("quizDisplay");
+    const q = allQuestions[currentIdx];
+    const options = q.options || []; 
+    const correct = q.answer;
+
+    quizDisplay.innerHTML = `
+        <div class="card">
+            <span style="color:red; font-weight:bold;">प्रश्न: ${currentIdx + 1} / ${allQuestions.length}</span>
+            <p style="margin:15px 0; font-weight:bold;">${q.question}</p>
+            <div id="optArea">
+                ${options.map((opt, i) => `
+                    <button class="option" onclick="window.handleAns(this, '${opt}', '${correct}')">
+                        ${String.fromCharCode(65+i)}. ${opt}
+                    </button>
+                `).join('')}
+            </div>
+            <div class="btn-row" style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn" style="background:#6c757d; flex:1; ${currentIdx===0?'display:none':''}" onclick="window.nav(-1)">Previous</button>
+                
+                ${currentIdx === allQuestions.length - 1 
+                    ? `<button class="btn" style="background:#28a745; flex:1;" onclick="window.submitQuiz()">Submit Result</button>` 
+                    : `<button class="btn" style="background:#2c3e50; flex:1;" onclick="window.nav(1)">Next</button>`
+                }
+            </div>
+        </div>
+    `;
+
+    // Answer History Restore Logic
+    if(userAnswers[currentIdx]) {
+        const btns = document.querySelectorAll('.option');
+        btns.forEach(b => {
+            b.disabled = true;
+            if(b.innerText.includes(userAnswers[currentIdx].selected)) b.classList.add(userAnswers[currentIdx].isCorrect ? 'correct' : 'wrong');
+            if(b.innerText.includes(correct)) b.classList.add('correct');
+        });
+    }
+}
+
+// --- SCORE & RESULT LOGIC ---
+window.submitQuiz = () => {
+    document.getElementById("quizDisplay").style.display = "none";
+    const resultBox = document.getElementById("resultBox");
+    resultBox.style.display = "block";
+    resultBox.innerHTML = `
+        <div class="card" style="text-align:center;">
+            <h2>📊 Your Final Score</h2>
+            <div style="font-size:35px; color:#007bff; margin:20px 0;">${score} / ${allQuestions.length}</div>
+            <p>Aapne successfully quiz complete kar liya hai.</p>
+            <button class="btn" style="background:#007bff; width:100%; margin-top:15px;" onclick="location.reload()">Restart Quiz</button>
+        </div>
+    `;
+};
+
 </script>
 </body>
 </html>
