@@ -11,14 +11,17 @@
         .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: var(--dark); margin-bottom: 20px; font-size: 22px; border-bottom: 3px solid var(--primary); padding-bottom: 10px; }
         .selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        select, input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px; }
+        select, input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; }
         .status-bar { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 15px; padding: 8px; border-radius: 5px; display: none; }
         .card { background: #fafafa; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-top: 15px; }
         .btn { padding: 13px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: #fff; width: 100%; font-size: 16px; margin-top: 8px; }
+        .btn-pay { background: var(--warning); text-decoration: none; display: block; text-align: center; }
+        .btn-request { background: var(--success); }
+        .btn-open { background: var(--primary); }
         .btn-start { background: #6f42c1; }
-        .option { display: block; width: 100%; text-align: left; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; }
+        .option { display: block; width: 100%; text-align: left; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 8px; background: #fff; cursor: pointer; transition: 0.2s; }
         .q-num { color: #e74c3c; font-weight: bold; font-size: 14px; }
-        .correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; }
+        .correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
         .wrong { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
     </style>
 </head>
@@ -26,34 +29,44 @@
 
 <div class="container">
     <h1>Previous Year Questions</h1>
+
     <div class="selector-grid">
         <select id="yearSelect">
             <option value="" disabled selected>वर्ष चुनें</option>
-            <option value="PYQ 2020">PYQ 2020</option>
-            <option value="PYQ 2021">PYQ 2021</option>
-            <option value="PYQ 2022">PYQ 2022</option>
-            <option value="PYQ 2023">PYQ 2023</option>
-            <option value="PYQ 2024">PYQ 2024</option>
+            <option>PYQ 2020</option>
+            <option>PYQ 2021</option>
+            <option>PYQ 2022</option>
+            <option>PYQ 2023</option>
+            <option>PYQ 2024</option>
         </select>
         <select id="postSelect">
             <option value="" disabled selected>पोस्ट चुनें</option>
-            <option value="MTS">MTS</option>
-            <option value="POSTMAN">POSTMAN</option>
-            <option value="PA-SA">PA-SA</option>
+            <option>MTS</option>
+            <option>POSTMAN</option>
+            <option>PA-SA</option>
         </select>
     </div>
 
     <div id="statusBox" class="status-bar"></div>
 
-    <button class="btn btn-start" id="startQuizBtn">Start MCQ Practice</button>
+    <div class="card" id="paymentUI">
+        <h3>🔒 Unlock PDF Section</h3>
+        <a href="upi://pay?pa=7489956942@postbank&pn=Rameshwar_SAHU&am=9&cu=INR" class="btn btn-pay">Pay ₹9 via UPI</a>
+        <input type="email" id="userEmail" placeholder="रजिस्टर्ड ईमेल डालें" style="margin-top:10px;">
+        <input type="text" id="txnId" placeholder="UTR / Transaction ID">
+        <button class="btn btn-request" id="reqBtn">Request Access</button>
+        <button class="btn btn-open" id="openPdfBtn">Open PDF</button>
+    </div>
+
+    <button class="btn btn-start" id="startQuizBtn" style="margin-top:20px;">Start MCQ Practice</button>
     
     <div id="quizDisplay" style="display:none; margin-top:20px;"></div>
-    <div id="resultDisplay" style="display:none; margin-top:20px; text-align:center;" class="card"></div>
+    <div id="resultBox" style="display:none; margin-top:20px; text-align:center;" class="card"></div>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
@@ -66,6 +79,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
 
     let allQuestions = [];
     let currentIdx = 0;
@@ -82,7 +96,12 @@
         status.innerHTML = "लोड हो रहा है...";
 
         try {
-            const q = query(collection(db, "pyqQuestions"), where("category", "==", year), where("post", "==", post));
+            const q = query(
+                collection(db, "pyqQuestions"), 
+                where("category", "==", year), 
+                where("post", "==", post),
+                orderBy("createdAt", "asc") // Admin panel ke order ke mutabik
+            );
             const querySnapshot = await getDocs(q);
             
             allQuestions = [];
@@ -90,18 +109,16 @@
                 allQuestions.push({ id: doc.id, ...doc.data() });
             });
 
-            // STRICT NUMERICAL SORTING (1, 2, 3...)
-            allQuestions.sort((a, b) => (parseInt(a.q_no) || 0) - (parseInt(b.q_no) || 0));
-
             if (allQuestions.length > 0) {
                 status.style.background = "#d4edda";
-                status.innerHTML = `✅ ${allQuestions.length} सवाल क्रम में मिले!`;
+                status.innerHTML = `✅ ${allQuestions.length} सवाल मिले!`;
             } else {
                 status.style.background = "#fff3cd";
                 status.innerHTML = "❌ सवाल नहीं मिले।";
             }
         } catch (error) {
-            status.innerHTML = "⚠️ Error fetching data.";
+            console.log(error);
+            status.innerHTML = "⚠️ Error: Firestore Indexing pending?";
         }
     }
 
@@ -109,24 +126,23 @@
         const quizDisplay = document.getElementById("quizDisplay");
         const q = allQuestions[currentIdx];
 
-        // Foolproof Option Mapping (A), a, A - sab check karega)
-        const optA = q['A)'] || q.a || q.option_a || q.A || "Data missing";
-        const optB = q['B)'] || q.b || q.option_b || q.B || "Data missing";
-        const optC = q['C)'] || q.c || q.option_c || q.C || "Data missing";
-        const optD = q['D)'] || q.d || q.option_d || q.D || "Data missing";
-        
-        // Answer logic mapping
-        const correct = (q.answer || q.Answer || q['Answer:'] || "").trim();
+        // ADMIN-PYQ COMPATIBLE MAPPING
+        // Admin Panel 'options' naam ke Array mein data save karta hai
+        const optA = q.options ? q.options : "Data Missing";
+        const optB = q.options ? q.options : "Data Missing";
+        const optC = q.options ? q.options : "Data Missing";
+        const optD = q.options ? q.options : "Data Missing";
+        const correctValue = q.answer; // Seedha sahi option ka text
 
         quizDisplay.innerHTML = `
             <div class="card" style="border-left: 5px solid var(--primary);">
                 <span class="q-num">प्रश्न: ${currentIdx + 1} / ${allQuestions.length}</span>
-                <p style="font-weight:bold; font-size:16px; margin: 15px 0;">${q.question || q.Question}</p>
+                <p style="font-weight:bold; font-size:16px; margin: 10px 0;">${q.question}</p>
                 
-                <button class="option" onclick="window.checkAns(this, 'A', '${correct}')">A. ${optA}</button>
-                <button class="option" onclick="window.checkAns(this, 'B', '${correct}')">B. ${optB}</button>
-                <button class="option" onclick="window.checkAns(this, 'C', '${correct}')">C. ${optC}</button>
-                <button class="option" onclick="window.checkAns(this, 'D', '${correct}')">D. ${optD}</button>
+                <button class="option" onclick="window.checkAns(this, \`${optA}\`, \`${correctValue}\`)">A. ${optA}</button>
+                <button class="option" onclick="window.checkAns(this, \`${optB}\`, \`${correctValue}\`)">B. ${optB}</button>
+                <button class="option" onclick="window.checkAns(this, \`${optC}\`, \`${correctValue}\`)">C. ${optC}</button>
+                <button class="option" onclick="window.checkAns(this, \`${optD}\`, \`${correctValue}\`)">D. ${optD}</button>
 
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button class="btn" id="prevBtn" style="background:#6c757d; flex: 1; ${currentIdx === 0 ? 'display:none' : ''}">← पीछे</button>
@@ -138,58 +154,55 @@
         `;
 
         document.getElementById("nextBtn").onclick = () => {
-            if (currentIdx < allQuestions.length - 1) {
-                currentIdx++;
-                renderQuiz();
-            } else {
-                showFinalResult();
-            }
+            if (currentIdx < allQuestions.length - 1) { currentIdx++; renderQuiz(); }
+            else { showResult(); }
         };
-
-        if(currentIdx > 0) {
-            document.getElementById("prevBtn").onclick = () => {
-                currentIdx--;
-                renderQuiz();
-            };
-        }
+        if(currentIdx > 0) document.getElementById("prevBtn").onclick = () => { currentIdx--; renderQuiz(); };
     }
 
     window.checkAns = (btn, selected, correct) => {
         const options = btn.parentElement.querySelectorAll('.option');
         options.forEach(opt => opt.disabled = true);
 
-        // Standardizing correct answer format (A vs Answer: A)
-        let cleanCorrect = correct.replace('Answer: ', '').trim();
-
-        if (selected === cleanCorrect) {
+        if (selected === correct) {
             btn.classList.add('correct');
             score++;
         } else {
             btn.classList.add('wrong');
             options.forEach(opt => {
-                if(opt.innerText.startsWith(cleanCorrect)) opt.classList.add('correct');
+                if(opt.innerText.includes(correct)) opt.classList.add('correct');
             });
         }
     };
 
-    function showFinalResult() {
+    function showResult() {
         document.getElementById("quizDisplay").style.display = "none";
-        const resDiv = document.getElementById("resultDisplay");
-        resDiv.style.display = "block";
-        resDiv.innerHTML = `
-            <h3>📊 रिजल्ट</h3>
-            <p style="font-size: 24px; margin: 15px 0;">स्कोर: ${score} / ${allQuestions.length}</p>
-            <button class="btn btn-start" onclick="location.reload()">दोबारा शुरू करें</button>
-        `;
+        const rb = document.getElementById("resultBox");
+        rb.style.display = "block";
+        rb.innerHTML = `<h3>📊 स्कोर: ${score} / ${allQuestions.length}</h3><button class="btn btn-open" onclick="location.reload()">Restart</button>`;
     }
+
+    // PAYMENT & BACKEND LOGIC
+    document.getElementById("reqBtn").onclick = async () => {
+        const email = document.getElementById("userEmail").value.trim();
+        const txnId = document.getElementById("txnId").value.trim();
+        if(!email || !txnId) return alert("Details bharein!");
+        const res = await fetch(`${BACKEND_URL}/request-access`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({email, txnId}) });
+        alert(res.ok ? "Request Sent!" : "Error!");
+    };
+
+    document.getElementById("openPdfBtn").onclick = () => {
+        const email = document.getElementById("userEmail").value.trim();
+        window.open(`${BACKEND_URL}/get-pdf?email=${encodeURIComponent(email)}`, "_blank");
+    };
 
     document.getElementById("yearSelect").onchange = fetchQuestions;
     document.getElementById("postSelect").onchange = fetchQuestions;
     document.getElementById("startQuizBtn").onclick = () => {
-        if (allQuestions.length === 0) return alert("लोड होने दें!");
+        if (allQuestions.length === 0) return alert("Pehle data load hone dein!");
         document.getElementById("quizDisplay").style.display = "block";
         document.getElementById("startQuizBtn").style.display = "none";
-        currentIdx = 0; score = 0;
+        document.getElementById("paymentUI").style.display = "none";
         renderQuiz();
     };
 </script>
