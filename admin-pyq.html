@@ -330,57 +330,61 @@ status("OCR Failed","red");
   
 };  
 
-window.bulkSave = async function () {  
-  if (!auth.currentUser) return alert("Admin not logged in");  
-  const category = val("category");  
-  const post = val("post");  
-  const bulk = val("bulk");  
-  if (!category || !post || !bulk) return alert("Select category/post and paste data");  
+window.bulkSave = async function () {
+  if (!auth.currentUser) return alert("Admin not logged in");
+  const category = val("category");
+  const post = val("post");
+  const bulk = val("bulk");
+  if (!category || !post || !bulk) return alert("Select category/post and paste data");
 
-  try {  
-    status("Uploading Bulk...", "blue");  
-    let blocks = bulk.trim().split(/\n\s*\n/);  
+  try {
+    status("Uploading Bulk...", "blue");
+    // Extra spaces aur lines hatakar blocks banana
+    let blocks = bulk.trim().split(/\n\s*\n/);
 
-    for (let block of blocks) {  
-      let lines = block.split("\n").map(x => x.trim()).filter(Boolean);  
-      if (lines.length < 6) continue;  
+    for (let block of blocks) {
+      let lines = block.split("\n").map(x => x.trim()).filter(Boolean);
+      // Agar 6 line se kam hai toh skip karega taaki crash na ho
+      if (lines.length < 6) continue;
 
-      let question = lines.replace(/^\d+[\.\)\-\s]*/, "");  
-      let a = lines.replace(/^[a-dA-D][\.\)\-\s]*/i, "").trim();  
-      let b = lines.replace(/^[a-dA-D][\.\)\-\s]*/i, "").trim();  
-      let c = lines.replace(/^[a-dA-D][\.\)\-\s]*/i, "").trim();  
-      let d = lines.replace(/^[a-dA-D][\.\)\-\s]*/i, "").trim();  
+      let question = lines.replace(/^\d+[\.\)\-\s]*/, "");
+      let a = lines.replace(/^[a-dA-D][\.\)\-\s]*/i, "").trim();
+      let b = lines.replace(/^[a-dA-D][\.\)\-\s]*/i, "").trim();
+      let c = lines.replace(/^[a-dA-D][\.\)\-\s]*/i, "").trim();
+      let d = lines.replace(/^[a-dA-D][\.\)\-\s]*/i, "").trim();
 
-      // Improved Answer Logic
-      let ansLine = lines.toUpperCase();  
-      let match = ansLine.match(/([A-D])(?![A-Z])/i) || ansLine.match(/[:\s]([A-D])\b/i);
-      let ansChar = match ? match.toUpperCase() : "A";
+      // Answer nikalne ka sabse simple aur safe tarika
+      let ansLine = lines.toUpperCase();
+      let ansChar = "A"; // Default
+      if (ansLine.includes("B")) ansChar = "B";
+      if (ansLine.includes("C")) ansChar = "C";
+      if (ansLine.includes("D")) ansChar = "D";
 
-      let finalAnswer = a;  
-      if (ansChar === "B") finalAnswer = b;  
-      else if (ansChar === "C") finalAnswer = c;  
-      else if (ansChar === "D") finalAnswer = d;  
+      let finalAnswer = a;
+      if (ansChar === "B") finalAnswer = b;
+      if (ansChar === "C") finalAnswer = c;
+      if (ansChar === "D") finalAnswer = d;
 
-      if (question && a && b && c && d) {
-        await addDoc(collection(db, "pyqQuestions"), {  
-          category: esc(category),  
-          post: esc(post),  
-          question: esc(question),  
-          options: [esc(a), esc(b), esc(c), esc(d)],  
-          answer: esc(finalAnswer),  
-          createdAt: serverTimestamp()  
-        });  
-      }
-    }  
+      // Database Save
+      await addDoc(collection(db, "pyqQuestions"), {
+        category: esc(category),
+        post: esc(post),
+        question: esc(question),
+        options: [esc(a), esc(b), esc(c), esc(d)],
+        answer: esc(finalAnswer),
+        createdAt: serverTimestamp()
+      });
+    }
 
-    document.getElementById("bulk").value = "";  
-    status("Bulk Upload Successful");  
-    loadAll();  
-  } catch (err) {  
-    console.log(err);  
-    status("Bulk Upload Failed", "red");  
-  }  
-};  
+    document.getElementById("bulk").value = "";
+    status("Bulk Upload Successful ✅");
+    loadAll();
+  } catch (err) {
+    console.log(err);
+    status("Bulk Upload Failed ❌", "red");
+  }
+};
+
     
 /* LOAD ALL */  
 async function loadAll(){  
