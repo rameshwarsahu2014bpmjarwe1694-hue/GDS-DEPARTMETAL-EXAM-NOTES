@@ -336,74 +336,60 @@ status("OCR Failed","red");
   
 };  
 window.bulkSave = async function () {
-  if (!auth.currentUser) return alert("Admin not logged in");
-
   const category = val("category");
   const post = val("post");
   const bulk = val("bulk");
 
   if (!category || !post || !bulk) {
-    return alert("Category, Post aur Data fill karein");
+    return alert("Category, Post aur Data fill karein!");
   }
 
   try {
-    status("Uploading Bulk...", "blue");
-
-    // Question blocks ko split karna (Double line break se)
+    status("Uploading...", "blue");
     let blocks = bulk.trim().split(/\n\s*\n/);
 
     for (let block of blocks) {
       let lines = block.split("\n").map(x => x.trim()).filter(Boolean);
-
-      // Kam se kam 6 lines honi chahiye (1 Question + 4 Options + 1 Answer)
-      if (lines.length < 6) {
-        console.warn("Skipping invalid block (too short):", block);
-        continue;
-      }
+      if (lines.length < 6) continue;
 
       let question = lines;
+      let a = lines.replace(/^[a-dA-D\(\)\]\.\s]+/i, "").trim();
+      let b = lines.replace(/^[a-dA-D\(\)\]\.\s]+/i, "").trim();
+      let c = lines.replace(/^[a-dA-D\(\)\]\.\s]+/i, "").trim();
+      let d = lines.replace(/^[a-dA-D\(\)\]\.\s]+/i, "").trim();
 
-      // Sabhi common formats ko handle karne ke liye (A), A), A.)
-      let a = lines.replace(/^[\(\[]?A[\)\]\.\s]+/i, "").trim();
-      let b = lines.replace(/^[\(\[]?B[\)\]\.\s]+/i, "").trim();
-      let c = lines.replace(/^[\(\[]?C[\)\]\.\s]+/i, "").trim();
-      let d = lines.replace(/^[\(\[]?D[\)\]\.\s]+/i, "").trim();
-
-      // Answer line se sirf A, B, C, ya D nikalna
+      // --- Answer Nikalne Ka Sahi Logic ---
       let ansLine = lines.toUpperCase();
-      let match = ansLine.match(/ANS[WER]*[:\s]*([A-D])/i);
+      // Yeh sirf (a) (b) (c) ya (d) ke andar ka letter dhundega
+      let match = ansLine.match(/\(([A-D])\)/i) || ansLine.match(/[:\s]([A-D])\b/i);
       let ansChar = match ? match.toUpperCase() : "";
 
-      if (!question || !a || !b || !c || !d || !ansChar) {
-        console.error("Parsing failed for block:", block);
-        continue;
+      let finalAnswer = "";
+      if (ansChar === "A") finalAnswer = a;
+      else if (ansChar === "B") finalAnswer = b;
+      else if (ansChar === "C") finalAnswer = c;
+      else if (ansChar === "D") finalAnswer = d;
+      // ------------------------------------
+
+      if (finalAnswer !== "") {
+        await addDoc(collection(db, "pyqQuestions"), {
+          category: esc(category),
+          post: esc(post),
+          question: esc(question),
+          options: [esc(a), esc(b), esc(c), esc(d)],
+          answer: esc(finalAnswer),
+          createdAt: serverTimestamp()
+        });
       }
-
-      // Sahi text value assign karna
-      let correctText = "";
-      if (ansChar === "A") correctText = a;
-      else if (ansChar === "B") correctText = b;
-      else if (ansChar === "C") correctText = c;
-      else if (ansChar === "D") correctText = d;
-
-      // Firebase mein save karna
-      await addDoc(collection(db, "pyqQuestions"), {
-        category: esc(category),
-        post: esc(post),
-        question: esc(question),
-        options: [esc(a), esc(b), esc(c), esc(d)],
-        answer: esc(correctText),
-        createdAt: serverTimestamp()
-      });
     }
 
     document.getElementById("bulk").value = "";
-    status("Bulk Upload Successful ✅");
+    status("Bulk Upload Done! ✅");
     loadAll();
 
   } catch (err) {
-    console.error("Bulk Upload Error:", err);
-    status("Upload Failed ❌", "red");
+    console.error(err);
+    status("Error ❌", "red");
   }
 };
 
