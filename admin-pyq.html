@@ -333,52 +333,60 @@ status("OCR Failed","red");
 }  
   
 };  
-window.bulkSave = async function () {
-  if (!auth.currentUser) return alert("Admin not logged in");
-  const category = val("category"), post = val("post"), bulk = val("bulk");
-  if (!category || !post || !bulk) return alert("Select category/post and paste data");
-
-  try {
-    status("Uploading Bulk...", "blue");
-    let blocks = bulk.trim().split(/\n\s*\n/);
-
-    for (let block of blocks) {
-      let lines = block.split("\n").map(x => x.trim()).filter(Boolean);
-      if (lines.length >= 6) continue;
-
-      // 1. Clean Extraction
-      let question = lines;
-      let a = lines, b = lines, c = lines, d = lines;
-      let ansLine = lines.toUpperCase();
-
-      // 2. Clean Answer Detection (No hardcoding)
-      let match = ansLine.match(/[A-D]/);
-      let ansChar = match ? match : "A";
-
-      let finalAnswer = a;
-      if (ansChar === "B") finalAnswer = b;
-      else if (ansChar === "C") finalAnswer = c;
-      else if (ansChar === "D") finalAnswer = d;
-
-      // 3. Simple Database Save
-      await addDoc(collection(db, "pyqQuestions"), {
-        category: esc(category),
-        post: esc(post),
-        question: esc(question),
-        options: [esc(a), esc(b), esc(c), esc(d)],
-        answer: esc(finalAnswer),
-        createdAt: serverTimestamp()
-      });
-    }
-    document.getElementById("bulk").value = "";
-    status("Bulk Upload Successful ✅");
-    loadAll();
-  } catch (err) {
-    console.log(err);
-    status("Bulk Upload Failed ❌", "red");
-  }
-};
   
+/* BULK SAVE - CLEAN VERSION */
+window.bulkSave = async function() {
+    const category = val("category");
+    const post = val("post");
+    const text = val("bulk");
+
+    if (!auth.currentUser) return alert("Admin not logged in");
+    if (!category || !post || !text) return alert("Select category/post and paste data");
+
+    try {
+        status("Uploading Bulk...", "blue");
+        let blocks = text.split(/\n\s*\n/);
+        let count = 0;
+
+        for (let block of blocks) {
+            let lines = block.split("\n").map(x => x.trim()).filter(Boolean);
+
+            if (lines.length >= 6) {
+                let q = lines;
+                let a = lines;
+                let b = lines;
+                let c = lines;
+                let d = lines;
+
+                let ansLine = lines.toUpperCase();
+                let correct = a; // Default A
+
+                if (ansLine.includes("B")) correct = b;
+                if (ansLine.includes("C")) correct = c;
+                if (ansLine.includes("D")) correct = d;
+
+                await addDoc(collection(db, "pyqQuestions"), {
+                    category: esc(category),
+                    post: esc(post),
+                    question: esc(q),
+                    options: [esc(a), esc(b), esc(c), esc(d)],
+                    answer: esc(correct),
+                    createdAt: serverTimestamp()
+                });
+                count++;
+            }
+        }
+
+        document.getElementById("bulk").value = "";
+        status(count + " Questions Imported ✅");
+        loadAll();
+
+    } catch (err) {
+        console.log(err);
+        status("Bulk Upload Failed ❌", "red");
+    }
+};
+          
     
 /* LOAD ALL */  
 async function loadAll(){  
