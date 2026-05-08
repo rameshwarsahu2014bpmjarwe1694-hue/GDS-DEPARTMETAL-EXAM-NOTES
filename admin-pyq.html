@@ -334,74 +334,52 @@ status("OCR Failed","red");
   
 };  
 window.bulkSave = async function () {  
-  
-if (!auth.currentUser) return alert("Admin not logged in");  
-  
-const category = val("category");  
-const post = val("post");  
-const bulk = val("bulk");  
-  
-if (!category || !post || !bulk) {  
-return alert("Select category/post and paste data");  
-}  
-  
-try {  
-  
-status("Uploading Bulk...", "blue");  
-  
-/* Split by blank lines = each question block */  
-let blocks = bulk.split(/\n\s*\n/);  
-  
-for (let block of blocks) {
-  let lines = block.split("\n").map(x => x.trim()).filter(Boolean);
-  if (lines.length < 6) continue;
+window.bulkSave = async function () {
+  if (!auth.currentUser) return alert("Admin not logged in");
+  const category = val("category"), post = val("post"), bulk = val("bulk");
+  if (!category || !post || !bulk) return alert("Select category/post and paste data");
 
-  let question = lines;
-  let startIdx = 1;
+  try {
+    status("Uploading Bulk...", "blue");
+    let blocks = bulk.trim().split(/\n\s*\n/);
 
-  // AGAR dusri line me (A) ya A) nahi hai, matlab wo Hindi translation hai
-  if (!lines.match(/^\(?[A-D][\)\.]/i)) {
-    question += " " + lines; // Hindi ko sawal me jod do
-    startIdx = 2; // Options ab teesri line se shuru honge
+    for (let block of blocks) {
+      let lines = block.split("\n").map(x => x.trim()).filter(Boolean);
+      if (lines.length < 6) continue;
+
+      // 1. Clean Extraction
+      let question = lines;
+      let a = lines, b = lines, c = lines, d = lines;
+      let ansLine = lines.toUpperCase();
+
+      // 2. Clean Answer Detection (No hardcoding)
+      let match = ansLine.match(/[A-D]/);
+      let ansChar = match ? match : "A";
+
+      let finalAnswer = a;
+      if (ansChar === "B") finalAnswer = b;
+      else if (ansChar === "C") finalAnswer = c;
+      else if (ansChar === "D") finalAnswer = d;
+
+      // 3. Simple Database Save
+      await addDoc(collection(db, "pyqQuestions"), {
+        category: esc(category),
+        post: esc(post),
+        question: esc(question),
+        options: [esc(a), esc(b), esc(c), esc(d)],
+        answer: esc(finalAnswer),
+        createdAt: serverTimestamp()
+      });
+    }
+    document.getElementById("bulk").value = "";
+    status("Bulk Upload Successful ✅");
+    loadAll();
+  } catch (err) {
+    console.log(err);
+    status("Bulk Upload Failed ❌", "red");
   }
-
-  // Options sahi line se uthayega
-  let a = lines[startIdx];
-  let b = lines[startIdx + 1];
-  let c = lines[startIdx + 2];
-  let d = lines[startIdx + 3];
-
-  // Answer Match karne ka sabse solid tarika
-  let ansLine = lines[lines.length - 1].toUpperCase();
-  let finalAnswer = a;
-
-  if (ansLine.includes("B") || ansLine.includes(b.toUpperCase())) finalAnswer = b;
-  else if (ansLine.includes("C") || ansLine.includes(c.toUpperCase())) finalAnswer = c;
-  else if (ansLine.includes("D") || ansLine.includes(d.toUpperCase())) finalAnswer = d;
-  else finalAnswer = a;
-
-  // Firebase Save (Bina kisi badlav ke)
-  await addDoc(collection(db, "pyqQuestions"), {
-    category: esc(category),
-    post: esc(post),
-    question: esc(question),
-    options: [esc(a), esc(b), esc(c), esc(d)],
-    answer: esc(finalAnswer),
-    createdAt: serverTimestamp()
-  });
-}
-
-document.getElementById("bulk").value = "";  
-status("Bulk Upload Successful");  
+};
   
-loadAll();  
-  
-} catch (err) {  
-console.log(err);  
-status("Bulk Upload Failed", "red");  
-}  
-  
-};  
     
 /* LOAD ALL */  
 async function loadAll(){  
