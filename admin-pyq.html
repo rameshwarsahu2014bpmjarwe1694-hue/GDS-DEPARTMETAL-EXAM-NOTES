@@ -125,17 +125,19 @@ const firebaseConfig = {
 };  
 
 const ADMIN_EMAIL = "rameshwarsahu2014bpmjarwe1694@gmail.com";  
-const userPass = prompt("Please enter Admin Password:");
+/* POP-UP LOGIN (Auto Connection Fix) */
+const userPass = prompt("Admin Password Darj Karein:"); 
 
 signInWithEmailAndPassword(auth, ADMIN_EMAIL, userPass)
 .then(() => { 
-    status("Admin Logged In"); 
-    loadAll(); 
+    status("Admin Logged In & Connected ✅"); 
+    loadAll(); // Login hote hi data load hoga
 })
 .catch(err => { 
-    status("Login Failed: Galat Password ya Connection Error", "red"); 
-    console.error(err);
-});  
+    status("Connection Failed: Password Galat Hai", "red"); 
+    console.error("Firebase Error:", err.code);
+});
+
 
 const app = initializeApp(firebaseConfig);  
 const db = getFirestore(app);  
@@ -180,23 +182,44 @@ window.saveSingleQuestion = async function() {
 };  
 
 /* SAVE BULK */  
-window.saveBulk = async function() {  
-    const raw = document.getElementById('bulkText').value.trim();  
-    const cat = document.getElementById('category').value, post = document.getElementById('post').value;  
-    if(!raw || !cat || !post) return alert("Text, Category and Post are required!");  
-    const lines = raw.split('\n'); let count = 0;  
-    status("Processing Bulk...", "orange");  
-    for(let line of lines) {  
-        const p = line.split('|').map(x => x.trim());  
-        if(p.length >= 6) {  
-            await addDoc(collection(db, "pyqQuestions"), {  
-                question: p, options: [p, p, p, p], answer: p, category: cat, post: post, createdAt: serverTimestamp()  
-            });  
-            count++;  
-        }  
-    }  
-    status(`${count} Questions added!`); loadAll();  
-};  
+window.saveBulk = async function() {
+    const raw = document.getElementById('bulkText').value.trim();
+    const cat = document.getElementById('category').value;
+    const post = document.getElementById('post').value;
+
+    if(!raw) return alert("Pehle bulk text area mein sawal dalein!");
+    if(!cat || !post) return alert("Pehle Category aur Post select karein!");
+
+    const lines = raw.split('\n');
+    let successCount = 0;
+    
+    status("Saving Bulk Questions... Please wait", "orange");
+
+    try {
+        for(let line of lines) {
+            const p = line.split('|').map(x => x.trim());
+            // Format check: Question | A | B | C | D | Ans
+            if(p.length >= 6) {
+                await addDoc(collection(db, "pyqQuestions"), {
+                    question: p,
+                    options: [p, p, p, p],
+                    answer: p,
+                    category: cat,
+                    post: post,
+                    createdAt: serverTimestamp()
+                });
+                successCount++;
+            }
+        }
+        status(`${successCount} Questions Successfully Saved!`, "green");
+        document.getElementById('bulkText').value = ""; // Clear input
+        loadAll(); // List refresh karein
+    } catch (error) {
+        console.error(error);
+        status("Bulk Save Failed: " + error.message, "red");
+    }
+};
+
 
 /* OCR (Tesseract) */  
 window.extractPdf = async function(){  
