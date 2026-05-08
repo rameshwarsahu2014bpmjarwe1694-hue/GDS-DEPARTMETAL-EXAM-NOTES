@@ -1,75 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Admin PYQ Panel - Complete</title>
-<style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-    body{background:#f4f6f9;padding:20px}
-    .container{max-width:1000px;margin:auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08)}
-    h1{text-align:center;margin-bottom:20px;color:#333}
-    h3{margin:20px 0 10px; color:#007bff; border-left: 4px solid #007bff; padding-left: 10px;}
-    .grid{display:grid;gap:12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));}
-    input,select,textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-size:16px;outline:none}
-    textarea{min-height:110px}
-    
-    .btn-row { display: flex; gap: 10px; margin-top: 10px; }
-    button{padding:12px;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer; transition: 0.2s;}
-    
-    .save-btn{background:#007bff;color:#fff; width: 100%; margin-top: 10px;}
-    .bulk-btn{background:#28a745;color:#fff;}
-    .delete-btn{background:#dc3545;color:#fff}
-    
-    .card{background:#fafafa;padding:15px;border:1px solid #ddd;border-radius:10px;margin-bottom:12px}
-    .status{text-align:center;font-weight:bold;margin:12px 0; padding:10px; border-radius:8px; display:none;}
-    hr{margin:25px 0;border:none;border-top:1px solid #ddd}
-    .q-box { background: #fdfdfd; border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; margin-top: 10px;}
-</style>
-</head>
-<body>
-
-<div class="container">
-    <h1>Admin PYQ Panel</h1>
-
-    <div class="grid">
-        <select id="category">
-            <option value="">Select Category</option>
-            <option>PYQ 2020</option>
-            <option>PYQ 2021</option>
-            <option>PYQ 2022</option>
-            <option>PYQ 2023</option>
-            <option>PYQ 2024</option>
-            <option>PYQ 2025</option>
-            <option>PYQ 2026</option>
-            <option>Model Paper</option>
-            <option>Practice Set</option>
-        </select>
-        <select id="post">
-            <option value="">Select Post</option>
-            <option>MTS</option>
-            <option>POSTMAN</option>
-            <option>PA-SA</option>
-        </select>
-    </div>
-
-    <div id="statusMsg" class="status">Loading...</div>
-
-    <hr>
-
-    <h3>PDF Management</h3>
-    <div class="grid">
-        <div>
-            <label class="small">Extract from File:</label>
-            <input type="file" id="pdfFile" accept=".pdf,image/*">
-            <button class="save-btn" style="background:#6f42c1" onclick="extractPdf()">Extract Text (OCR)</button>
-        </div>
-        <div>
-            <label class="small">Save PDF Link:</label>
-            <input type="text" id="pdfTitle" placeholder="Title">
-            <input type="text" id="pdfUrl" placeholder="File URL">
-            <button class="save-btn" onclick="savePdf()">Save PDF Info</button>
-        </div>
+<!-- =========================  
+FILE : admin-pyq.html  
+STRICT FINAL RULES COMPATIBLE VERSION  
+AUTO LOGIN + PDF + QUESTION + BULK + DELETE  
+========================= -->  <!DOCTYPE html>  <html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width,initial-scale=1.0">  
+<title>Admin PYQ Panel</title>  <style>  
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}  
+body{background:#f4f6f9;padding:20px}  
+.container{  
+max-width:1000px;  
+margin:auto;  
+background:#fff;  
+padding:20px;  
+border-radius:12px;  
+box-shadow:0 5px 15px rgba(0,0,0,.08)  
+}  
+h1{text-align:center;margin-bottom:20px}  
+h3{margin:15px 0 10px}  
+.grid{display:grid;gap:12px}  
+input,select,textarea{  
+width:100%;  
+padding:12px;  
+border:1px solid #ccc;  
+border-radius:8px;  
+font-size:16px;  
+outline:none  
+}  
+textarea{min-height:110px}  
+button{  
+padding:12px;  
+border:none;  
+border-radius:8px;  
+font-size:16px;  
+font-weight:bold;  
+cursor:pointer  
+}  
+.save-btn{background:#007bff;color:#fff}  
+.delete-btn{background:#dc3545;color:#fff}  
+.card{  
+background:#fafafa;  
+padding:15px;  
+border:1px solid #ddd;  
+border-radius:10px;  
+margin-bottom:12px  
+}  
+.row{  
+display:flex;  
+justify-content:space-between;  
+gap:10px;  
+flex-wrap:wrap  
+}  
+.small{font-size:14px;color:#666;margin-top:5px}  
+.status{text-align:center;font-weight:bold;margin:12px 0}  
+hr{margin:20px 0;border:none;border-top:1px solid #ddd}  
+</style>  </head>  
+<body>  <div class="container">  <h1>Admin PYQ Panel</h1>  <div class="grid">  <select id="category">  
+<option value="">Select Category</option>  
+<option>PYQ 2020</option>  
+<option>PYQ 2021</option>  
+<option>PYQ 2022</option>  
+<option>PYQ 2023</option>  
+<option>PYQ 2024</option>  
+<option>PYQ 2025</option>  
+<option>PYQ 2026</option>  
+<option>Model Paper</option>  
+<option>Practice Set</option>  
+</select>  <select id="post">  
+<option value="">Select Post</option>  
+<option>MTS</option>  
+<option>POSTMAN</option>  
+<option>PA-SA</option>  
+</select>  </div>  <div id="statusMsg" class="status">Loading...</div>  <hr>  <h3>PDF OCR to Bulk Text</h3>  <div class="grid">  
+<input type="file" id="pdfFile" accept=".pdf,image/*">  
+<button class="save-btn" onclick="extractPdf()">Extract Questions</button>  
+</div>  
+<h3>Save PDF</h3>  <div class="grid">  
+<input type="text" id="title" placeholder="PDF Title">  
+<input type="text" id="fileName" placeholder="PDF File Name or URL">  
+<textarea id="desc" placeholder="Description"></textarea>  
+<button class="save-btn" onclick="savePdf()">Save PDF</button>  
+</div
+   
     </div>
 
     <hr>
@@ -101,7 +114,7 @@
     <p style="font-size:12px; color:gray">Format: Question | A | B | C | D | Ans (One per line)</p>
     <textarea id="bulkText" placeholder="Example: What is Post? | Job | Fun | Work | None | A"></textarea>
     <div class="btn-row">
-        <button class="bulk-btn" style="flex:2" onclick="saveBulk()">Process & Save All</button>
+        <button class="bulk-btn" style="flex:2" onclick="saveBulk()">bulk Save All</button>
         <button class="delete-btn" style="flex:1" onclick="document.getElementById('bulkText').value=''">Clear</button>
     </div>
 
