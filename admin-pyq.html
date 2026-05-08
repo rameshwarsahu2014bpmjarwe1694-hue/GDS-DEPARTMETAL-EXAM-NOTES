@@ -333,80 +333,43 @@ status("OCR Failed","red");
 }  
   
 };  
-window.bulkSave = async function () {  
-  
-if (!auth.currentUser) return alert("Admin not logged in");  
-  
-const category = val("category");  
-const post = val("post");  
-const bulk = val("bulk");  
-  
-if (!category || !post || !bulk) {  
-return alert("Select category/post and paste data");  
-}  
-  
-try {  
-  
-status("Uploading Bulk...", "blue");  
-  
-/* Split by blank lines = each question block */  
-let blocks = bulk.split(/\n\s*\n/);  
-  
-for (let block of blocks) {  
-  
-let lines = block  
-.split("\n")  
-.map(x => x.trim())  
-.filter(Boolean);  
-  
-if (lines.length < 6) continue;  
-  
-/* STRICT FORMAT PARSER */  
-let question = lines[0];  
-  
-let a = lines[1].replace(/^A\)\s*/i, "").trim();  
-let b = lines[2].replace(/^B\)\s*/i, "").trim();  
-let c = lines[3].replace(/^C\)\s*/i, "").trim();  
-let d = lines[4].replace(/^D\)\s*/i, "").trim();  
-  
-let ansLine = lines[5].toUpperCase();  
-  
-/* extract A/B/C/D */  
-let ans = ansLine.match(/[ABCD]/)?.[0] || "";  
-  
-/* skip invalid */  
-if (!question || !a || !b || !c || !d || !ans) {  
-console.log("SKIPPED:", block);  
-continue;  
-}  
-  
-let answer = a;  
-if (ans === "B") answer = b;  
-if (ans === "C") answer = c;  
-if (ans === "D") answer = d;  
-  
-await addDoc(collection(db, "pyqQuestions"), {  
-category: esc(category),  
-post: esc(post),  
-question: esc(question),  
-options: [esc(a), esc(b), esc(c), esc(d)],  
-answer: esc(answer),  
-createdAt: serverTimestamp()  
-});  
-  
-}  
-  
-document.getElementById("bulk").value = "";  
-status("Bulk Upload Successful");  
-  
-loadAll();  
-  
-} catch (err) {  
-console.log(err);  
-status("Bulk Upload Failed", "red");  
-}  
-  
-};  
+* 2. BULK SAVE FUNCTION (FIXED) */
+window.saveBulk = async function() {
+    const raw = document.getElementById('bulkText').value.trim();
+    const cat = document.getElementById('category').value;
+    const post = document.getElementById('post').value;
+
+    if (!raw || !cat || !post) {
+        return alert("Text, Category aur Post teeno zaruri hain!");
+    }
+
+    const lines = raw.split('\n');
+    let count = 0;
+    status("Processing Bulk Upload...", "orange");
+
+    try {
+        for (let line of lines) {
+            const p = line.split('|').map(x => x.trim());
+            if (p.length >= 6) {
+                await addDoc(collection(db, "pyqQuestions"), {
+                    question: p,
+                    options: [p, p, p, p],
+                    answer: p,
+                    category: cat,
+                    post: post,
+                    createdAt: serverTimestamp()
+                });
+                count++;
+            }
+        }
+        status(`${count} Questions added successfully!`, "green");
+        document.getElementById('bulkText').value = "";
+        loadAll(); 
+    } catch (e) {
+        status("Bulk Save Failed!", "red");
+        console.error(e);
+    }
+};
     
 /* LOAD ALL */  
 async function loadAll(){  
