@@ -435,10 +435,17 @@ console.log("SKIPPED:", block);
 continue;
 }
 
-let answer = a;
-if (ans === "B") answer = b;
-if (ans === "C") answer = c;
-if (ans === "D") answer = d;
+let answer = "";
+if (ans === "A") answer = a;
+else if (ans === "B") answer = b;
+else if (ans === "C") answer = c;
+else if (ans === "D") answer = d;
+
+// Check karein ki answer mila ya nahi
+if (!answer) {
+    console.log("Answer match nahi hua:", block);
+    continue; 
+}
 
 await addDoc(collection(db, "pyqQuestions"), {
 category: esc(category),
