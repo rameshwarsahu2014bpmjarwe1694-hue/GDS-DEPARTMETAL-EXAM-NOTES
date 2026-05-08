@@ -104,252 +104,69 @@ Answer: A"></textarea>  <button class="save-btn" onclick="bulkSave()">Bulk Save<
 
 </div>  <hr>  <h3>Saved PDFs</h3>  
 <div id="pdfList">Loading...</div>  <hr>  <h3>Saved Questions</h3>  
-<div id="questionList">Loading...</div>  </div>  <script type="module">  
+<div id="questionList">Loading...
+</div>  </div> 
+
   
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";  
-  
-import {  
-getFirestore,  
-collection,  
-addDoc,  
-getDocs,  
-deleteDoc,  
-doc,  
-serverTimestamp,  
-query,  
-orderBy  
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";  
-  
-import {  
-getAuth,  
-signInWithEmailAndPassword  
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";  
-  
-const firebaseConfig = {  
-apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",  
-authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",  
-projectId: "gds-departmental-exam-studyhub",  
-storageBucket: "gds-departmental-exam-studyhub.appspot.com",  
-messagingSenderId: "759916756080",  
-appId: "1:759916756080:web:7f2c0e66458bd007e888b5"  
-};  
-  
-const ADMIN_EMAIL = "rameshwarsahu2014bpmjarwe1694@gmail.com";  
-const ADMIN_PASS = "YOUR_ADMIN_PASSWORD";  
-  
-const app = initializeApp(firebaseConfig);  
-const db = getFirestore(app);  
-const auth = getAuth(app);  
-  
-const statusMsg = document.getElementById("statusMsg");  
-  
-/* AUTO LOGIN */  
-signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASS)  
-.then(()=>{  
-status("Admin Logged In");  
-loadAll();  
-})  
-.catch(err=>{  
-statusMsg.style.color="red";  
-statusMsg.innerText="Admin Login Failed";  
-console.log(err);  
-});  
-  
-/* HELPERS */  
-function val(id){  
-return document.getElementById(id).value.trim();  
-}  
-  
-function status(t,color="green"){  
-statusMsg.innerText=t;  
-statusMsg.style.color=color;  
-}  
-  
-function clearPdf(){  
-["title","fileName","desc"].forEach(id=>{  
-document.getElementById(id).value="";  
-});  
-}  
-  
-function clearQ(){  
-["question","a","b","c","d","ans"].forEach(id=>{  
-document.getElementById(id).value="";  
-});  
-}  
-  
-function esc(str){  
-return String(str).replace(/[&<>"']/g,m=>({  
-"&":"&amp;",  
-"<":"&lt;",  
-">":"&gt;",  
-'"':"&quot;",  
-"'":"&#39;"  
-}[m]));  
-}  
-  
-function safe(v){  
-return String(v || "")  
-.replace(/^\d+\./,"")  
-.replace(/^\d+\)/,"")  
-.replace(/^\d+\-/,"")  
-.trim();  
-}  
-  
-/* SAVE PDF */  
-window.savePdf = async function(){  
-  
-if(!auth.currentUser) return alert("Admin not logged in");  
-  
-const category=val("category");  
-const post=val("post");  
-const title=val("title");  
-const fileName=val("fileName");  
-const desc=val("desc");  
-  
-if(!category || !post || !title || !fileName){  
-return alert("Fill all PDF fields");  
-}  
-  
-try{  
-  
-status("Saving...","blue");  
-  
-await addDoc(collection(db,"pyqFiles"),{  
-category:esc(category),  
-post:esc(post),  
-title:esc(title),  
-fileName:esc(fileName),  
-desc:esc(desc),  
-createdAt:serverTimestamp()  
-});  
-  
-clearPdf();  
-status("PDF Saved");  
-loadAll();  
-  
-}catch(err){  
-status("Save Failed","red");  
-console.log(err);  
-}  
-  
-};  
-  
-/* SAVE QUESTION */  
-window.saveQuestion = async function(){  
-  
-if(!auth.currentUser) return alert("Admin not logged in");  
-  
-const category=val("category");  
-const post=val("post");  
-const question = val("question")  
-.replace(/^\d+\./,"")  
-.replace(/^\d+\)/,"")  
-.replace(/^\d+\-/,"")  
-.trim();  
-const a=val("a");  
-const b=val("b");  
-const c=val("c");  
-const d=val("d");  
-const ans=val("ans");  
-  
-if(!category||!post||!question||!a||!b||!c||!d||!ans){  
-return alert("Fill all question fields");  
-}  
-  
-let answer=a;  
-if(ans==="B") answer=b;  
-if(ans==="C") answer=c;  
-if(ans==="D") answer=d;  
-  
-try{  
-  
-status("Saving...","blue");  
-  
-await addDoc(collection(db,"pyqQuestions"),{  
-category:esc(category),  
-post:esc(post),  
-question:esc(question),  
-options:[esc(a),esc(b),esc(c),esc(d)],  
-answer:esc(answer),  
-createdAt:serverTimestamp()  
-});  
-  
-clearQ();  
-status("Question Saved");  
-loadAll();  
-  
-}catch(err){  
-status("Save Failed","red");  
-console.log(err);  
-}  
-  
-};  
-window.extractPdf = async function(){  
-  
-if(!auth.currentUser) return alert("Admin not logged in");  
-  
-const file = document.getElementById("pdfFile").files[0];  
-  
-if(!file) return alert("Choose PDF/Image");  
-  
-status("OCR Reading...","blue");  
-  
-try{  
-  
-const result = await Tesseract.recognize(  
-file,  
-'eng+hin'  
-);  
-  
-let text = result.data.text;  
-text = text.replace(/\r/g,'');  
-  
-/* Auto Cleaner */  
-text = text.replace(/RAMESHWAR SAHU/gi,'');  
-text = text.replace(/GDS DEPARTMENTAL EXAM STUDY HUB/gi,'');  
-text = text.replace(/GDS TO MTS/gi,'');  
-text = text.replace(/PYQ 20\d\d/gi,'');  
-  
-/* Page numbers like 1/10 */  
-text = text.replace(/\b\d+\s*\/\s*\d+\b/g,'');  
-  
-/* Multiple blank lines clean */  
-text = text.replace(/\n{3,}/g,"\n\n");  
-  
-/* Trim */  
-text = text.trim();  
-text = text.replace(/\r/g,'');  
-  
-document.getElementById("bulk").value = text;  
-  
-status("OCR Completed");  
-  
-}catch(err){  
-  
-console.log(err);  
-  
-status("OCR Failed","red");  
-  
-}  
-  
-};  
-* 2. BULK SAVE FUNCTION (FIXED) */
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+    authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+    projectId: "gds-departmental-exam-studyhub",
+    storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+    messagingSenderId: "759916756080",
+    appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const statusMsg = document.getElementById("statusMsg");
+
+const ADMIN_EMAIL = "rameshwarsahu2014bpmjarwe1694@gmail.com";
+
+function status(t, color = "green") {
+    statusMsg.innerText = t;
+    statusMsg.style.color = color;
+}
+
+// --- LOGIN PROCESS ---
+async function loginAndStart() {
+    const userPass = prompt("Admin Password Darj Karein:");
+    if(!userPass) return status("Password required to connect!", "red");
+
+    try {
+        status("Connecting to Firebase...", "blue");
+        await signInWithEmailAndPassword(auth, ADMIN_EMAIL, userPass);
+        status("Admin Logged In & Connected ✅");
+        loadAll(); 
+    } catch (err) {
+        status("Login Failed: " + err.message, "red");
+    }
+}
+
+// --- FIX: BULK SAVE FUNCTION ---
 window.saveBulk = async function() {
     const raw = document.getElementById('bulkText').value.trim();
     const cat = document.getElementById('category').value;
     const post = document.getElementById('post').value;
 
     if (!raw || !cat || !post) {
-        return alert("Text, Category aur Post teeno zaruri hain!");
+        return alert("Text, Category aur Post select karna zaruri hai!");
     }
 
     const lines = raw.split('\n');
     let count = 0;
-    status("Processing Bulk Upload...", "orange");
+    status(`Uploading ${lines.length} Questions...`, "orange");
 
     try {
         for (let line of lines) {
             const p = line.split('|').map(x => x.trim());
+            // Format check: Question | A | B | C | D | Answer
             if (p.length >= 6) {
                 await addDoc(collection(db, "pyqQuestions"), {
                     question: p,
@@ -362,136 +179,74 @@ window.saveBulk = async function() {
                 count++;
             }
         }
-        status(`${count} Questions added successfully!`, "green");
+        status(`${count} Questions Uploaded Successfully! ✅`);
         document.getElementById('bulkText').value = "";
-        loadAll(); 
+        loadAll();
     } catch (e) {
-        status("Bulk Save Failed!", "red");
+        status("Bulk Upload Error: " + e.message, "red");
         console.error(e);
     }
 };
-    
-/* LOAD ALL */  
-async function loadAll(){  
-  
-/* PDFs */  
-try{  
-  
-const pdfSnap = await getDocs(  
-query(collection(db,"pyqFiles"),orderBy("createdAt","desc"))  
-);  
-  
-let pdfHtml="";  
-  
-pdfSnap.forEach(item=>{  
-let d=item.data();  
-  
-pdfHtml += `  
-<div class="card">  
-<div class="row">  
-<div>  
-<b>${safe(d.title)}</b>  
-<div class="small">${safe(d.category)} | ${safe(d.post)}</div>  
-<div class="small">${safe(d.fileName)}</div>  
-<div class="small">${safe(d.desc)}</div>  
-</div>  
-<div>  
-<button class="delete-btn" onclick="deletePdf('${item.id}')">Delete</button>  
-</div>  
-</div>  
-</div>  
-`;  
-});  
-  
-document.getElementById("pdfList").innerHTML = pdfHtml || "No PDF Saved";  
-  
-}catch(err){  
-document.getElementById("pdfList").innerHTML="Load Failed";  
-}  
-  
-/* Questions */  
-try{  
-  
-const qSnap = await getDocs(  
-query(collection(db,"pyqQuestions"),orderBy("createdAt","desc"))  
-);  
-  
-let qHtml="";  
-let i=1;  
-  
-qSnap.forEach(item=>{  
-  
-let d=item.data();  
-  
-qHtml += `  
-<div class="card">  
-<div class="row">  
-  
-<div style="flex:1">  
-  
-<b style="font-size:17px;color:#111;line-height:1.6">  
-${i}. ${safe(d.question)}  
-</b>  
-  
-<div class="small" style="margin-top:8px;font-weight:bold;color:#444">  
-${safe(d.category)} | ${safe(d.post)}  
-</div>  
-  
-<div class="small" style="margin-top:10px;line-height:1.8;font-size:15px">  
-A. ${safe(d.options[0])}<br>  
-B. ${safe(d.options[1])}<br>  
-C. ${safe(d.options[2])}<br>  
-D. ${safe(d.options[3])}  
-</div>  
-  
-<div class="small" style="margin-top:10px;font-weight:bold;color:green;font-size:15px;">  
-Answer: ${safe(d.answer)}  
-</div>  
-  
-</div>  
-  
-<div>  
-<button class="delete-btn" onclick="deleteQ('${item.id}')">  
-Delete  
-</button>  
-</div>  
-  
-</div>  
-</div>  
-`;  
-  
-i++;  
-});  
-  
-document.getElementById("questionList").innerHTML=qHtml || "No Questions Saved";  
-  
-}catch(err){  
-document.getElementById("questionList").innerHTML="Load Failed";  
-}  
-  
-}  
-  
-/* DELETE */  
-window.deletePdf = async function(id){  
-  
-if(!confirm("Delete PDF?")) return;  
-  
-await deleteDoc(doc(db,"pyqFiles",id));  
-loadAll();  
-  
-};  
-  
-window.deleteQ = async function(id){  
-  
-if(!confirm("Delete Question?")) return;  
-  
-await deleteDoc(doc(db,"pyqQuestions",id));  
-loadAll();  
-  
-};  
-  
-document.addEventListener("contextmenu",e=>e.preventDefault());  
-  
-</script>  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>  
+
+// --- SAVE SINGLE QUESTION ---
+window.saveSingleQuestion = async function() {
+    const q = document.getElementById('q_text').value;
+    const ans = document.getElementById('q_ans').value;
+    const cat = document.getElementById('category').value;
+    const post = document.getElementById('post').value;
+
+    if(!q || !ans || !cat || !post) return alert("Fill all fields!");
+
+    try {
+        status("Saving Question...", "blue");
+        await addDoc(collection(db, "pyqQuestions"), {
+            question: q,
+            options: [
+                document.getElementById('q_a').value,
+                document.getElementById('q_b').value,
+                document.getElementById('q_c').value,
+                document.getElementById('q_d').value
+            ],
+            answer: ans,
+            category: cat,
+            post: post,
+            createdAt: serverTimestamp()
+        });
+        status("Question Saved! ✅");
+        loadAll();
+    } catch(e) { status("Error: " + e.message, "red"); }
+};
+
+// --- LOAD ALL DATA ---
+async function loadAll() {
+    try {
+        const qSnap = await getDocs(query(collection(db, "pyqQuestions"), orderBy("createdAt", "desc")));
+        let qHtml = "";
+        qSnap.forEach(docSnap => {
+            const d = docSnap.data();
+            qHtml += `<div class="card">
+                <b>${d.question}</b><br>
+                <small>${d.category} | ${d.post}</small><br>
+                <button class="delete-btn" style="float:right" onclick="deleteQ('${docSnap.id}')">Delete</button>
+            </div>`;
+        });
+        document.getElementById("questionList").innerHTML = qHtml || "No Data";
+    } catch (e) { console.error(e); }
+}
+
+window.deleteQ = async (id) => { 
+    if(confirm("Delete?")) { 
+        await deleteDoc(doc(db, "pyqQuestions", id)); 
+        loadAll(); 
+    } 
+};
+
+// Start application
+loginAndStart();
+
+</script>
+
+      
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>  
 </body>  
 </html>
