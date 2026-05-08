@@ -125,7 +125,17 @@ const firebaseConfig = {
 };  
 
 const ADMIN_EMAIL = "rameshwarsahu2014bpmjarwe1694@gmail.com";  
-const ADMIN_PASS = "YOUR_ADMIN_PASSWORD"; // <--- Yahan apna password dalein  
+const userPass = prompt("Please enter Admin Password:");
+
+signInWithEmailAndPassword(auth, ADMIN_EMAIL, userPass)
+.then(() => { 
+    status("Admin Logged In"); 
+    loadAll(); 
+})
+.catch(err => { 
+    status("Login Failed: Galat Password ya Connection Error", "red"); 
+    console.error(err);
+});  
 
 const app = initializeApp(firebaseConfig);  
 const db = getFirestore(app);  
