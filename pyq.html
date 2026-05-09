@@ -338,14 +338,15 @@ let html=`
 
 for(let i=0;i<4;i++){
 
-const op=safe(q.options?.[i]);
-const active=answers[current]===op ? "selected":"";
+const letter = String.fromCharCode(65+i);
+const active = answers[current] === letter ? "selected" : "";
 
-html+=`
-<button class="option ${active}" onclick="selectAns('${esc(op)}')">
-${String.fromCharCode(65+i)}. ${op}
+html += `
+<button class="option ${active}" onclick="selectAns('${letter}')">
+${letter}. ${op}
 </button>
 `;
+
 }
 
 html+="<br>";
@@ -370,10 +371,11 @@ document.getElementById("quizBox").innerHTML=html;
 }
 
 /* ACTIONS */
-window.selectAns=function(v){
-answers[current]=v;
-showQuestion();
+window.selectAns = function(letter) {
+    answers[current] = letter; 
+    showQuestion();
 };
+
 
 window.nextQ=function(){
 if(current<questions.length-1){
@@ -401,9 +403,7 @@ for(let i=0;i<questions.length;i++){
 const q=questions[i];
 const user=answers[i] || "Not Answered";
 const ans=safe(q.answer);
-
-const ok=user===ans;
-
+const ok = String(user).trim().toUpperCase() === String(ans).trim().toUpperCase();
 if(user!=="Not Answered") attempted++;
 if(ok) score++;
 
