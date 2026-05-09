@@ -196,28 +196,61 @@ window.bulkSave = async function() {
     const cat = document.getElementById('category').value;
     const post = document.getElementById('post').value;
 
-    if (!raw || !cat || !post) return alert("Details bharein!");
+    if (!raw || !cat || !post) return alert("Category aur Post select karna jaruri hai!");
 
     const lines = raw.split('\n');
+    let successCount = 0;
+
     try {
+        status("Uploading started...", "orange");
+
         for (let line of lines) {
-            const p = line.split('|').map(x => x.trim());
-            if (p.length >= 6) {
+            let cleanLine = line.trim();
+            if (!cleanLine || !cleanLine.includes('|')) continue;
+
+            // 1. Sawal aur baki hissa alag karein
+            const parts = cleanLine.split('|').map(x => x.trim());
+            const questionText = parts; 
+
+            // 2. Options aur Ans wale part ko comma se split karein
+            // filter(Boolean) khali values (jaise aakhri comma ke baad) ko hata dega
+            const optionsAndAns = parts.split(',').map(x => x.trim()).filter(Boolean);
+
+            // Humein kam se kam 4 options aur 1 answer chahiye (Total 5 items)
+            if (optionsAndAns.length >= 5) {
                 await addDoc(collection(db, "pyqQuestions"), {
-                    question: p,
-                    options: [p, p, p, p], // Individual elements daale hain, array nahi
-                    answer: p,
+                    question: questionText,
+                    options: [
+                        optionsAndAns, 
+                        optionsAndAns, 
+                        optionsAndAns, 
+                        optionsAndAns
+                    ],
+                    answer: optionsAndAns, // Ye A, B, C ya D uthayega
                     category: cat,
                     post: post,
                     createdAt: serverTimestamp()
                 });
+                successCount++;
+            } else {
+                console.warn("Skipping line due to incorrect comma format: ", cleanLine);
             }
         }
-        status("Bulk Upload Success! ✅");
-        document.getElementById('bulk').value = "";
-        loadAll();
-    } catch (e) { status("Error: " + e.message, "red"); }
+
+        if (successCount > 0) {
+            status(`${successCount} Questions Uploaded! ✅`, "green");
+            document.getElementById('bulk').value = "";
+            loadAll();
+        } else {
+            status("Format mismatch! Check karein: Sawal | A, B, C, D, Ans|", "red");
+        }
+
+    } catch (e) { 
+        console.error("Firebase Error:", e);
+        status("Upload Error: " + e.message, "red"); 
+    }
 };
+
 
 
 // --- FIX 4: OCR EXTRACT ---
