@@ -197,29 +197,30 @@ window.bulkSave = async function() {
     const selectedPost = document.getElementById('post').value;
 
     if (!rawInput || !selectedCat || !selectedPost) {
-        return alert("Category aur Post select karna na bhoolein!");
+        return alert("Category aur Post select karein!");
     }
 
     const allLines = rawInput.split('\n');
     let countSuccess = 0;
 
     try {
-        status("Connecting to Database...", "orange");
+        status("Uploading...", "orange");
 
         for (let currentLine of allLines) {
             let trimmedLine = currentLine.trim();
             if (!trimmedLine || !trimmedLine.includes('|')) continue;
 
-            // Yahan humne variable ka naam badal kar 'lineSplit' kar diya hai
-            // Taki 'parts' naam ke purane error se bacha ja sake
             const lineSplit = trimmedLine.split('|').map(item => item.trim());
             
+            // lineSplit = Sawal
+            // lineSplit = Options aur Answer ka text
             if (lineSplit.length >= 2) {
                 const finalQuestion = lineSplit;
                 
-                // lineSplit ek string hai, ispar split kaam karega hi karega
+                // lineSplit string hai, ispar split chalega
                 const contentArray = lineSplit.split(',').map(item => item.trim()).filter(Boolean);
 
+                // Humein 4 options + 1 answer = 5 items chahiye
                 if (contentArray.length >= 5) {
                     await addDoc(collection(db, "pyqQuestions"), {
                         question: finalQuestion,
@@ -244,12 +245,12 @@ window.bulkSave = async function() {
             document.getElementById('bulk').value = "";
             loadAll();
         } else {
-            status("Format Error! Use: Question | A, B, C, D, Ans", "red");
+            status("Format Check: Sawal | A, B, C, D, Ans", "red");
         }
 
     } catch (err) { 
-        console.error("Critical Error:", err);
-        status("Fatal Error: " + err.message, "red"); 
+        console.error("Error Details:", err);
+        status("Error: " + err.message, "red"); 
     }
 };
 
