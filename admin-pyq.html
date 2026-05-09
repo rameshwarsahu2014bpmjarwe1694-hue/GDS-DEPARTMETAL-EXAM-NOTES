@@ -192,63 +192,64 @@ window.saveQuestion = async function() {
 
 // --- FIX 3: BULK SAVE ---
 window.bulkSave = async function() {
-    const raw = document.getElementById('bulk').value.trim();
-    const cat = document.getElementById('category').value;
-    const post = document.getElementById('post').value;
+    const rawInput = document.getElementById('bulk').value.trim();
+    const selectedCat = document.getElementById('category').value;
+    const selectedPost = document.getElementById('post').value;
 
-    if (!raw || !cat || !post) return alert("Category aur Post select karein!");
+    if (!rawInput || !selectedCat || !selectedPost) {
+        return alert("Category aur Post select karna na bhoolein!");
+    }
 
-    const lines = raw.split('\n');
-    let successCount = 0;
+    const allLines = rawInput.split('\n');
+    let countSuccess = 0;
 
     try {
-        status("Uploading...", "orange");
+        status("Connecting to Database...", "orange");
 
-        for (let line of lines) {
-            let cleanLine = line.trim();
-            if (!cleanLine || !cleanLine.includes('|')) continue;
+        for (let currentLine of allLines) {
+            let trimmedLine = currentLine.trim();
+            if (!trimmedLine || !trimmedLine.includes('|')) continue;
 
-            // Step 1: Sawal aur baki hisse ko Pipe (|) se alag kiya
-            const parts = cleanLine.split('|').map(x => x.trim());
+            // Yahan humne variable ka naam badal kar 'lineSplit' kar diya hai
+            // Taki 'parts' naam ke purane error se bacha ja sake
+            const lineSplit = trimmedLine.split('|').map(item => item.trim());
             
-            // Step 2: Sirf parts (jo options wala text hai) uspar split chalaya
-            if (parts.length >= 2) {
-                const questionText = parts;
+            if (lineSplit.length >= 2) {
+                const finalQuestion = lineSplit;
                 
-                // Comma se split karke khali spaces hataye
-                const optionsAndAns = parts.split(',').map(x => x.trim()).filter(Boolean);
+                // lineSplit ek string hai, ispar split kaam karega hi karega
+                const contentArray = lineSplit.split(',').map(item => item.trim()).filter(Boolean);
 
-                // Check ki kam se kam 4 options aur 1 answer (total 5) mil rahe hain
-                if (optionsAndAns.length >= 5) {
+                if (contentArray.length >= 5) {
                     await addDoc(collection(db, "pyqQuestions"), {
-                        question: questionText,
+                        question: finalQuestion,
                         options: [
-                            optionsAndAns, 
-                            optionsAndAns, 
-                            optionsAndAns, 
-                            optionsAndAns
+                            contentArray, 
+                            contentArray, 
+                            contentArray, 
+                            contentArray
                         ],
-                        answer: optionsAndAns,
-                        category: cat,
-                        post: post,
+                        answer: contentArray,
+                        category: selectedCat,
+                        post: selectedPost,
                         createdAt: serverTimestamp()
                     });
-                    successCount++;
+                    countSuccess++;
                 }
             }
         }
 
-        if (successCount > 0) {
-            status(`${successCount} Questions Uploaded! ✅`, "green");
+        if (countSuccess > 0) {
+            status(`${countSuccess} Questions Saved! ✅`, "green");
             document.getElementById('bulk').value = "";
             loadAll();
         } else {
-            status("Format Check Karein: Sawal | A, B, C, D, Ans|", "red");
+            status("Format Error! Use: Question | A, B, C, D, Ans", "red");
         }
 
-    } catch (e) { 
-        console.error("Error details:", e);
-        status("Error: " + e.message, "red"); 
+    } catch (err) { 
+        console.error("Critical Error:", err);
+        status("Fatal Error: " + err.message, "red"); 
     }
 };
 
