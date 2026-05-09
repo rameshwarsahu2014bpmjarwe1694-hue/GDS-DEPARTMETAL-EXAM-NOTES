@@ -319,63 +319,49 @@ return;
 }
 
 document.getElementById("startBtn").style.display="none";
-document.getElementById("resultBox").style.display="none";
+docfunctionument.getElementById("resultBox").style.display="none";
 document.getElementById("quizBox").style.display="block";
 
 showQuestion();
 }
 
 /* SHOW QUESTION */
+ showQuestion(){
+/* SHOW QUESTION */
 function showQuestion(){
+    const q = questions[current];
+    let html = `
+    <div class="card">
+    <h3>Question ${q.serial} / ${questions.length}</h3>
+    <p style="margin:15px 0;"><b>${safe(q.question)}</b></p>
+    `;
 
-const q=questions[current];
+    for(let i=0; i<4; i++){
+        const letter = String.fromCharCode(65+i); // A, B, C, D
+        const op = safe(q.options?.[i]);
+        // Yahan check hoga ki kya ye letter select kiya gaya hai
+        const active = answers[current] === letter ? "selected" : "";
 
-let html=`
-<div class="card">
-<h3>Question ${q.serial} / ${questions.length}</h3>
-<p style="margin:15px 0;"><b>${safe(q.question)}</b></p>
-`;
+        html += `
+        <button class="option ${active}" onclick="selectAns('${letter}')">
+        ${letter}. ${op}
+        </button>
+        `;
+    }
 
-for(let i=0;i<4;i++){
+    html += "<br>";
+    if(current > 0) html += `<button class="nav-btn" onclick="prevQ()">Previous</button>`;
+    if(current < questions.length - 1) html += `<button class="nav-btn" onclick="nextQ()">Next</button>`;
+    html += `<button class="submit-btn" onclick="submitQuiz()">Submit</button></div>`;
 
-const letter = String.fromCharCode(65+i);
-const active = answers[current] === letter ? "selected" : "";
-
-html += `
-<button class="option ${active}" onclick="selectAns('${letter}')">
-${letter}. ${op}
-</button>
-`;
-
-}
-
-html+="<br>";
-
-if(current>0){
-html+=`<button class="nav-btn" onclick="prevQ()">Previous</button>`;
-}
-
-if(current<questions.length-1){
-html+=`<button class="nav-btn" onclick="nextQ()">Next</button>`;
-}
-  
-/* EVERY QUESTION PAGE */
-html += `<button class="submit-btn" onclick="submitQuiz()">Submit</button>`;
-
-html += "</div>";
-
-
-html+="</div>";
-
-document.getElementById("quizBox").innerHTML=html;
+    document.getElementById("quizBox").innerHTML = html;
 }
 
 /* ACTIONS */
-window.selectAns = function(letter) {
-    answers[current] = letter; 
+window.selectAns = function(letter){
+    answers[current] = letter; // Text ki jagah sirf 'A', 'B' save hoga
     showQuestion();
 };
-
 
 window.nextQ=function(){
 if(current<questions.length-1){
