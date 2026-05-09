@@ -171,15 +171,18 @@ window.saveQuestion = async function() {
     if(!q || !ans || !cat || !post) return alert("Sari fields bharein!");
     try {
         await addDoc(collection(db, "pyqQuestions"), {
-            question: q,
-            options: [
-                document.getElementById('a').value,
-                document.getElementById('b').value,
-                document.getElementById('c').value,
-                document.getElementById('d').value
-            ],
-            answer: ans, category: cat, post: post, createdAt: serverTimestamp()
-        });
+    question: q,
+    options: [
+        document.getElementById('a').value,
+        document.getElementById('b').value,
+        document.getElementById('c').value,
+        document.getElementById('d').value
+    ],
+    answer: ans,
+    category: cat,
+    post: post,
+    createdAt: serverTimestamp()
+});
         status("Question Saved! ✅");
         loadAll();
     } catch(e) { status("Error: " + e.message, "red"); }
@@ -198,11 +201,13 @@ window.bulkSave = async function() {
             const p = line.split('|').map(x => x.trim());
             if (p.length >= 6) {
                 await addDoc(collection(db, "pyqQuestions"), {
-                    question: p,
-                    options: [p, p, p, p],
-                    answer: p,
-                    category: cat, post: post, createdAt: serverTimestamp()
-                });
+    question: p,
+    options: [p, p, p, p],
+    answer: p,
+    category: cat,
+    post: post,
+    createdAt: serverTimestamp()
+});
             }
         }
         status("Bulk Upload Success! ✅");
