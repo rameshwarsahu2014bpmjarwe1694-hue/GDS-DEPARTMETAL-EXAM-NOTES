@@ -1,47 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Syllabus - Study Hub</title>
-<style>
-    /* Clean and Professional UI */
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
-    body{background:#f0f2f5;padding:15px;}
-    .container{max-width:800px;margin:auto;background:#fff;padding:25px;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
-    h1{text-align:center;margin-bottom:25px;color:#333;font-size:28px;}
-    .filters{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;}
-    input,select{padding:12px;border:1px solid #ddd;border-radius:10px;font-size:16px;outline:none;transition:0.3s;}
-    input:focus,select:focus{border-color:#007bff;box-shadow:0 0 5px rgba(0,123,255,0.2);}
-    .card{background:#fff;padding:20px;border:1px solid #eee;border-radius:12px;margin-bottom:15px;transition:0.3s;}
-    .card:hover{transform:translateY(-3px);box-shadow:0 5px 15px rgba(0,0,0,0.05);}
-    .card h3{color:#111;margin-bottom:8px;font-size:20px;}
-    .badge{display:inline-block;padding:5px 12px;background:#e7f1ff;color:#007bff;font-size:12px;font-weight:bold;border-radius:20px;margin-bottom:10px;}
-    .desc{color:#555;font-size:14px;line-height:1.5;margin-bottom:15px;}
-    .btn-pdf{display:inline-block;padding:12px 20px;background:#28a745;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;text-align:center;cursor:pointer;border:none;width:100%;}
-    .btn-pdf:hover{background:#218838;}
-    .loading{text-align:center;padding:50px;color:#666;font-weight:bold;}
-    @media(max-width:600px){.filters{grid-template-columns:1fr;}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Syllabus Dashboard</title>
+    <style>
+        /* Exact UI matching your candidate screenshot */
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI', Tahoma, sans-serif;}
+        body{background:#f9f9f9;padding:15px;display:flex;justify-content:center;}
+        .container{width:100%;max-width:450px;}
+        .card{background:#fff;padding:20px;border-radius:15px;margin-bottom:15px;border:1px solid #eee;box-shadow:0 2px 5px rgba(0,0,0,0.05);}
+        .badge{background:#e7f1ff;color:#007bff;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;display:inline-block;}
+        .card h3{margin:10px 0 5px;font-size:22px;color:#111;}
+        .btn-pdf{display:block;width:100%;padding:14px;background:#28a745;color:#fff;text-align:center;text-decoration:none;border-radius:10px;font-weight:bold;border:none;cursor:pointer;font-size:16px;}
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>📚 Official Syllabus</h1>
-    
-    <div class="filters">
-        <select id="catFilter">
-            <option value="All">All Exams</option>
-            <option value="MTS">MTS</option>
-            <option value="Postman">Postman</option>
-            <option value="PA/SA">PA/SA</option>
-        </select>
-        <input type="text" id="search" placeholder="Search topics...">
-    </div>
-
-    <div id="syllabusList">
-        <div class="loading">Fetching Latest Syllabus...</div>
-    </div>
+<div class="container" id="syllabus-list">
+    <div style="text-align:center;padding:20px;">Fetching Latest Syllabus...</div>
 </div>
 
 <script type="module">
@@ -63,71 +40,49 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
-let syllabusData = [];
 let userEmail = "";
 
-// Auth Check for Secure Rendering
 onAuthStateChanged(auth, (user) => {
-    if (user) {
-        userEmail = user.email;
-        fetchSyllabus();
-    } else {
-        window.location.href = "login.html";
+    if (user) { 
+        userEmail = user.email; 
+        loadSyllabus(); 
+    } else { 
+        window.location.href = "login.html"; 
     }
 });
 
-async function fetchSyllabus() {
+async function loadSyllabus() {
+    const listDiv = document.getElementById("syllabus-list");
     try {
         const q = query(collection(db, "syllabus"), orderBy("createdAt", "desc"));
         const snap = await getDocs(q);
-        syllabusData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderUI();
-    } catch (err) {
-        document.getElementById("syllabusList").innerHTML = "Failed to load syllabus.";
-    }
-}
-
-function renderUI() {
-    const list = document.getElementById("syllabusList");
-    const cat = document.getElementById("catFilter").value;
-    const term = document.getElementById("search").value.toLowerCase();
-
-    let filtered = syllabusData.filter(i => {
-        return (cat === "All" || i.category === cat) && 
-               (i.title.toLowerCase().includes(term));
-    });
-
-    if(filtered.length === 0) {
-        list.innerHTML = "<p style='text-align:center; padding:20px;'>No records found.</p>";
-        return;
-    }
-
-    list.innerHTML = "";
-    filtered.forEach(item => {
-        // Galti Sudhar: Admin Panel se aane wala EXACT file name
-        let fName = (item.fileName || "").trim();
+        listDiv.innerHTML = "";
         
-        // GitHub Directory Check: Agar .pdf extension missing hai toh auto-add karo
-        if(fName && !fName.toLowerCase().endsWith(".pdf")) fName += ".pdf";
+        snap.forEach(doc => {
+            const d = doc.data();
+            
+            // Post = Category (MTS, Postman, PA/SA)
+            // Filename = Exact File Name from Admin Panel
+            const postType = d.category || "General"; 
+            const exactFileName = (d.fileName || "").trim();
 
-        // Render Route matching your backend/pdfs/ directory
-        const secureLink = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(userEmail)}&year=Syllabus&post=${encodeURIComponent(fName)}`;
+            // Link matching your requirement: Post aur Filename dono bhej rahe hain
+            const url = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(userEmail)}&post=${encodeURIComponent(postType)}&filename=${encodeURIComponent(exactFileName)}`;
 
-        list.innerHTML += `
-        <div class="card">
-            <span class="badge">${item.category}</span>
-            <h3>${item.title}</h3>
-            <p class="desc">${item.desc || 'Latest updated exam pattern and syllabus.'}</p>
-            <button class="btn-pdf" onclick="window.open('${secureLink}', '_blank')">
-                📖 Open Syllabus PDF
-            </button>
-        </div>`;
-    });
+            listDiv.innerHTML += `
+                <div class="card">
+                    <span class="badge">${postType}</span>
+                    <h3>${d.title}</h3>
+                    <p style="color:#666; font-size:13px; margin-bottom:15px;">File: ${exactFileName}</p>
+                    <button class="btn-pdf" onclick="window.open('${url}', '_blank')">
+                        📖 Open ${postType} Syllabus
+                    </button>
+                </div>`;
+        });
+    } catch(err) { 
+        listDiv.innerHTML = "Error loading data."; 
+    }
 }
-
-document.getElementById("catFilter").onchange = renderUI;
-document.getElementById("search").oninput = renderUI;
-
 </script>
 </body>
 </html>
