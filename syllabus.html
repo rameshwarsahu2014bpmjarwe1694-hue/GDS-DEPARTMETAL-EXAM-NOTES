@@ -49,6 +49,10 @@ outline:none;
 width:100%;
 }
 
+input:focus,select:focus{
+border-color:#007bff;
+}
+
 .card{
 background:#fafafa;
 padding:15px;
@@ -72,17 +76,6 @@ border-radius:20px;
 margin-bottom:8px;
 }
 
-.file-name-tag {
-display: block;
-background: #e9ecef;
-padding: 8px;
-border-radius: 6px;
-font-size: 13px;
-color: #495057;
-margin: 10px 0;
-border-left: 4px solid #28a745;
-}
-
 .small{
 font-size:14px;
 color:#666;
@@ -100,8 +93,10 @@ text-decoration:none;
 border-radius:8px;
 font-weight:bold;
 font-size:14px;
-cursor: pointer;
-border: none;
+}
+
+.download-btn:hover{
+background:#218838;
 }
 
 .empty{
@@ -126,13 +121,16 @@ grid-template-columns:1fr;
 <h1>Candidate Syllabus</h1>
 
 <div class="top-controls">
+
 <select id="categoryFilter">
 <option value="All">All Categories</option>
 <option value="MTS">MTS</option>
 <option value="Postman">Postman</option>
 <option value="PA/SA">PA/SA</option>
 </select>
+
 <input type="text" id="searchBox" placeholder="Search syllabus...">
+
 </div>
 
 <div id="list">Loading...</div>
@@ -142,8 +140,14 @@ grid-template-columns:1fr;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+getFirestore,
+collection,
+getDocs,
+query,
+orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
@@ -156,45 +160,59 @@ appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
 const list = document.getElementById("list");
 const categoryFilter = document.getElementById("categoryFilter");
 const searchBox = document.getElementById("searchBox");
 
-const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
 let allData = [];
-let currentUserEmail = "";
 
-onAuthStateChanged(auth, (user) => {
-if (user) {
-currentUserEmail = user.email;
-loadData();
-} else {
-window.location.href = "login.html";
-}
-});
-
+/* LOAD DATA */
 async function loadData(){
+
 try{
+
 const q = query(collection(db,"syllabus"),orderBy("createdAt","desc"));
 const snap = await getDocs(q);
+
 allData = [];
-snap.forEach(doc=>{ allData.push({ id: doc.id, ...doc.data() }); });
+
+snap.forEach(doc=>{
+allData.push({
+id: doc.id,
+...doc.data()
+});
+});
+
 renderData();
+
 }catch(error){
+
 list.innerHTML = `<div class="empty">Failed to Load</div>`;
-}
+console.log(error);
+
 }
 
+}
+
+/* RENDER DATA */
 function renderData(){
+
 const category = categoryFilter.value;
 const search = searchBox.value.toLowerCase().trim();
 
 let filtered = allData.filter(item=>{
-let catMatch = category === "All" || item.category === category;
-let textMatch = (item.title || "").toLowerCase().includes(search) || (item.fileName || "").toLowerCase().includes(search);
-return catMatch && textMatch;
+
+let categoryMatch =
+category === "All" || item.category === category;
+
+let searchMatch =
+(item.title || "").toLowerCase().includes(search) ||
+(item.desc || "").toLowerCase().includes(search) ||
+(item.fileName || "").toLowerCase().includes(search);
+
+return categoryMatch && searchMatch;
+
 });
 
 if(filtered.length === 0){
@@ -205,35 +223,38 @@ return;
 list.innerHTML = "";
 
 filtered.forEach(item=>{
-// 1. फाइल नाम से एक्स्ट्रा स्पेस हटाना
-let fName = (item.fileName || "").trim();
-
-// 2. अगर फाइल नाम में .pdf नहीं है तो जोड़ना (ताकि GitHub से मैच हो)
-if(fName && !fName.toLowerCase().endsWith(".pdf")){
-    fName += ".pdf";
-}
-
-// 3. रेंडर बैकएंड रूट (year=Syllabus)
-const secureUrl = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(currentUserEmail)}&year=Syllabus&post=${encodeURIComponent(fName)}`;
 
 list.innerHTML += `
 <div class="card">
-    <h3>${safe(item.title)}</h3>
-    <div class="category">${safe(item.category)}</div>
-    <div class="file-name-tag">📄 File: ${safe(fName)}</div>
-    <p class="small">${safe(item.desc)}</p>
-    <button class="download-btn" onclick="window.open('${secureUrl}', '_blank')">
-        📄 Open PDF
-    </button>
+
+<h3>${safe(item.title)}</h3>
+
+<div class="category">${safe(item.category)}</div>
+
+<p class="small">${safe(item.desc)}</p>
+
+<a class="download-btn" href="${safe(item.fileName)}" download>
+📄 ${safe(item.fileName)}
+</a>
+
 </div>
 `;
+
 });
+
 }
 
+/* EVENTS */
 categoryFilter.addEventListener("change",renderData);
 searchBox.addEventListener("input",renderData);
 
-function safe(str){ return str ? str : ""; }
+/* SAFE */
+function safe(str){
+return str ? str : "";
+}
+
+/* START */
+loadData();
 
 </script>
 
