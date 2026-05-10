@@ -151,7 +151,6 @@ query,
 orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// AUTH IMPORT FOR EMAIL
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -175,15 +174,13 @@ const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
 let allData = [];
 let currentUserEmail = "";
 
-/* AUTH CHECK */
 onAuthStateChanged(auth, (user) => {
-    if (user) {
-        currentUserEmail = user.email;
-        loadData();
-    } else {
-        alert("Security Alert: Please login first!");
-        window.location.href = "login.html"; 
-    }
+if (user) {
+currentUserEmail = user.email;
+loadData();
+} else {
+window.location.href = "login.html";
+}
 });
 
 /* LOAD DATA */
@@ -243,7 +240,6 @@ list.innerHTML = "";
 
 filtered.forEach(item=>{
 
-// RENDER URL LOGIC ADDED HERE
 const secureUrl = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(currentUserEmail)}&year=Syllabus&post=${encodeURIComponent(item.category || item.title)}`;
 
 list.innerHTML += `
@@ -256,7 +252,7 @@ list.innerHTML += `
 <p class="small">${safe(item.desc)}</p>
 
 <button class="download-btn" onclick="window.open('${secureUrl}', '_blank')">
-📄 Open PDF
+📄 Open Syllabus PDF
 </button>
 
 </div>
