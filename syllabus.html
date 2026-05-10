@@ -165,10 +165,9 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
 getAuth,
-signInAnonymously
+signInWithEmailAndPassword
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
 /* FIREBASE CONFIG */
 
 const firebaseConfig = {
@@ -194,7 +193,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const auth = getAuth(app);
-
+const USER_EMAIL = "registered@gmail.com";
+const USER_PASS = "userpassword";
 /* ELEMENTS */
 
 const list = document.getElementById("list");
@@ -211,19 +211,25 @@ let allData = [];
 
 /* LOGIN + LOAD */
 
-signInAnonymously(auth)
+signInWithEmailAndPassword(
+auth,
+USER_EMAIL,
+USER_PASS
+)
+
 .then(()=>{
 
 loadData();
 
 })
+
 .catch((error)=>{
 
 console.log(error);
 
 list.innerHTML = `
 <div class="empty">
-Authentication Failed
+Access Denied
 </div>
 `;
 
