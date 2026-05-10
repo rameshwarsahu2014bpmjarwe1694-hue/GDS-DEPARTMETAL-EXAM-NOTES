@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>Syllabus Dashboard</title>
     <style>
-        /* Exact UI matching your candidate dashboard screenshot */
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI', Tahoma, sans-serif;}
         body{background:#f9f9f9;padding:15px;display:flex;justify-content:center;}
         .container{width:100%;max-width:450px;}
+        /* Card Design as per your screenshot */
         .card{background:#fff;padding:20px;border-radius:15px;margin-bottom:15px;border:1px solid #eee;box-shadow:0 2px 5px rgba(0,0,0,0.05);}
         .badge{background:#e7f1ff;color:#007bff;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;display:inline-block;}
-        .card h3{margin:10px 0 5px;font-size:22px;color:#111;}
+        .card h3{margin:10px 0 5px;font-size:22px;color:#111;} /* Yeh Title hai */
+        .card p{color:#666;font-size:14px;margin-bottom:15px;} /* Yeh Description hai */
+        .file-label{font-size:11px; color:#999; margin-bottom:10px; display:block;}
         .btn-pdf{display:block;width:100%;padding:14px;background:#28a745;color:#fff;text-align:center;text-decoration:none;border-radius:10px;font-weight:bold;border:none;cursor:pointer;font-size:16px;}
         .loading{text-align:center;padding:50px;color:#666;}
     </style>
@@ -19,7 +21,7 @@
 <body>
 
 <div class="container" id="syllabus-list">
-    <div class="loading">Fetching Syllabus...</div>
+    <div class="loading">Syllabus Load Ho Raha Hai...</div>
 </div>
 
 <script type="module">
@@ -27,7 +29,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
     authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
@@ -44,7 +45,7 @@ const auth = getAuth(app);
 const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
 let userEmail = "";
 
-// Auth state observer to get the logged-in user's email
+// Login Status Check
 onAuthStateChanged(auth, (user) => {
     if (user) { 
         userEmail = user.email; 
@@ -54,7 +55,6 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Function to decode HTML entities (fixes the &amp; issue from Admin esc() function)
 function decodeHTMLEntities(text) {
     const textArea = document.createElement('textarea');
     textArea.innerHTML = text;
@@ -68,33 +68,34 @@ async function loadSyllabus() {
         const snap = await getDocs(q);
         listDiv.innerHTML = "";
         
-        if (snap.empty) {
-            listDiv.innerHTML = "<p style='text-align:center;'>No syllabus found.</p>";
-            return;
-        }
-
         snap.forEach(doc => {
             const d = doc.data();
             
-            // Setting Parameters based on your requirement
-            const postType = (d.category || "").trim(); // MTS, Postman, PA/SA
-            const exactFileName = decodeHTMLEntities(d.fileName || ""); // Exact file name from DB
+            // 1. Title: Jo screen par dikhega
+            const syllabusTitle = d.title || "Exam Pattern";
+            
+            // 2. Post: Category (MTS/Postman/PA-SA)
+            const postType = (d.category || "").trim();
+            
+            // 3. Filename: Exact file name for backend
+            const exactFileName = decodeHTMLEntities(d.fileName || "");
 
-            // Constructing URL with all 3 parameters: email, post, and filename
+            // Final URL: email, post, aur filename teeno ke sath
             const url = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(userEmail)}&post=${encodeURIComponent(postType)}&filename=${encodeURIComponent(exactFileName)}`;
 
             listDiv.innerHTML += `
                 <div class="card">
                     <span class="badge">${postType}</span>
-                    <h3>${d.title}</h3>
-                    <p style="color:#666; font-size:13px; margin-bottom:15px;">${d.desc || 'Latest Pattern'}</p>
+                    <h3>${syllabusTitle}</h3>
+                    <p>${d.desc || 'Latest Pattern Syllabus'}</p>
+                    <span class="file-label">Target File: ${exactFileName}</span>
                     <button class="btn-pdf" onclick="window.open('${url}', '_blank')">
                         📖 Open Syllabus PDF
                     </button>
                 </div>`;
         });
     } catch(err) { 
-        listDiv.innerHTML = "<p style='text-align:center; color:red;'>Error loading data.</p>"; 
+        listDiv.innerHTML = "<p>Data load karne mein error aaya.</p>"; 
     }
 }
 </script>
