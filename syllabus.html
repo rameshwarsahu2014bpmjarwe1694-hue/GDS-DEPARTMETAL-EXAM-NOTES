@@ -3,101 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>Syllabus Dashboard</title>
+    <title>Syllabus Hub - Departmental Exams</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI', Tahoma, sans-serif;}
-        body{background:#f9f9f9;padding:15px;display:flex;justify-content:center;}
-        .container{width:100%;max-width:450px;}
-        /* Card Design as per your screenshot */
-        .card{background:#fff;padding:20px;border-radius:15px;margin-bottom:15px;border:1px solid #eee;box-shadow:0 2px 5px rgba(0,0,0,0.05);}
-        .badge{background:#e7f1ff;color:#007bff;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;display:inline-block;}
-        .card h3{margin:10px 0 5px;font-size:22px;color:#111;} /* Yeh Title hai */
-        .card p{color:#666;font-size:14px;margin-bottom:15px;} /* Yeh Description hai */
-        .file-label{font-size:11px; color:#999; margin-bottom:10px; display:block;}
-        .btn-pdf{display:block;width:100%;padding:14px;background:#28a745;color:#fff;text-align:center;text-decoration:none;border-radius:10px;font-weight:bold;border:none;cursor:pointer;font-size:16px;}
-        .loading{text-align:center;padding:50px;color:#666;}
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f0f2f5; color: #333; padding: 15px; }
+        .container { max-width: 800px; margin: auto; }
+        
+        header { text-align: center; padding: 20px 0; background: #007bff; color: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { font-size: 24px; }
+
+        /* Tabs for Categories */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .tab-btn { 
+            padding: 10px 20px; background: #fff; border: 2px solid #007bff; color: #007bff; 
+            border-radius: 25px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: 0.3s;
+        }
+        .tab-btn.active { background: #007bff; color: #fff; }
+
+        /* Syllabus Cards */
+        #syllabus-list { display: grid; gap: 15px; }
+        .syllabus-card { 
+            background: #fff; padding: 20px; border-radius: 12px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #007bff;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .info h3 { margin-bottom: 5px; color: #222; }
+        .info p { font-size: 14px; color: #666; line-height: 1.4; }
+        .category-tag { 
+            display: inline-block; background: #e7f3ff; color: #007bff; 
+            padding: 3px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; margin-top: 8px;
+        }
+
+        .view-btn { 
+            background: #28a745; color: white; text-decoration: none; 
+            padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 14px;
+            transition: 0.2s; border: none; cursor: pointer;
+        }
+        .view-btn:hover { background: #218838; transform: scale(1.05); }
+
+        .loader { text-align: center; padding: 50px; font-weight: bold; color: #666; }
+        .empty-msg { text-align: center; padding: 40px; color: #999; background: #fff; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container" id="syllabus-list">
-    <div class="loading">Syllabus Load Ho Raha Hai...</div>
+<div class="container">
+    <header>
+        <h1>Study Syllabus</h1>
+        <p style="font-size: 14px; opacity: 0.9;">Official Departmental Exam Resources</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="filterSyllabus('All')">All</button>
+        <button class="tab-btn" onclick="filterSyllabus('MTS')">MTS</button>
+        <button class="tab-btn" onclick="filterSyllabus('Postman')">Postman</button>
+        <button class="tab-btn" onclick="filterSyllabus('PA/SA')">PA/SA</button>
+    </div>
+
+    <div id="syllabus-list">
+        <div class="loader">Fetching Syllabus...</div>
+    </div>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+        getFirestore, 
+        collection, 
+        getDocs, 
+        query, 
+        orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
-    authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
-    projectId: "gds-departmental-exam-studyhub",
-    storageBucket: "gds-departmental-exam-studyhub.appspot.com",
-    messagingSenderId: "759916756080",
-    appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
-};
+    // Same config as your Admin Panel
+    const firebaseConfig = {
+        apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+        authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+        projectId: "gds-departmental-exam-studyhub",
+        storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+        messagingSenderId: "759916756080",
+        appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+    };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let allSyllabusData = [];
 
-const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
-let userEmail = "";
-
-// Login Status Check
-onAuthStateChanged(auth, (user) => {
-    if (user) { 
-        userEmail = user.email; 
-        loadSyllabus(); 
-    } else { 
-        window.location.href = "login.html"; 
-    }
-});
-
-function decodeHTMLEntities(text) {
-    const textArea = document.createElement('textarea');
-    textArea.innerHTML = text;
-    return textArea.value.trim();
-}
-
-async function loadSyllabus() {
     const listDiv = document.getElementById("syllabus-list");
-    try {
-        const q = query(collection(db, "syllabus"), orderBy("createdAt", "desc"));
-        const snap = await getDocs(q);
+
+    // Load Data from Firestore
+    async function fetchSyllabus() {
+        try {
+            const q = query(collection(db, "syllabus"), orderBy("createdAt", "desc"));
+            const querySnapshot = await getDocs(q);
+            
+            allSyllabusData = [];
+            querySnapshot.forEach((doc) => {
+                allSyllabusData.push(doc.data());
+            });
+
+            renderSyllabus("All");
+        } catch (error) {
+            console.error("Error fetching syllabus: ", error);
+            listDiv.innerHTML = `<div class="empty-msg">Error loading data. Please refresh.</div>`;
+        }
+    }
+
+    // Render Data to UI
+    window.renderSyllabus = function(category) {
         listDiv.innerHTML = "";
         
-        snap.forEach(doc => {
-            const d = doc.data();
-            
-            // 1. Title: Jo screen par dikhega
-            const syllabusTitle = d.title || "Exam Pattern";
-            
-            // 2. Post: Category (MTS/Postman/PA-SA)
-            const postType = (d.category || "").trim();
-            
-            // 3. Filename: Exact file name for backend
-            const exactFileName = decodeHTMLEntities(d.fileName || "");
+        const filtered = category === "All" 
+            ? allSyllabusData 
+            : allSyllabusData.filter(item => item.category === category);
 
-            // Final URL: email, post, aur filename teeno ke sath
-            const url = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(userEmail)}&post=${encodeURIComponent(postType)}&filename=${encodeURIComponent(exactFileName)}`;
+        if (filtered.length === 0) {
+            listDiv.innerHTML = `<div class="empty-msg">No syllabus available for ${category}.</div>`;
+            return;
+        }
+
+        filtered.forEach(data => {
+            // Decoding HTML entities back for display
+            const title = decodeHtml(data.title);
+            const desc = decodeHtml(data.desc);
+            const file = data.fileName;
 
             listDiv.innerHTML += `
-                <div class="card">
-                    <span class="badge">${postType}</span>
-                    <h3>${syllabusTitle}</h3>
-                    <p>${d.desc || 'Latest Pattern Syllabus'}</p>
-                    <span class="file-label">Target File: ${exactFileName}</span>
-                    <button class="btn-pdf" onclick="window.open('${url}', '_blank')">
-                        📖 Open Syllabus PDF
-                    </button>
-                </div>`;
+                <div class="syllabus-card">
+                    <div class="info">
+                        <h3>${title}</h3>
+                        <p>${desc}</p>
+                        <span class="category-tag">${data.category}</span>
+                    </div>
+                    <a href="pdfs/${file}" class="view-btn" target="_blank">View PDF</a>
+                </div>
+            `;
         });
-    } catch(err) { 
-        listDiv.innerHTML = "<p>Data load karne mein error aaya.</p>"; 
     }
-}
+
+    // Tab Filtering Logic
+    window.filterSyllabus = function(category) {
+        // Update Buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if(btn.innerText === category) btn.classList.add('active');
+        });
+        
+        renderSyllabus(category);
+    }
+
+    function decodeHtml(html) {
+        var txt = document.createElement("textarea");
+        txt.innerHTML = html;
+        return txt.value;
+    }
+
+    // Anti-copy protection (Matches your admin panel)
+    document.addEventListener("contextmenu", e => e.preventDefault());
+
+    // Start
+    fetchSyllabus();
+
 </script>
 </body>
 </html>
