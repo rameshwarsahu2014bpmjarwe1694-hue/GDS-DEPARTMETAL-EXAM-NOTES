@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <title>Candidate Syllabus</title>
 
 <style>
+
 *{
 margin:0;
 padding:0;
@@ -49,7 +51,8 @@ outline:none;
 width:100%;
 }
 
-input:focus,select:focus{
+input:focus,
+select:focus{
 border-color:#007bff;
 }
 
@@ -63,7 +66,7 @@ margin-bottom:12px;
 
 .card h3{
 color:#111;
-margin-bottom:5px;
+margin-bottom:6px;
 }
 
 .category{
@@ -107,10 +110,13 @@ font-weight:bold;
 }
 
 @media(max-width:700px){
+
 .top-controls{
 grid-template-columns:1fr;
 }
+
 }
+
 </style>
 </head>
 
@@ -123,13 +129,19 @@ grid-template-columns:1fr;
 <div class="top-controls">
 
 <select id="categoryFilter">
+
 <option value="All">All Categories</option>
 <option value="MTS">MTS</option>
 <option value="Postman">Postman</option>
 <option value="PA/SA">PA/SA</option>
+
 </select>
 
-<input type="text" id="searchBox" placeholder="Search syllabus...">
+<input
+type="text"
+id="searchBox"
+placeholder="Search syllabus..."
+>
 
 </div>
 
@@ -139,7 +151,8 @@ grid-template-columns:1fr;
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getFirestore,
@@ -147,77 +160,162 @@ collection,
 getDocs,
 query,
 orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+getAuth,
+signInAnonymously
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* FIREBASE CONFIG */
 
 const firebaseConfig = {
+
 apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+
 authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+
 projectId: "gds-departmental-exam-studyhub",
+
 storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+
 messagingSenderId: "759916756080",
+
 appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+
 };
 
+/* INIT */
+
 const app = initializeApp(firebaseConfig);
+
 const db = getFirestore(app);
 
+const auth = getAuth(app);
+
+/* ELEMENTS */
+
 const list = document.getElementById("list");
-const categoryFilter = document.getElementById("categoryFilter");
-const searchBox = document.getElementById("searchBox");
+
+const categoryFilter =
+document.getElementById("categoryFilter");
+
+const searchBox =
+document.getElementById("searchBox");
+
+/* DATA */
 
 let allData = [];
 
+/* LOGIN + LOAD */
+
+signInAnonymously(auth)
+.then(()=>{
+
+loadData();
+
+})
+.catch((error)=>{
+
+console.log(error);
+
+list.innerHTML = `
+<div class="empty">
+Authentication Failed
+</div>
+`;
+
+});
+
 /* LOAD DATA */
+
 async function loadData(){
 
 try{
 
-const q = query(collection(db,"syllabus"),orderBy("createdAt","desc"));
+const q = query(
+collection(db,"syllabus"),
+orderBy("createdAt","desc")
+);
+
 const snap = await getDocs(q);
 
 allData = [];
 
 snap.forEach(doc=>{
+
 allData.push({
 id: doc.id,
 ...doc.data()
 });
+
 });
 
 renderData();
 
 }catch(error){
 
-list.innerHTML = `<div class="empty">Failed to Load</div>`;
 console.log(error);
 
-}
+list.innerHTML = `
+<div class="empty">
+Failed to Load Syllabus
+</div>
+`;
 
 }
 
-/* RENDER DATA */
+}
+
+/* RENDER */
+
 function renderData(){
 
 const category = categoryFilter.value;
-const search = searchBox.value.toLowerCase().trim();
+
+const search =
+searchBox.value.toLowerCase().trim();
 
 let filtered = allData.filter(item=>{
 
-let categoryMatch =
-category === "All" || item.category === category;
+const categoryMatch =
+category === "All"
+|| item.category === category;
 
-let searchMatch =
-(item.title || "").toLowerCase().includes(search) ||
-(item.desc || "").toLowerCase().includes(search) ||
-(item.fileName || "").toLowerCase().includes(search);
+const searchMatch =
+
+(item.title || "")
+.toLowerCase()
+.includes(search)
+
+||
+
+(item.desc || "")
+.toLowerCase()
+.includes(search)
+
+||
+
+(item.fileName || "")
+.toLowerCase()
+.includes(search);
 
 return categoryMatch && searchMatch;
 
 });
 
 if(filtered.length === 0){
-list.innerHTML = `<div class="empty">No syllabus found</div>`;
+
+list.innerHTML = `
+<div class="empty">
+No syllabus found
+</div>
+`;
+
 return;
+
 }
 
 list.innerHTML = "";
@@ -225,19 +323,31 @@ list.innerHTML = "";
 filtered.forEach(item=>{
 
 list.innerHTML += `
+
 <div class="card">
 
 <h3>${safe(item.title)}</h3>
 
-<div class="category">${safe(item.category)}</div>
+<div class="category">
+${safe(item.category)}
+</div>
 
-<p class="small">${safe(item.desc)}</p>
+<p class="small">
+${safe(item.desc)}
+</p>
 
-<a class="download-btn" href="${safe(item.fileName)}" download>
-📄 ${safe(item.fileName)}
+<a
+class="download-btn"
+href="${safe(item.fileName)}"
+target="_blank"
+>
+
+📄 Open PDF
+
 </a>
 
 </div>
+
 `;
 
 });
@@ -245,16 +355,24 @@ list.innerHTML += `
 }
 
 /* EVENTS */
-categoryFilter.addEventListener("change",renderData);
-searchBox.addEventListener("input",renderData);
+
+categoryFilter.addEventListener(
+"change",
+renderData
+);
+
+searchBox.addEventListener(
+"input",
+renderData
+);
 
 /* SAFE */
-function safe(str){
-return str ? str : "";
-}
 
-/* START */
-loadData();
+function safe(str){
+
+return str ? str : "";
+
+}
 
 </script>
 
