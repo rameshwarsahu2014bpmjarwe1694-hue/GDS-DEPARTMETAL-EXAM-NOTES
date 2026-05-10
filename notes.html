@@ -1,302 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Notes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Notes Hub - Official Study</title>
+    <style>
+        :root { --primary: #007bff; --success: #28a745; --warning: #ff9800; --dark: #2c3e50; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #f0f2f5; padding: 15px; color: #333; }
+        
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: var(--dark); margin-bottom: 20px; font-size: 22px; border-bottom: 3px solid var(--primary); padding-bottom: 10px; }
+        
+        .selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        select, input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; }
+        input:focus, select:focus { border-color: var(--primary); }
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,Helvetica,sans-serif;
-}
+        .card { background: #fafafa; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-top: 15px; transition: 0.3s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        
+        .category-badge { display: inline-block; padding: 4px 10px; background: var(--primary); color: #fff; font-size: 11px; border-radius: 5px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+        .card h3 { font-size: 18px; color: var(--dark); margin-bottom: 5px; }
+        
+        .desc { font-size: 14px; color: #444; line-height: 1.5; margin: 10px 0; white-space: pre-wrap; }
+        
+        .preview-img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 10px; margin-top: 10px; border: 1px solid #ddd; }
 
-body{
-background:#f4f6f9;
-padding:15px;
-}
+        .btn-open { display: block; text-align: center; padding: 12px; background: var(--success); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 10px; cursor: pointer; border: none; width: 100%; }
+        .btn-open:hover { opacity: 0.9; }
 
-.container{
-max-width:1000px;
-margin:auto;
-}
-
-.topbar{
-background:#b30000;
-color:#fff;
-padding:16px;
-text-align:center;
-font-size:24px;
-font-weight:700;
-border-radius:14px;
-margin-bottom:16px;
-}
-
-.tools{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-margin-bottom:16px;
-}
-
-input,select{
-width:100%;
-padding:13px;
-border:1px solid #ccc;
-border-radius:12px;
-font-size:15px;
-outline:none;
-background:#fff;
-}
-
-#notesList{
-display:grid;
-gap:14px;
-}
-
-.note{
-background:#fff;
-padding:18px;
-border-radius:16px;
-box-shadow:0 5px 14px rgba(0,0,0,.08);
-}
-
-.note h3{
-font-size:20px;
-margin-bottom:8px;
-color:#111;
-}
-
-.meta{
-font-size:14px;
-color:#666;
-margin-bottom:10px;
-}
-
-.desc{
-line-height:1.6;
-white-space:pre-wrap;
-color:#222;
-margin-top:8px;
-}
-
-.btn{
-display:inline-block;
-margin-top:10px;
-padding:10px 14px;
-background:#111;
-color:#fff;
-text-decoration:none;
-border-radius:10px;
-font-size:14px;
-}
-
-.preview{
-width:100%;
-max-height:260px;
-object-fit:contain;
-border-radius:12px;
-margin-top:10px;
-border:1px solid #eee;
-background:#fafafa;
-}
-
-.empty{
-background:#fff;
-padding:18px;
-border-radius:14px;
-text-align:center;
-color:#666;
-}
-
-@media(max-width:700px){
-.tools{
-grid-template-columns:1fr;
-}
-.topbar{
-font-size:21px;
-}
-}
-</style>
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .empty-msg { text-align: center; padding: 30px; color: #666; font-weight: bold; }
+    </style>
 </head>
-
 <body>
 
 <div class="container">
+    <h1>Study Notes Hub</h1>
 
-<div class="topbar">📚 Notes</div>
+    <div class="selector-grid">
+        <select id="catFilter">
+            <option value="ALL">सभी नोट्स</option>
+            <option value="MTS">MTS</option>
+            <option value="POSTMAN">POSTMAN</option>
+            <option value="PA/SA">PA/SA</option>
+        </select>
+            <div class="selector-grid">
+        <select id="catFilter">
+            <option value="ALL">सभी विषय (All Subjects)</option>
+            <option value="MTS">MTS Exam</option>
+            <option value="POSTMAN">Postman/Mail Guard</option>
+            <option value="PA/SA">PA/SA Exam</option>
+            <option value="PO GUIDE 1">PO Guide Part 1</option>
+            <option value="PO GUIDE 2">PO Guide Part 2</option>
+            <option value="POSTAL MANUAL 5">Postal Manual Vol 5</option>
+            <option value="POSTAL MANUAL 6">Postal Manual Vol 6</option>
+            <option value="POSTAL MANUAL 7">Postal Manual Vol 7</option>
+            <option value="GK">General Knowledge</option>
+            <option value="MATHS">Mathematics</option>
+            <option value="REASONINGS">Reasoning</option>
+        </select>
+        <input type="text" id="searchInput" placeholder="नोट्स सर्च करें...">
+    </div>
 
-<div class="tools">
-<input type="text" id="searchInput" placeholder="Search notes...">
 
-<select id="catFilter">
-<option value="ALL">All Categories</option>
-<option value="MTS">MTS</option>
-<option value="POSTMAN">POSTMAN</option>
-<option value="PA/SA">PA/SA</option>
-</select>
+    <div id="notesList">
+        <div class="loader"></div>
+        <p style="text-align:center; font-size:14px; color:#666;">नोट्स लोड हो रहे हैं...</p>
+    </div>
 </div>
-
-<div id="notesList">
-<div class="empty">Loading notes...</div>
-</div>
-
-</div>
-
-<script type="module" src="firebase.js"></script>
 
 <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-collection,
-getDocs,
-query,
-orderBy
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+    const firebaseConfig = {
+        apiKey: "AIzaSyDjzmo0A4KhOkrqFQdOyCEek6bsPF-UVPQ",
+        authDomain: "gds-departmental-exam-studyhub.firebaseapp.com",
+        projectId: "gds-departmental-exam-studyhub",
+        storageBucket: "gds-departmental-exam-studyhub.appspot.com",
+        messagingSenderId: "759916756080",
+        appId: "1:759916756080:web:7f2c0e66458bd007e888b5"
+    };
 
-let allNotes = [];
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-function safe(v){
-return String(v || "")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-}
+    // आपका RENDER URL
+    const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
 
-function waitFirebase(){
-if(window.db){
-loadNotes();
-}else{
-setTimeout(waitFirebase,300);
-}
-}
+    let allNotes = [];
+    let currentUserEmail = "";
 
-async function loadNotes(){
+    // लॉगिन चेक
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUserEmail = user.email;
+            fetchNotes();
+        } else {
+            alert("कृपया पहले लॉगिन करें!");
+            window.location.href = "login.html";
+        }
+    });
 
-const box = document.getElementById("notesList");
+    async function fetchNotes() {
+        const box = document.getElementById("notesList");
+        try {
+            const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
+            const snap = await getDocs(q);
+            allNotes = [];
+            snap.forEach(doc => { allNotes.push({ id: doc.id, ...doc.data() }); });
+            renderNotes();
+        } catch (error) {
+            box.innerHTML = `<div class="empty-msg">⚠️ नोट्स लोड करने में एरर आया।</div>`;
+        }
+    }
 
-try{
+    window.renderNotes = function() {
+        const search = document.getElementById("searchInput").value.toLowerCase().trim();
+        const cat = document.getElementById("catFilter").value;
+        const box = document.getElementById("notesList");
 
-const q = query(
-collection(window.db,"notes"),
-orderBy("createdAt","desc")
-);
+        let filtered = allNotes.filter(x => {
+            const matchText = (x.title || "").toLowerCase().includes(search) || (x.description || x.content || "").toLowerCase().includes(search);
+            const matchCat = (cat === "ALL") || (x.category === cat || x.subject === cat);
+            return matchText && matchCat;
+        });
 
-const snap = await getDocs(q);
+        if (filtered.length === 0) {
+            box.innerHTML = `<div class="empty-msg">❌ कोई नोट्स नहीं मिले।</div>`;
+            return;
+        }
 
-allNotes = [];
+        box.innerHTML = filtered.map(x => `
+            <div class="card">
+                <div class="category-badge">${x.category || x.subject || 'General'}</div>
+                <h3>${x.title || 'Untitled Note'}</h3>
+                ${x.description || x.content ? `<div class="desc">${x.description || x.content}</div>` : ''}
+                
+                ${x.fileURL && (x.fileType || "").startsWith("image") ? 
+                    `<img src="${x.fileURL}" class="preview-img">` : ''}
+                
+                ${x.fileURL ? `
+                    <button class="btn-open" onclick="openSecureFile('${x.category || 'Notes'}')">
+                        📖 Open Study Material
+                    </button>
+                ` : ''}
+            </div>
+        `).join('');
+    };
 
-snap.forEach((doc)=>{
-allNotes.push({
-id:doc.id,
-...doc.data()
-});
-});
+    // Render Backend के जरिए फाइल खोलना
+    window.openSecureFile = function(category) {
+        if (!currentUserEmail) return alert("लॉगिन जरूरी है!");
+        // हम 'year' की जगह 'Notes' भेज रहे हैं ताकि बैकएंड समझ सके
+        const url = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(currentUserEmail)}&year=Notes&post=${encodeURIComponent(category)}`;
+        window.open(url, "_blank");
+    };
 
-renderNotes(allNotes);
-
-}catch(error){
-
-box.innerHTML =
-`<div class="empty">Failed to load notes</div>`;
-
-}
-
-}
-
-function renderNotes(arr){
-
-const box = document.getElementById("notesList");
-
-if(arr.length===0){
-box.innerHTML =
-`<div class="empty">No notes found</div>`;
-return;
-}
-
-let html = "";
-
-arr.forEach((x)=>{
-
-const title = safe(x.title);
-const cat = safe(x.category || x.subject || "-");
-const desc = safe(x.description || x.content || "");
-const fileURL = x.fileURL || "";
-const fileType = x.fileType || "";
-
-html += `
-<div class="note">
-
-<h3>${title}</h3>
-
-<div class="meta">📘 ${cat}</div>
-
-${desc ? `<div class="desc">${desc}</div>` : ""}
-
-${fileURL && fileType.startsWith("image")
-? `<img src="${fileURL}" class="preview">`
-: ""}
-
-${fileURL
-? `<a href="${fileURL}" target="_blank" class="btn">Open File</a>`
-: ""}
-
-</div>
-`;
-
-});
-
-box.innerHTML = html;
-
-}
-
-function applyFilter(){
-
-const q = document
-.getElementById("searchInput")
-.value
-.toLowerCase()
-.trim();
-
-const cat = document
-.getElementById("catFilter")
-.value;
-
-const filtered = allNotes.filter((x)=>{
-
-const title = (x.title || "").toLowerCase();
-const desc = (x.description || x.content || "").toLowerCase();
-const category = (x.category || x.subject || "");
-
-const matchText =
-title.includes(q) || desc.includes(q);
-
-const matchCat =
-(cat==="ALL") || (category===cat);
-
-return matchText && matchCat;
-
-});
-
-renderNotes(filtered);
-
-}
-
-document
-.getElementById("searchInput")
-.addEventListener("input",applyFilter);
-
-document
-.getElementById("catFilter")
-.addEventListener("change",applyFilter);
-
-waitFirebase();
+    document.getElementById("searchInput").oninput = renderNotes;
+    document.getElementById("catFilter").onchange = renderNotes;
 
 </script>
-
 </body>
 </html>
