@@ -165,18 +165,41 @@ ${currentIdx !== allQuestions.length - 1
     };
 
     window.checkAns = function(btn, selected, correct) {
-        const btns = document.querySelectorAll('.option');
-        btns.forEach(b => b.disabled = true);
-        const isCorrect = (selected === correct);
-        if(isCorrect) { btn.classList.add('correct'); score++; }
-        else { btn.classList.add('wrong'); btns.forEach(b => { if(b.innerText.includes(correct)) b.classList.add('correct'); }); }
-        quizHistory[currentIdx] = { selected, isCorrect };
-    };
 
-    window.nav = function(dir) {
-        currentIdx += dir;
-        window.renderQuiz();
+    const btns = document.querySelectorAll('.option');
+
+    btns.forEach(b => b.disabled = true);
+
+    // Correct option text निकालो
+    let correctText = correct;
+
+    if(correct.length === 1){
+        const index = correct.charCodeAt(0) - 65;
+        correctText = allQuestions[currentIdx].options[index];
+    }
+
+    const isCorrect =
+        selected.trim().toLowerCase() ===
+        correctText.trim().toLowerCase();
+
+    if(isCorrect){
+        btn.classList.add('correct');
+        score++;
+    } else {
+        btn.classList.add('wrong');
+
+        btns.forEach(b => {
+            if(b.innerText.includes(correctText)){
+                b.classList.add('correct');
+            }
+        });
+    }
+
+    quizHistory[currentIdx] = {
+        selected,
+        isCorrect
     };
+};
 
     window.showFinal = function() {
     document.getElementById("quizDisplay").style.display = "none";
