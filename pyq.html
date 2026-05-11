@@ -140,10 +140,16 @@
                 </div>
                 <div class="btn-row">
                     <button class="btn" style="background:#6c757d; flex:1; ${currentIdx===0?'display:none':''}" onclick="window.nav(-1)">Previous</button>
-                    ${currentIdx === allQuestions.length - 1 
-                        ? `<button class="btn" style="background:var(--success); flex:1;" onclick="window.showFinal()">Submit Result</button>` 
-                        : `<button class="btn" style="background:var(--dark); flex:1;" onclick="window.nav(1)">Next</button>`
-                    }
+                    <button class="btn" 
+    style="background:var(--success); flex:1;" 
+    onclick="window.showFinal()">
+    Submit Result
+</button>
+
+${currentIdx !== allQuestions.length - 1 
+    ? `<button class="btn" style="background:var(--dark); flex:1;" onclick="window.nav(1)">Next</button>` 
+    : ''
+}
                 </div>
             </div>
         `;
