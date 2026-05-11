@@ -553,6 +553,8 @@ window.prevQ = function() {
 };
 
 
+// ===== OLD submitQuiz FUNCTION KO ISSE REPLACE KARO =====
+
 window.submitQuiz = async function() {
 
     let start = Math.floor(current / 10) * 10;
@@ -560,73 +562,188 @@ window.submitQuiz = async function() {
 
     let score = 0;
 
+    let reviewHTML = `
+        <div style="
+            max-width:700px;
+            margin:auto;
+            padding:20px;
+            font-family:Segoe UI;
+        ">
+
+        <h2 style="
+            text-align:center;
+            color:#007bff;
+            margin-bottom:15px;
+        ">
+            📊 Section Review
+        </h2>
+
+        <div style="
+            background:#f1f8ff;
+            padding:15px;
+            border-radius:12px;
+            margin-bottom:20px;
+            text-align:center;
+            font-size:20px;
+            font-weight:bold;
+            color:#2c3e50;
+        ">
+            Questions ${start + 1} - ${end + 1}<br>
+            Score: 0 / ${end - start + 1}
+        </div>
+    `;
+
     for (let i = start; i <= end; i++) {
 
-        if (answers[i] === questions[i].answer) {
+        let q = questions[i];
 
-            score++;
-        }
+        let userAns = answers[i] || "Not Answered";
+
+        let correct = userAns === q.answer;
+
+        if (correct) score++;
+
+        reviewHTML += `
+            <div style="
+                background:#fff;
+                border-radius:12px;
+                padding:15px;
+                margin-bottom:15px;
+                border:2px solid ${correct ? '#28a745' : '#dc3545'};
+                box-shadow:0 3px 10px rgba(0,0,0,0.08);
+            ">
+
+                <div style="
+                    font-weight:bold;
+                    margin-bottom:10px;
+                    color:#2c3e50;
+                ">
+                    Q${i + 1}. ${q.question}
+                </div>
+
+                <div style="
+                    color:${correct ? '#28a745' : '#dc3545'};
+                    font-weight:bold;
+                    margin-bottom:6px;
+                ">
+                    Your Answer: ${userAns}
+                </div>
+
+                <div style="
+                    color:#28a745;
+                    font-weight:bold;
+                ">
+                    Correct Answer: ${q.answer}
+                </div>
+
+            </div>
+        `;
     }
 
-    alert(
-        `Questions ${start + 1} - ${end + 1}\n\n` +
-        `Your Score: ${score} / ${end - start + 1}`
+    reviewHTML = reviewHTML.replace(
+        `Score: 0 / ${end - start + 1}`,
+        `Score: ${score} / ${end - start + 1}`
     );
 
+    reviewHTML += `
+        <div style="text-align:center; margin-top:20px;">
 
-    if (current === questions.length - 1) {
+            <button onclick="closeReview()"
+                style="
+                    background:#007bff;
+                    color:white;
+                    border:none;
+                    padding:14px 30px;
+                    border-radius:10px;
+                    font-size:16px;
+                    font-weight:bold;
+                    cursor:pointer;
+                ">
+                Continue Test
+            </button>
 
-        submitted = true;
+        </div>
 
-        clearInterval(timerInt);
+        </div>
+    `;
 
-        let finalScore = 0;
+    let reviewBox = document.createElement("div");
 
-        questions.forEach((q, i) => {
+    reviewBox.id = "reviewModal";
 
-            if (answers[i] === q.answer) {
+    reviewBox.style = `
+        position:fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,0.7);
+        overflow:auto;
+        z-index:9999;
+        padding:20px;
+    `;
 
-                finalScore++;
+    reviewBox.innerHTML = reviewHTML;
+
+    document.body.appendChild(reviewBox);
+
+    window.closeReview = async function() {
+
+        document.body.removeChild(reviewBox);
+
+        // FINAL RESULT
+        if (current === questions.length - 1) {
+
+            submitted = true;
+
+            clearInterval(timerInt);
+
+            let finalScore = 0;
+
+            questions.forEach((q, i) => {
+
+                if (answers[i] === q.answer) {
+                    finalScore++;
+                }
+            });
+
+            document.getElementById("quizBox")
+                .classList.add("hide");
+
+            document.getElementById("resultArea")
+                .classList.remove("hide");
+
+            document.getElementById("resultScore")
+                .innerText =
+                `${finalScore} / ${questions.length}`;
+
+            if (user) {
+
+                try {
+
+                    await addDoc(collection(db, "results"), {
+
+                        uid: user.uid,
+                        email: user.email,
+                        subject: subject,
+                        score: finalScore,
+                        total: questions.length,
+                        createdAt: serverTimestamp()
+                    });
+
+                } catch (e) {
+
+                    console.error("Error saving result", e);
+                }
             }
-        });
 
-        document.getElementById("quizBox")
-            .classList.add("hide");
+        } else {
 
-        document.getElementById("resultArea")
-            .classList.remove("hide");
-
-        document.getElementById("resultScore")
-            .innerText =
-            `${finalScore} / ${questions.length}`;
-
-        if (user) {
-
-            try {
-
-                await addDoc(collection(db, "results"), {
-
-                    uid: user.uid,
-                    email: user.email,
-                    subject: subject,
-                    score: finalScore,
-                    total: questions.length,
-                    createdAt: serverTimestamp()
-                });
-
-            } catch (e) {
-
-                console.error("Error saving result", e);
-            }
+            current++;
+            render();
         }
-
-    } else {
-
-        current++;
-        render();
-    }
+    };
 };
-
 
 window.goBack = function() {
 
