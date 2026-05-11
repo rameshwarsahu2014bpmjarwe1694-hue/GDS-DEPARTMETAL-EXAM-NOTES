@@ -137,19 +137,15 @@ window.startQuiz = async function(sub) {
     subject = sub;
     msg("लोड हो रहा है: " + sub + "...", "loader");
     
-            try {
-        // Backend se data mangwane ke liye
+    try {
         const response = await fetch(`${BACKEND_URL}/api/questions?subject=${encodeURIComponent(sub)}`);
-        
         if (!response.ok) throw new Error("Network response was not ok");
-        
         questions = await response.json();
 
         if (!questions || questions.length === 0) {
             msg("No questions found for " + sub, "err");
             return;
         }
-
 
         document.getElementById("subjectBox").classList.add("hide");
         document.getElementById("statusBox").classList.add("hide");
@@ -196,7 +192,6 @@ window.render = function() {
     });
     document.getElementById("options").innerHTML = html;
 
-    // Button controls
     document.getElementById("submitBtn").classList.toggle("hide", current !== questions.length - 1);
     document.getElementById("nextBtn").classList.toggle("hide", current === questions.length - 1);
 };
@@ -223,7 +218,7 @@ window.submitQuiz = async function() {
     document.getElementById("resultArea").classList.remove("hide");
     document.getElementById("resultScore").innerText = `${score} / ${questions.length}`;
 
-        if (user) {
+    if (user) {
         try {
             await fetch(`${BACKEND_URL}/api/save-result`, {
                 method: 'POST',
@@ -243,7 +238,7 @@ window.submitQuiz = async function() {
             msg("Result saved locally only.", "err");
         }
     }
-
+}; // <--- Yeh bracket missing tha jo fix kar diya gaya hai
 
 window.goBack = function() {
     if (confirm("Exit test?")) {
@@ -253,9 +248,11 @@ window.goBack = function() {
 
 function msg(t, type) {
     const b = document.getElementById("statusBox");
-    b.className = "status-bar " + type;
-    b.innerText = t;
-    b.classList.remove("hide");
+    if(b) {
+        b.className = "status-bar " + type;
+        b.innerText = t;
+        b.classList.remove("hide");
+    }
 }
 
 function esc(str) { return String(str).replace(/'/g, "\\'"); }
