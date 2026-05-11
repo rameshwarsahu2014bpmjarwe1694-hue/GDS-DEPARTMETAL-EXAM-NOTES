@@ -179,12 +179,136 @@ ${currentIdx !== allQuestions.length - 1
     };
 
     window.showFinal = function() {
-        document.getElementById("quizDisplay").style.display = "none";
-        const rb = document.getElementById("resultBox");
-        rb.style.display = "block";
-        rb.innerHTML = `<h3>📊 Your Final Score</h3><p style="font-size:35px; color:#007bff; margin:15px 0;">${score} / ${allQuestions.length}</p>
-                        <button class="btn" style="background:var(--primary); width:100%;" onclick="location.reload()">Restart Quiz</button>`;
-    };
+    document.getElementById("quizDisplay").style.display = "none";
+
+    const rb = document.getElementById("resultBox");
+    rb.style.display = "block";
+
+    let reviewHTML = "";
+
+    allQuestions.forEach((q, index) => {
+
+        const history = quizHistory[index];
+        const userAns = history ? history.selected : "Not Answered";
+        const isCorrect = history ? history.isCorrect : false;
+
+        reviewHTML += `
+            <div style="
+                border:1px solid #ddd;
+                border-radius:12px;
+                padding:15px;
+                margin-top:15px;
+                text-align:left;
+                background:#fff;
+                box-shadow:0 3px 10px rgba(0,0,0,0.05);
+            ">
+
+                <div style="
+                    font-weight:bold;
+                    margin-bottom:10px;
+                    color:#2c3e50;
+                ">
+                    Q${index + 1}. ${q.question}
+                </div>
+
+                <div style="
+                    padding:10px;
+                    border-radius:8px;
+                    margin-bottom:8px;
+                    background:${isCorrect ? '#d4edda' : '#f8d7da'};
+                    color:${isCorrect ? '#155724' : '#721c24'};
+                    font-weight:bold;
+                ">
+                    Your Answer: ${userAns}
+                </div>
+
+                <div style="
+                    padding:10px;
+                    border-radius:8px;
+                    background:#d1ecf1;
+                    color:#0c5460;
+                    font-weight:bold;
+                ">
+                    Correct Answer: ${q.answer}
+                </div>
+
+                <div style="
+                    margin-top:10px;
+                    font-weight:bold;
+                    color:${isCorrect ? 'green' : 'red'};
+                ">
+                    ${isCorrect ? '✔ Correct' : '✘ Wrong'}
+                </div>
+
+            </div>
+        `;
+    });
+
+    const wrongCount = allQuestions.length - score;
+
+    rb.innerHTML = `
+        <div style="
+            background:linear-gradient(135deg,#007bff,#6610f2);
+            color:white;
+            padding:25px;
+            border-radius:15px;
+            margin-bottom:20px;
+        ">
+            <h2 style="margin-bottom:15px;">📊 Quiz Result</h2>
+
+            <div style="
+                font-size:42px;
+                font-weight:bold;
+                margin-bottom:10px;
+            ">
+                ${score} / ${allQuestions.length}
+            </div>
+
+            <div style="
+                display:flex;
+                justify-content:space-around;
+                margin-top:20px;
+                flex-wrap:wrap;
+                gap:10px;
+            ">
+                <div style="
+                    background:rgba(255,255,255,0.2);
+                    padding:12px 18px;
+                    border-radius:10px;
+                ">
+                    ✔ Correct: ${score}
+                </div>
+
+                <div style="
+                    background:rgba(255,255,255,0.2);
+                    padding:12px 18px;
+                    border-radius:10px;
+                ">
+                    ✘ Wrong: ${wrongCount}
+                </div>
+            </div>
+        </div>
+
+        <h3 style="
+            margin-bottom:15px;
+            color:#2c3e50;
+        ">
+            Answer Review
+        </h3>
+
+        ${reviewHTML}
+
+        <button class="btn"
+            style="
+                background:var(--primary);
+                width:100%;
+                margin-top:25px;
+            "
+            onclick="location.reload()">
+            Restart Quiz
+        </button>
+    `;
+};
 
     document.getElementById("openPdfBtn").onclick = () => {
         const year = document.getElementById("yearSelect").value;
