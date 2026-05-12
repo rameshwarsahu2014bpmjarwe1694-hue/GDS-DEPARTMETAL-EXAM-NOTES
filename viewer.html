@@ -203,32 +203,48 @@ pdfjsLib.getDocument(pdfUrl).promise.then(async pdf => {
     const container =
     document.getElementById("pdf-container");
 
-    for(let pageNum=1; pageNum<=pdf.numPages; pageNum++){
+   for(let pageNum=1; pageNum<=Math.min(pdf.numPages, 3); pageNum++){
 
-        const page =
-        await pdf.getPage(pageNum);
+        let currentPage = 4;
 
-        const viewport =
-        page.getViewport({ scale: 1.5 });
+container.addEventListener("scroll", async () => {
 
-        const canvas =
-        document.createElement("canvas");
+    if(
+        container.scrollTop +
+        container.clientHeight >=
+        container.scrollHeight - 500
+    ){
 
-        const context =
-        canvas.getContext("2d");
+        if(currentPage <= pdf.numPages){
 
-        canvas.height = viewport.height;
+            const page =
+            await pdf.getPage(currentPage);
 
-        canvas.width = viewport.width;
+            const viewport =
+            page.getViewport({ scale: 1.1 });
 
-        container.appendChild(canvas);
+            const canvas =
+            document.createElement("canvas");
 
-        await page.render({
-            canvasContext: context,
-            viewport: viewport
-        }).promise;
+            const context =
+            canvas.getContext("2d");
 
+            canvas.height = viewport.height;
+
+            canvas.width = viewport.width;
+
+            container.appendChild(canvas);
+
+            await page.render({
+                canvasContext: context,
+                viewport: viewport
+            }).promise;
+
+            currentPage++;
+        }
     }
+
+});
 
 }).catch(err => {
 
