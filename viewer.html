@@ -112,7 +112,23 @@ canvas{
 </head>
 
 <body>
-
+<div id="loader"
+style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#111;
+display:flex;
+justify-content:center;
+align-items:center;
+color:white;
+font-size:22px;
+z-index:999999;
+">
+Loading Protected PDF...
+</div>
 <div class="topbar">
 Protected PDF Viewer
 </div>
@@ -221,7 +237,7 @@ container.addEventListener("scroll", async () => {
             await pdf.getPage(currentPage);
 
             const viewport =
-            page.getViewport({ scale: 1.1 });
+            page.getViewport({ scale: 0.9 });
 
             const canvas =
             document.createElement("canvas");
@@ -240,6 +256,8 @@ container.addEventListener("scroll", async () => {
                 viewport: viewport
             }).promise;
 
+      document.getElementById("loader")
+.style.display = "none";
             currentPage++;
         }
     }
