@@ -27,26 +27,74 @@ canvas{
     display:block;
     margin:10px auto;
     max-width:100%;
-}
 
+    position:relative;
+
+    z-index:1;
+}
 .watermark{
     position:fixed;
+
     top:50%;
     left:50%;
-    transform:translate(-50%,-50%) rotate(-30deg);
 
-    font-size:45px;
+    transform:
+    translate(-50%,-50%)
+    rotate(-30deg);
 
-    color:rgba(255,255,255,0.08);
+    font-size:42px;
 
-    z-index:9999;
+    font-weight:bold;
+
+    color:rgba(255,0,0,0.22);
+
+    z-index:999999;
 
     pointer-events:none;
 
     user-select:none;
 
     text-align:center;
-}
+
+    width:100%;
+
+    line-height:1.8;
+
+    text-shadow:
+    2px 2px 4px rgba(0,0,0,0.4);
+    .watermark{
+    position:fixed;
+
+    top:50%;
+    left:50%;
+
+    transform:
+    translate(-50%,-50%)
+    rotate(-30deg);
+
+    font-size:42px;
+
+    font-weight:bold;
+
+    color:rgba(255,0,0,0.22);
+
+    z-index:999999;
+
+    pointer-events:none;
+
+    user-select:none;
+
+    text-align:center;
+
+    width:100%;
+
+    line-height:1.8;
+
+    text-shadow:
+    2px 2px 4px rgba(0,0,0,0.4);
+
+    mix-blend-mode:screen;
+    }
 
 .topbar{
     position:fixed;
