@@ -1,22 +1,25 @@
 {
-  "name": "GDS Departmental Exam Notes",
+  "name": "GDS Departmental Exam Study Hub",
   "short_name": "GDS Notes",
-  "description": "GDS Departmental Exam Notes, Mock Tests and Study Material for India Post GDS Exam",
+  "description": "Complete GDS Departmental Exam Notes, Mock Tests, PDF Study Material and Practice Platform",
   "start_url": "./",
   "scope": "/GDS-DEPARTMETAL-EXAM-NOTES/",
   "display": "standalone",
-  "background_color": "#2c3e50",
-  "theme_color": "#18bc9c",
+  "background_color": "#ffffff",
+  "theme_color": "#8d151a",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
