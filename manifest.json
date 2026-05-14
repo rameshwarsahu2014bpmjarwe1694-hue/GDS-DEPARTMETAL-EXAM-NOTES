@@ -1,22 +1,22 @@
 {
-  "dir": "auto",
+  "dir": "ltr",
   "name": "RAMESHWAR SAHU GDS DEPARTMENTAL EXAM APP",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#c73737",
+  "theme_color": "#b63030",
   "display": "fullscreen",
   "start_url": "/",
-  "scope": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io",
-  "id": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/EmtTq3KaKMzlDsujxnlO",
+  "scope": "/",
+  "id": "io.gdsnotes.rshtwa",
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "https://oouxkyuexvzylckxeeks.supabase.co/storage/v1/object/public/pgsstoragebucket/VMq58JF1v0swoISGU3S6/dFJLoPnjqqFBBsp.png",
-      "sizes": "512x512",
+      "src": "rameshwarsahu2014bpmjarwe1694-hue.github.io/icon-192.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://oouxkyuexvzylckxeeks.supabase.co/storage/v1/object/public/pgsstoragebucket/VMq58JF1v0swoISGU3S6/iTsHAIumIqcZMyp.png",
+      "src": "rameshwarsahu2014bpmjarwe1694-hue.github.io/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -33,9 +33,15 @@
     }
   ],
   "short_name": "GDS notes",
-  "orientation": "portrait-primary",
   "lang": "hi",
+  "orientation": "portrait",
+  "display_override": [
+    "fullscreen",
+    "standalone",
+    "window-controls-overlay"
+  ],
   "categories": [
     "education"
-  ]
+  ],
+  "description": "GDS DEPARTMENTAL EXAM preparation app"
 }
