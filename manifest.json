@@ -1,58 +1,40 @@
 {
-  "id": "com.io.gdsnotes.rshtwa",
+  "dir": "auto",
   "name": "RAMESHWAR SAHU GDS DEPARTMENTAL EXAM APP",
-  "short_name": "GDS Notes",
-  "description": "Complete GDS Departmental Exam Notes",
-  "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "display_override": [
-    "fullscreen",
-    "standalone",
-    "window-controls-overlay"
-  ],
   "background_color": "#ffffff",
-  "theme_color": "#8d151a",
-  "orientation": "portrait-primary",
-  "lang": "hi",
-  "dir": "ltr",
-  "screenshots": [
-    {
-      "src": "Screenshots1dashboard.jpg",
-      "sizes": "720x1604",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "GDS Notes Home Screen"
-    },
-    {
-      "src": "Screenshotpyq.jpg",
-      "sizes": "720x1604",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Study Material View"
-    },
-    {
-      "src": "Screenshotsquiz.jpg",
-      "sizes": "720x1604",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "mock test View"
-    }
-  ],
+  "theme_color": "#ffffff",
+  "display": "fullscreen",
+  "start_url": "/",
+  "scope": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io",
+  "id": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/EmtTq3KaKMzlDsujxnlO",
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
+      "src": "https://oouxkyuexvzylckxeeks.supabase.co/storage/v1/object/public/pgsstoragebucket/VMq58JF1v0swoISGU3S6/dFJLoPnjqqFBBsp.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "https://oouxkyuexvzylckxeeks.supabase.co/storage/v1/object/public/pgsstoragebucket/VMq58JF1v0swoISGU3S6/iTsHAIumIqcZMyp.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+pwa",
+      "url": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/?launchedfrom=homescreen&amp;pwaprotocolredirect=%s"
+    },
+    {
+      "protocol": "web+rameshwarsahugdsdepartmentalexamapp",
+      "url": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/?launchedfrom=homescreen&amp;pwaprotocolredirect=%s"
+    }
+  ],
+  "short_name": "GDS notes",
+  "orientation": "portrait-primary",
+  "lang": "hi",
   "categories": [
     "education"
   ]
