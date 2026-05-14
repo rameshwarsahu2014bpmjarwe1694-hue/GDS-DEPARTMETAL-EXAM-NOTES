@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<head>
+
 <meta charset="UTF-8">
 
 <title>RAMESHWAR SAHU GDS Departmental Exam Study Hub</title>
@@ -9,18 +9,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#8d151a">
 
-<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="manifest" href="/manifest.json">
 
 <!-- Icons -->
-<link rel="icon" href="icon-192.png">
-<link rel="shortcut icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
-
-</head>
-
-</head>
-<body>
+<link rel="icon" href="/icon-192.png">
+<link rel="shortcut icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
 
 <style>
 *{
@@ -188,7 +187,6 @@ margin-top:10px;
 width:180px;
 height:180px;
 }
-}
 
 .hero h1{
 font-size:24px;
@@ -203,13 +201,9 @@ width:100%;
 max-width:260px;
 }
 
-.logo{
-width:85px;
-height:85px;
-}
-
 }
 </style>
+
 </head>
 
 <body>
@@ -270,7 +264,7 @@ height:85px;
 
 </div>
 
-<!-- SAME DISCLAIMER -->
+<!-- DISCLAIMER -->
 <div class="disclaimer">
 <h3>⚠️ डिस्क्लेमर (Disclaimer)</h3>
 <p>
@@ -285,7 +279,7 @@ height:85px;
 
 <p>Share This Website on WhatsApp</p>
 
-<a href="https://api.whatsapp.com/send?text=Check%20this%20useful%20website:%20https://rameshwarsahu2014bpmjarwe1694-hue.github.io/GDS-DEPARTMETAL-EXAM-NOTES/" target="_blank">
+<a href="https://api.whatsapp.com/send?text=Check%20this%20useful%20website:%20https://rameshwarsahu2014bpmjarwe1694-hue.github.io/" target="_blank">
 
 <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" class="footer-whatsapp">
 
@@ -294,11 +288,14 @@ height:85px;
 <p style="margin-top:15px;">© 2026 Rameshwar Sahu | Hosted on GitHub</p>
 <p>Founded & Managed by Rameshwar Prasad Sahu</p>
 <p>© All Rights Reserved.</p>
+
 </footer>
- <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-  }
-</script> 
+
+<script>
+if ('serviceWorker' in navigator) {
+navigator.serviceWorker.register('/sw.js');
+}
+</script>
+
 </body>
 </html>
