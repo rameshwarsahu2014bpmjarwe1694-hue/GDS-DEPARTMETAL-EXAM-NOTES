@@ -6,7 +6,7 @@
   "start_url": "/",
   "scope": "/",
   "display": "fullscreen",
-  "display_override": ["fullscreen", "standalone"],
+  "display_override": ["fullscreen", "standalone", "window-controls-overlay"],
   "background_color": "#ffffff",
   "theme_color": "#8d151a",
   "orientation": "portrait-primary",
@@ -40,7 +40,7 @@
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
