@@ -1,3 +1,6 @@
+// Progressier ka script sabse upar add kar diya gaya hai
+importScripts("https://progressier.app/EmtTq3KaKMzlDsujxnlO/sw.js");
+
 const CACHE_NAME = "gds-cache-v3";
 
 const urlsToCache = [
@@ -16,7 +19,6 @@ self.addEventListener("install", (event) => {
       return cache.addAll(urlsToCache);
     })
   );
-
   self.skipWaiting();
 });
 
@@ -33,36 +35,28 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
-
   self.clients.claim();
 });
 
 // FETCH
 self.addEventListener("fetch", (event) => {
-
   if (event.request.method !== "GET") return;
 
   event.respondWith(
     caches.match(event.request).then((response) => {
-
       if (response) {
         return response;
       }
-
       return fetch(event.request)
         .then((networkResponse) => {
-
           return caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, networkResponse.clone());
             return networkResponse;
           });
-
         })
         .catch(() => {
           return caches.match("/index.html");
         });
-
     })
   );
-
 });
