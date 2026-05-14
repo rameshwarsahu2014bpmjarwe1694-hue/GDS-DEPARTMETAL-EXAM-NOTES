@@ -1,12 +1,16 @@
 {
-  "id": "io.gdsnotes.rshtwa",
+  "id": "com.io.gdsnotes.rshtwa",
   "name": "RAMESHWAR SAHU GDS DEPARTMENTAL EXAM APP",
   "short_name": "GDS Notes",
   "description": "Complete GDS Departmental Exam Notes",
   "start_url": "/",
   "scope": "/",
   "display": "fullscreen",
-  "display_override": ["fullscreen", "standalone", "window-controls-overlay"],
+  "display_override": [
+    "fullscreen",
+    "standalone",
+    "window-controls-overlay"
+  ],
   "background_color": "#ffffff",
   "theme_color": "#8d151a",
   "orientation": "portrait-primary",
@@ -48,5 +52,8 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "categories": [
+    "education"
   ]
 }
