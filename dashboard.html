@@ -1,214 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Candidate Dashboard</title>
-
 <style>
-body{
-margin:0;
-font-family:Arial,sans-serif;
-background:#f5f5f5;
-}
-
-.topbar{
-background:#b30000;
-color:#fff;
-padding:15px;
-text-align:center;
-font-size:22px;
-font-weight:bold;
-}
-
-.container{
-padding:20px;
-max-width:1000px;
-margin:auto;
-}
-
-.welcome{
-background:#fff;
-padding:18px;
-border-radius:12px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
-margin-bottom:20px;
-font-size:18px;
-font-weight:bold;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:14px;
-margin-top:10px;
-}
-
-.card{
-background:linear-gradient(135deg,#ffffff,#f8f8f8);
-padding:18px 12px;
-border-radius:16px;
-text-align:center;
-font-weight:bold;
-font-size:16px;
-box-shadow:0 6px 14px rgba(0,0,0,0.10);
-text-decoration:none;
-color:#111;
-display:flex;
-align-items:center;
-justify-content:center;
-min-height:70px;
-transition:0.3s;
-}
-
-.card:hover{
-transform:translateY(-3px);
-}
-
-@media(min-width:700px){
-.grid{
-grid-template-columns:repeat(3,1fr);
-}
-}
-
-.logout{
-margin-top:25px;
-display:block;
-background:#111;
-color:#fff;
-padding:12px;
-text-align:center;
-border-radius:10px;
-text-decoration:none;
-font-weight:bold;
-cursor:pointer;
-}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;}
+.topbar{background:#b30000;color:#fff;padding:15px;text-align:center;font-size:20px;font-weight:bold;}
+.container{max-width:1000px;margin:auto;padding:20px;}
+.cardGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.card{background:#fff;padding:16px;border-radius:14px;text-align:center;text-decoration:none;color:#111;font-weight:bold;box-shadow:0 4px 10px rgba(0,0,0,0.08);transition:0.2s;display:flex;align-items:center;justify-content:center;min-height:70px;}
+.card:hover{transform:translateY(-3px);}
+@media(min-width:768px){.cardGrid{grid-template-columns:repeat(3,1fr);}}
+.headerRow{display:flex;justify-content:space-between;align-items:center;}
+.userBox{display:flex;align-items:center;gap:10px;}
+.userBox img{width:40px;height:40px;border-radius:50%;border:2px solid #fff;object-fit:cover;}
+.logout{margin-top:20px;background:#111;color:#fff;text-align:center;padding:12px;border-radius:10px;cursor:pointer;}
+.welcome{background:#fff;padding:15px;border-radius:12px;margin-bottom:15px;font-weight:bold;}
 </style>
 </head>
+<body><div class="topbar">
+  <div class="headerRow">
+    <div>Candidate Dashboard</div>
+    <div class="userBox">
+      <img id="photo" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" />
+      <span id="nameTop"></span>
+    </div>
+  </div>
+</div><div class="container"><div class="welcome" id="welcome">Loading user...</div><div class="cardGrid">
+  <a class="card" href="syllabus.html">📘 Syllabus</a>
+  <a class="card" href="notes.html">📚 Notes</a>
+  <a class="card" href="quiz.html">📝 Mock Test</a>
+  <a class="card" href="pyq.html">📄 PYQ</a>
+  <a class="card" href="result-history.html">🏆 Results</a>
+  <a class="card" href="profile.html">👤 Profile</a>
+</div><div class="logout" onclick="logoutUser()">🚪 Logout</div></div><script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<body>
+// 🔴 YOUR FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 
-<div class="topbar">
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-<div style="
-display:flex;
-align-items:center;
-justify-content:space-between;
-">
+// ✅ SESSION PERSISTENCE
+await setPersistence(auth, browserLocalPersistence);
 
-<div>
-Candidate Dashboard
-</div>
-
-<div style="
-display:flex;
-align-items:center;
-gap:10px;
-">
-
-<img id="candidatePhoto"
-src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-style="
-width:42px;
-height:42px;
-border-radius:50%;
-object-fit:cover;
-border:2px solid #fff;
-">
-
-<span id="candidateTopName"></span>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="container">
-
-<div class="welcome" id="welcomeBox">
-Welcome Candidate 👋
-</div>
-
-<div class="grid">
-<a href="syllabus.html" class="card">📘 Syllabus</a>
-<a href="notes.html" class="card">📚 Notes</a>
-<a href="quiz.html" class="card">📝 Mock Test</a>
-<a href="pyq.html" class="card">📄 PYQ</a>
-<a href="result-history.html" class="card">🏆 Result</a>
-<a href="profile.html" class="card">
-👤 My Profile
-</a>
-</div>
-
-<a href="#" onclick="logout()" class="logout">🚪 Logout</a>
-
-</div>
-
-<script type="module" src="firebase.js"></script>
-<script defer src="script.js"></script>
-
-<script type="module">
-  import {
-doc,
-getDoc
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {
-onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-function waitForFirebase(){
-if(window.auth){
-checkLogin();
-}else{
-setTimeout(waitForFirebase,300);
-}
-}
-
-function checkLogin(){
-
-onAuthStateChanged(window.auth, (user) => {
-
-if(!user){
-alert("Please login first.");
-window.location.href = "login.html";
-return;
-}
-const ref =
-doc(window.db,"candidates",user.uid);
-
-const snap =
-await getDoc(ref);
-
-if(snap.exists()){
-
-const data = snap.data();
-
-if(data.photo){
-
-document.getElementById(
-"candidatePhoto"
-).src = data.photo;
-
-}
-
-document.getElementById(
-"candidateTopName"
-).innerText =
-data.name || "Candidate";
-
+// 🔐 AUTH CHECK
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
   }
-let name = user.email.split("@")[0];
-document.getElementById("welcomeBox").innerHTML =
-"Welcome " + name + " 👋";
 
+  const snap = await getDoc(doc(db, "candidates", user.uid));
+
+  if (snap.exists()) {
+    const data = snap.data();
+
+    document.getElementById("nameTop").innerText = data.name || "Candidate";
+    document.getElementById("welcome").innerText = `Welcome ${data.name || user.email}`;
+
+    if (data.photo) {
+      document.getElementById("photo").src = data.photo;
+    }
+  } else {
+    document.getElementById("welcome").innerText = "Welcome Candidate";
+  }
 });
 
-}
-
-waitForFirebase();
-</script>
-
-</body>
+// 🚪 LOGOUT
+window.logoutUser = async function () {
+  await signOut(auth);
+  window.location.href = "login.html";
+};
+</script></body>
 </html>
