@@ -111,9 +111,7 @@ if (!name || !mobile || !email || !password) {
 alert("Fill all fields");
 return;
 }
-if (!name.trim()) return alert("Name required");
-if (!mobile.trim()) return alert("Mobile required");
-if (!email.trim()) return alert("Email required");
+
 waitForFirebase(async function () {
 
 try {
@@ -126,14 +124,12 @@ const uid = userCredential.user.uid;
 const { doc, setDoc } = await import(
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
 );
-const photo =
-document.getElementById("previewPhoto").src;
+
 await setDoc(doc(window.db, "candidates", uid), {
 name: name,
 mobile: mobile,
 email: email,
 uid: uid,
-photo: photo,
 createdAt: new Date().toISOString()
 });
 
@@ -141,13 +137,25 @@ alert("Registration Successful");
 window.location.href = "login.html";
 
 } catch (error) {
-alert(error.message);
+
+if (error.code === "auth/email-already-in-use") {
+alert("This email is already registered. Please login.");
+} 
+else if (error.code === "auth/invalid-email") {
+alert("Invalid email format");
+} 
+else if (error.code === "auth/weak-password") {
+alert("Password must be at least 6 characters");
+} 
+else {
+alert("Error: " + error.message);
+}
+
 }
 
 });
 
 };
-
 /* =========================
 LOGOUT
 ========================= */
