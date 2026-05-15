@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candidate Profile Card</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#001f4d,#003366,#0d1b2a);
+    overflow:hidden;
+    padding:20px;
+}
+
+/* Background Glow */
+body::before{
+    content:"";
+    position:absolute;
+    width:500px;
+    height:500px;
+    background:radial-gradient(circle,#00c3ff55,transparent 70%);
+    top:-100px;
+    left:-100px;
+}
+
+body::after{
+    content:"";
+    position:absolute;
+    width:500px;
+    height:500px;
+    background:radial-gradient(circle,#ff006655,transparent 70%);
+    bottom:-100px;
+    right:-100px;
+}
+
+/* Profile Card */
+.profile-card{
+    width:360px;
+    padding:30px 25px;
+    border-radius:30px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(18px);
+    border:1px solid rgba(255,255,255,0.15);
+    box-shadow:
+        0 15px 35px rgba(0,0,0,0.4),
+        inset 0 0 10px rgba(255,255,255,0.1);
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+    animation:floatCard 4s ease-in-out infinite;
+}
+
+/* Animated Border */
+.profile-card::before{
+    content:"";
+    position:absolute;
+    inset:-3px;
+    border-radius:30px;
+    background:linear-gradient(
+        45deg,
+        #00f0ff,
+        #ff00ea,
+        #00ff99,
+        #ffd500
+    );
+    z-index:-1;
+    animation:borderMove 5s linear infinite;
+    background-size:300% 300%;
+}
+
+@keyframes borderMove{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+
+@keyframes floatCard{
+    0%,100%{
+        transform:translateY(0px);
+    }
+    50%{
+        transform:translateY(-10px);
+    }
+}
+
+/* Profile Image */
+.profile-img{
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    border:5px solid #fff;
+    object-fit:cover;
+    box-shadow:
+        0 0 25px #00c3ff,
+        0 0 45px #ff00ea;
+    transition:0.5s;
+}
+
+.profile-img:hover{
+    transform:scale(1.08) rotate(3deg);
+}
+
+/* Candidate Name */
+.name{
+    margin-top:20px;
+    font-size:34px;
+    font-weight:700;
+    letter-spacing:1px;
+    background:linear-gradient(45deg,#00f0ff,#ff00ea,#ffd500);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    text-shadow:
+        0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* Role */
+.role{
+    color:#ddd;
+    margin-top:8px;
+    font-size:17px;
+    letter-spacing:1px;
+}
+
+/* Change Name Button */
+.edit-btn{
+    margin-top:15px;
+    padding:10px 20px;
+    border:none;
+    border-radius:30px;
+    background:linear-gradient(45deg,#00c3ff,#ff00ea);
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.edit-btn:hover{
+    transform:scale(1.05);
+}
+
+/* Stats */
+.stats{
+    display:flex;
+    justify-content:space-between;
+    margin-top:30px;
+    gap:10px;
+}
+
+.stat-box{
+    flex:1;
+    background:rgba(255,255,255,0.08);
+    padding:15px 10px;
+    border-radius:18px;
+    transition:0.4s;
+    border:1px solid rgba(255,255,255,0.1);
+}
+
+.stat-box:hover{
+    transform:translateY(-8px);
+    background:rgba(255,255,255,0.15);
+}
+
+.stat-number{
+    font-size:24px;
+    font-weight:700;
+    color:#fff;
+}
+
+.stat-label{
+    color:#ccc;
+    font-size:13px;
+    margin-top:5px;
+}
+
+/* Buttons */
+.btn-group{
+    margin-top:30px;
+    display:flex;
+    gap:15px;
+}
+
+.btn{
+    flex:1;
+    padding:13px;
+    border:none;
+    border-radius:50px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.4s;
+}
+
+.follow-btn{
+    background:linear-gradient(45deg,#00c3ff,#0066ff);
+    color:#fff;
+    box-shadow:0 5px 15px rgba(0,195,255,0.4);
+}
+
+.message-btn{
+    background:linear-gradient(45deg,#ff0066,#ff4d00);
+    color:#fff;
+    box-shadow:0 5px 15px rgba(255,0,102,0.4);
+}
+
+.btn:hover{
+    transform:scale(1.05);
+}
+
+/* Views */
+.views{
+    margin-top:25px;
+    color:#fff;
+    font-size:16px;
+    background:rgba(255,255,255,0.08);
+    padding:12px;
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,0.1);
+}
+
+.views span{
+    color:#00f0ff;
+    font-weight:700;
+    font-size:22px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="profile-card">
+
+    <!-- Profile Image -->
+    <img src="https://i.imgur.com/8Km9tLL.jpg" class="profile-img" id="profileImage">
+
+    <!-- Candidate Name -->
+    <h1 class="name" id="candidateName">RAMESHWAR SAHU</h1>
+
+    <!-- Role -->
+    <p class="role">GDS Departmental Exam Candidate</p>
+
+    <!-- Change Name -->
+    <button class="edit-btn" onclick="changeName()">
+        Change Name
+    </button>
+
+    <!-- Stats -->
+    <div class="stats">
+
+        <div class="stat-box">
+            <div class="stat-number">125</div>
+            <div class="stat-label">Mock Tests</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-number">98%</div>
+            <div class="stat-label">Accuracy</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-number">1st</div>
+            <div class="stat-label">Rank</div>
+        </div>
+
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-group">
+        <button class="btn follow-btn">Follow</button>
+        <button class="btn message-btn">Message</button>
+    </div>
+
+    <!-- Views -->
+    <div class="views">
+        Total Views :
+        <span id="viewCount">0</span>
+    </div>
+
+</div>
+
+<script>
+
+/* =========================
+   Dynamic View Counter
+========================= */
+
+let count = localStorage.getItem("profileViews");
+
+if(count === null){
+    count = 1;
+}else{
+    count = parseInt(count) + 1;
+}
+
+localStorage.setItem("profileViews", count);
+
+document.getElementById("viewCount").innerText = count;
+
+
+/* =========================
+   Load Saved Name
+========================= */
+
+let savedName = localStorage.getItem("candidateName");
+
+if(savedName){
+    document.getElementById("candidateName").innerText = savedName;
+}
+
+
+/* =========================
+   Change Candidate Name
+========================= */
+
+function changeName(){
+
+    let newName = prompt("Enter Candidate Name");
+
+    if(newName && newName.trim() !== ""){
+
+        document.getElementById("candidateName").innerText = newName;
+
+        localStorage.setItem("candidateName", newName);
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
