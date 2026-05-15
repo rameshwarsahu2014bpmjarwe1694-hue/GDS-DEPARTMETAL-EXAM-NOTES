@@ -10,141 +10,327 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <link rel="manifest" href="https://rameshwarsahu2014bpmjarwe1694-hue.github.io/manifest.json">
+    <!-- UPDATED PATH -->
+    <link rel="manifest" href="/gdsnotes/manifest.json">
 
-    <link rel="icon" href="/icon-192.png">
-    <link rel="shortcut icon" href="/icon-192.png">
-    <link rel="apple-touch-icon" href="/icon-192.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
+    <link rel="icon" href="/gdsnotes/icon-192.png">
+    <link rel="shortcut icon" href="/gdsnotes/icon-192.png">
+    <link rel="apple-touch-icon" href="/gdsnotes/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/gdsnotes/icon-512.png">
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
         body { background: #f4f6fb; color: #222; }
-        /* HERO SECTION */
-        .hero { background: linear-gradient(135deg,#8d151a,#c62828,#0d47a1); padding: 35px 15px; text-align: center; color: #fff; }
-        .hero-box { max-width: 900px; margin: auto; }
-        .logo { width: 230px; height: 230px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 6px 20px rgba(0,0,0,0.25); margin-bottom: 15px; }
-        .hero h1 { font-size: 32px; margin-bottom: 10px; font-weight: bold; }
-        .hero p { font-size: 17px; margin: 6px 0; opacity: 0.95; }
-        /* BUTTONS */
-        .btn-group { margin-top: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
-        .btn { padding: 14px 22px; border: none; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 16px; transition: 0.3s; min-width: 180px; display: inline-block; text-align: center; }
-        .btn:hover { transform: translateY(-3px); }
-        .btn-login { background: #fff; color: #8d151a; }
-        .btn-register { background: #ffd600; color: #000; }
-        .btn-admin { background: #111; color: #fff; }
-        /* CONTACT */
-        .contact { background: #fff; padding: 12px; text-align: center; font-size: 15px; border-bottom: 1px solid #ddd; }
-        .contact span { display: inline-block; margin: 6px 12px; font-weight: bold; }
-        /* FEATURES */
-        .section { max-width: 1000px; margin: auto; padding: 30px 15px; }
-        .cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 18px; margin-top: 20px; }
-        .card { background: #fff; padding: 22px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); text-align: center; transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); }
-        .card h3 { color: #8d151a; margin-bottom: 10px; }
-        /* DISCLAIMER */
-        .disclaimer { background: #fff3f3; border-left: 5px solid #8d151a; padding: 18px; margin-top: 30px; border-radius: 8px; line-height: 1.7; }
-        /* FOOTER */
-        footer { background: #111; color: #fff; text-align: center; padding: 25px 15px; margin-top: 40px; }
-        .footer-whatsapp { width: 42px; margin-top: 10px; }
-        @media(max-width:768px) { .logo { width: 180px; height: 180px; } .hero h1 { font-size: 24px; } .hero p { font-size: 15px; } .btn { width: 100%; max-width: 260px; } }
+
+        .hero {
+            background: linear-gradient(135deg,#8d151a,#c62828,#0d47a1);
+            padding: 35px 15px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .hero-box {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .logo {
+            width: 230px;
+            height: 230px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #fff;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            margin-bottom: 15px;
+        }
+
+        .hero h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .hero p {
+            font-size: 17px;
+            margin: 6px 0;
+            opacity: 0.95;
+        }
+
+        .btn-group {
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 14px 22px;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.3s;
+            min-width: 180px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .btn-login {
+            background: #fff;
+            color: #8d151a;
+        }
+
+        .btn-register {
+            background: #ffd600;
+            color: #000;
+        }
+
+        .btn-admin {
+            background: #111;
+            color: #fff;
+        }
+
+        .contact {
+            background: #fff;
+            padding: 12px;
+            text-align: center;
+            font-size: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .contact span {
+            display: inline-block;
+            margin: 6px 12px;
+            font-weight: bold;
+        }
+
+        .section {
+            max-width: 1000px;
+            margin: auto;
+            padding: 30px 15px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #8d151a;
+            margin-bottom: 10px;
+        }
+
+        .disclaimer {
+            background: #fff3f3;
+            border-left: 5px solid #8d151a;
+            padding: 18px;
+            margin-top: 30px;
+            border-radius: 8px;
+            line-height: 1.7;
+        }
+
+        footer {
+            background: #111;
+            color: #fff;
+            text-align: center;
+            padding: 25px 15px;
+            margin-top: 40px;
+        }
+
+        .footer-whatsapp {
+            width: 42px;
+            margin-top: 10px;
+        }
+
+        @media(max-width:768px) {
+            .logo {
+                width: 180px;
+                height: 180px;
+            }
+
+            .hero h1 {
+                font-size: 24px;
+            }
+
+            .hero p {
+                font-size: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 260px;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-    <section class="hero">
-        <div class="hero-box">
-            <img src="RSH.png?v=3" class="logo" alt="Logo">
-            <h1>RAMESHWAR SAHU GDS DEPARTMENTAL EXAM STUDY HUB</h1>
-            <p>Welcome to India’s Best GDS Preparation Platform</p>
-            <p>Crack GDS DEPARTMENTAL Exam With Smart Study</p>
-            <div class="btn-group">
-                <a href="login.html" class="btn btn-login">Candidate Login</a>
-                <a href="register.html" class="btn btn-register">Register</a>
-                <a href="admin.html" class="btn btn-admin">Admin Login</a>
-            </div>
-        </div>
-    </section>
+<section class="hero">
+    <div class="hero-box">
+        <img src="/gdsnotes/RSH.png?v=3" class="logo" alt="Logo">
 
-    <div class="contact">
-        <span>📞 Contact Us: +91 8963999086</span>
-        <span>🟢 WhatsApp: 8963999086</span>
-        <span>📧 E-mail: gdsdepartmentalstudysupport@gmail.com</span>
+        <h1>RAMESHWAR SAHU GDS DEPARTMENTAL EXAM STUDY HUB</h1>
+
+        <p>Welcome to India’s Best GDS Preparation Platform</p>
+
+        <p>Crack GDS DEPARTMENTAL Exam With Smart Study</p>
+
+        <div class="btn-group">
+            <a href="/gdsnotes/login.html" class="btn btn-login">Candidate Login</a>
+
+            <a href="/gdsnotes/register.html" class="btn btn-register">Register</a>
+
+            <a href="/gdsnotes/admin.html" class="btn btn-admin">Admin Login</a>
+        </div>
+    </div>
+</section>
+
+<div class="contact">
+    <span>📞 Contact Us: +91 8963999086</span>
+    <span>🟢 WhatsApp: 8963999086</span>
+    <span>📧 E-mail: gdsdepartmentalstudysupport@gmail.com</span>
+</div>
+
+<section class="section">
+
+    <h2 style="text-align:center;color:#8d151a;">Why Choose Us?</h2>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>📘 Updated Notes</h3>
+            <p>Latest syllabus based notes for MTS, Postman & PA/SA exam.</p>
+        </div>
+
+        <div class="card">
+            <h3>📝 Mock Tests</h3>
+            <p>Practice tests with score checking and result history.</p>
+        </div>
+
+        <div class="card">
+            <h3>📚 PDF Study Material</h3>
+            <p>Easy downloadable study content and PO Guide topics.</p>
+        </div>
+
+        <div class="card">
+            <h3>🚀 Smart Preparation</h3>
+            <p>Simple and fast learning platform for departmental exam.</p>
+        </div>
+
     </div>
 
-    <section class="section">
-        <h2 style="text-align:center;color:#8d151a;">Why Choose Us?</h2>
-        <div class="cards">
-            <div class="card">
-                <h3>📘 Updated Notes</h3>
-                <p>Latest syllabus based notes for MTS, Postman & PA/SA exam.</p>
-            </div>
-            <div class="card">
-                <h3>📝 Mock Tests</h3>
-                <p>Practice tests with score checking and result history.</p>
-            </div>
-            <div class="card">
-                <h3>📚 PDF Study Material</h3>
-                <p>Easy downloadable study content and PO Guide topics.</p>
-            </div>
-            <div class="card">
-                <h3>🚀 Smart Preparation</h3>
-                <p>Simple and fast learning platform for departmental exam.</p>
-            </div>
-        </div>
+    <div class="disclaimer">
+        <h3>⚠️ डिस्क्लेमर (Disclaimer)</h3>
 
-        <div class="disclaimer">
-            <h3>⚠️ डिस्क्लेमर (Disclaimer)</h3>
-            <p>यह वेबसाइट और इसमें दी गई PDF केवल शैक्षिक उद्देश्यों के लिए हैं। इसमें दी गई जानकारी डाक विभाग की आधिकारिक गाइड (PO Guide) और सार्वजनिक डोमेन से ली गई है। आधिकारिक पुष्टि के लिए कृपया इण्डिया पोस्ट की वेबसाइट देखें।</p>
-        </div>
-    </section>
+        <p>
+            यह वेबसाइट और इसमें दी गई PDF केवल शैक्षिक उद्देश्यों के लिए हैं।
+            इसमें दी गई जानकारी डाक विभाग की आधिकारिक गाइड (PO Guide)
+            और सार्वजनिक डोमेन से ली गई है।
+            आधिकारिक पुष्टि के लिए कृपया इण्डिया पोस्ट की वेबसाइट देखें।
+        </p>
+    </div>
 
-    <footer>
-        <p>Share This Website on WhatsApp</p>
-        <a href="https://api.whatsapp.com/send?text=Check%20this%20useful%20website:%20https://rameshwarsahu2014bpmjarwe1694-hue.github.io/" target="_blank">
-            <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" class="footer-whatsapp">
-        </a>
-        <p style="margin-top:15px;">© 2026 Rameshwar Sahu | Hosted on GitHub</p>
-        <p>Founded & Managed by Rameshwar Prasad Sahu</p>
-        <p>© All Rights Reserved.</p>
-    </footer>
+</section>
 
-    <script>
-        <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js', { scope: '/' })
-            .then(async (reg) => {
-                console.log('Service Worker Registered Successfully with scope: ', reg.scope);
+<footer>
 
-                // 1. Background Sync
-                if ('sync' in reg) {
-                    try { await reg.sync.register('sync-exam-data'); } catch(e) { console.log(e); }
+    <p>Share This Website on WhatsApp</p>
+
+    <a href="https://api.whatsapp.com/send?text=Check%20this%20useful%20website:%20https://rameshwarsahu2014bpmjarwe1694-hue.github.io/gdsnotes/" target="_blank">
+
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" class="footer-whatsapp">
+
+    </a>
+
+    <p style="margin-top:15px;">
+        © 2026 Rameshwar Sahu | Hosted on GitHub
+    </p>
+
+    <p>Founded & Managed by Rameshwar Prasad Sahu</p>
+
+    <p>© All Rights Reserved.</p>
+
+</footer>
+
+<script>
+if ('serviceWorker' in navigator) {
+
+    window.addEventListener('load', () => {
+
+        navigator.serviceWorker.register('/gdsnotes/sw.js', {
+            scope: '/gdsnotes/'
+        })
+
+        .then(async (reg) => {
+
+            console.log('Service Worker Registered Successfully with scope: ', reg.scope);
+
+            // Background Sync
+            if ('sync' in reg) {
+                try {
+                    await reg.sync.register('sync-exam-data');
+                } catch(e) {
+                    console.log(e);
                 }
+            }
 
-                // 2. Periodic Sync
-                if ('periodicSync' in reg) {
-                    const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
-                    if (status.state === 'granted') {
-                        try {
-                            await reg.periodicSync.register('get-latest-notes', {
-                                minInterval: 24 * 60 * 60 * 1000 // 24 hours
-                            });
-                        } catch(e) { console.log(e); }
+            // Periodic Sync
+            if ('periodicSync' in reg) {
+
+                const status = await navigator.permissions.query({
+                    name: 'periodic-background-sync'
+                });
+
+                if (status.state === 'granted') {
+
+                    try {
+
+                        await reg.periodicSync.register('get-latest-notes', {
+                            minInterval: 24 * 60 * 60 * 1000
+                        });
+
+                    } catch(e) {
+                        console.log(e);
                     }
                 }
+            }
 
-                // 3. Push Notification Permission
-                if (Notification.permission !== 'granted') {
-                    Notification.requestPermission();
-                }
-            })
-            .catch((err) => {
-                console.error('Service Worker Registration failed:', err);
-            });
+            // Notification Permission
+            if (Notification.permission !== 'granted') {
+                Notification.requestPermission();
+            }
+
+        })
+
+        .catch((err) => {
+            console.error('Service Worker Registration failed:', err);
         });
-    }
+
+    });
+
+}
 </script>
 
 </body>
