@@ -3,8 +3,8 @@
   "name": "RAMESHWAR SAHU GDS DEPARTMENTAL EXAM APP",
   "short_name": "GDS Notes",
   "description": "Complete GDS Departmental Exam Notes, Study Material and Mock Tests.",
-  "start_url": "/gdsnotes/",
-  "scope": "/gdsnotes/",
+  "start_url": "/",
+  "scope": "/",
   "display": "fullscreen",
   "display_override": [
     "fullscreen",
@@ -22,13 +22,13 @@
   ],
   "icons": [
     {
-      "src": "/gdsnotes/icon-192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/gdsnotes/icon-512.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
@@ -36,21 +36,21 @@
   ],
   "screenshots": [
     {
-      "src": "/gdsnotes/Screenshots1dashboard.jpg",
+      "src": "/Screenshots1dashboard.jpg",
       "sizes": "720x1604",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "GDS Notes Dashboard"
     },
     {
-      "src": "/gdsnotes/Screenshotpyq.jpg",
+      "src": "/Screenshotpyq.jpg",
       "sizes": "720x1604",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Previous Year Questions"
     },
     {
-      "src": "/gdsnotes/Screenshotsquiz.jpg",
+      "src": "/Screenshotsquiz.jpg",
       "sizes": "720x1604",
       "type": "image/jpeg",
       "form_factor": "narrow",
@@ -61,18 +61,18 @@
     {
       "name": "Start Mock Test",
       "short_name": "Quiz",
-      "url": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/gdsnotes/quiz.html",
-      "icons": [{ "src": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/gdsnotes/icon-192.png", "sizes": "192x192" }]
+      "url": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/quiz.html",
+      "icons": [{ "src": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Study Materials",
       "short_name": "Notes",
-      "url": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/gdsnotes/notes.html",
-      "icons": [{ "src": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/gdsnotes/icon-192.png", "sizes": "192x192" }]
+      "url": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/notes.html",
+      "icons": [{ "src": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/icon-192.png", "sizes": "192x192" }]
     }
   ],
   "share_target": {
-    "action": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/gdsnotes/share",
+    "action": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/share",
     "method": "GET",
     "params": {
       "title": "title",
@@ -82,7 +82,7 @@
   },
   "file_handlers": [
     {
-      "action": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/gdsnotes/open-file",
+      "action": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/open-file",
       "accept": {
         "application/pdf": [".pdf"],
         "text/plain": [".txt"]
@@ -95,7 +95,7 @@
   "protocol_handlers": [
     {
       "protocol": "web+gds",
-      "url": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/gdsnotes/index.html?query=%s"
+      "url": "https://rameshwarsahu2014bpmjarwe1694-hue.github.io/index.html?query=%s"
     }
   ],
   "handle_links": "auto",
