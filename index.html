@@ -111,35 +111,41 @@
     </footer>
 
     <script>
-        if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const reg = await navigator.serviceWorker.register('/gdsnotes/sw.js');
-      console.log('Service Worker Registered');
+        <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/gdsnotes/sw.js', { scope: '/gdsnotes/' })
+            .then(async (reg) => {
+                console.log('Service Worker Registered Successfully with scope: ', reg.scope);
 
-      // 1. Request Background Sync
-      if ('sync' in reg) {
-        await reg.sync.register('sync-exam-data');
-      }
+                // 1. Background Sync
+                if ('sync' in reg) {
+                    try { await reg.sync.register('sync-exam-data'); } catch(e) { console.log(e); }
+                }
 
-      // 2. Request Periodic Sync (Requires Permission)
-      const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
-      if (status.state === 'granted' && 'periodicSync' in reg) {
-        await reg.periodicSync.register('get-latest-notes', {
-          minInterval: 24 * 60 * 60 * 1000 // 24 hours
+                // 2. Periodic Sync
+                if ('periodicSync' in reg) {
+                    const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
+                    if (status.state === 'granted') {
+                        try {
+                            await reg.periodicSync.register('get-latest-notes', {
+                                minInterval: 24 * 60 * 60 * 1000 // 24 hours
+                            });
+                        } catch(e) { console.log(e); }
+                    }
+                }
+
+                // 3. Push Notification Permission
+                if (Notification.permission !== 'granted') {
+                    Notification.requestPermission();
+                }
+            })
+            .catch((err) => {
+                console.error('Service Worker Registration failed:', err);
+            });
         });
-      }
-
-      // 3. Request Push Notification Permission
-      Notification.requestPermission();
-
-    } catch (err) {
-      console.error('Registration failed:', err);
     }
-  });
-}
-
-    </script>
+</script>
 
 </body>
 </html>
