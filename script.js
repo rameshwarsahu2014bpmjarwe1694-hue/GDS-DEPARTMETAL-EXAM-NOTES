@@ -99,11 +99,11 @@ alert(error.message);
 };
 
 /* =========================
-RESET PASSWORD (FIXED 100%)
+RESET PASSWORD
 ========================= */
 window.resetPassword = function () {
 
-let email = document.getElementById("loginEmail").value.trim();
+const email = document.getElementById("loginEmail").value.trim();
 
 if (!email) {
 alert("Please enter your registered email first.");
