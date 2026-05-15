@@ -2,11 +2,11 @@ const CACHE_NAME = 'gds-notes-v6'; // वर्ज़न बढ़ाकर v6 �
 
 // 1. OFFLINE SUPPORT (Files to Cache)
 const ASSETS = [
-  '/gdsnotes/',
-  '/gdsnotes/index.html',
-  '/gdsnotes/manifest.json',
-  '/gdsnotes/icon-192.png',
-  '/gdsnotes/icon-512.png'
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 // INSTALL: Caching logic
