@@ -181,6 +181,8 @@
     </a>
 
     <p>© 2026 Rameshwar Sahu</p>
+    
+    <p> managed and founded by Rameshwar Prasad Sahu</p>
 </footer>
 
 <script>
@@ -201,9 +203,7 @@ function installApp() {
 }
 
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/gdsnotes/sw.js');
-    });
+  navigator.serviceWorker.register('/gdsnotes/sw.js');
 }
 </script>
 
