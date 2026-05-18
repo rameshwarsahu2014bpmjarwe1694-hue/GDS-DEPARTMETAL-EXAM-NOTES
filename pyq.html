@@ -412,7 +412,7 @@ window.nav = function(step) {
     const originalText = openBtn.innerText;
     openBtn.innerText = "Securing Connection... ⏳";
     openBtn.disabled = true;
-
+alert("Please wait 20 to 30 seconds. PDF is opening...");
     try {
         const url = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(currentUserEmail)}&year=${encodeURIComponent(year)}&post=${encodeURIComponent(post)}`;
 
