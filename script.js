@@ -203,3 +203,55 @@ alert(error.message);
 });
 
 };
+<script>
+
+// AUTO LOGOUT AFTER 2 MINUTES INACTIVE
+
+let logoutTimer;
+
+function resetLogoutTimer() {
+
+    clearTimeout(logoutTimer);
+
+    logoutTimer = setTimeout(() => {
+
+        // Firebase logout
+        if (window.auth && window.signOut) {
+
+            signOut(auth)
+            .then(() => {
+
+                alert("Session expired. Login again.");
+
+                window.location.href = "/gdsnotes/login.html";
+
+            })
+            .catch((error) => {
+
+                console.log(error);
+
+            });
+
+        } else {
+
+            localStorage.clear();
+            sessionStorage.clear();
+
+            window.location.href = "/gdsnotes/login.html";
+
+        }
+
+    }, 2 * 60 * 1000); // 2 minutes
+
+}
+
+// Detect activity
+window.onload = resetLogoutTimer;
+
+document.onmousemove = resetLogoutTimer;
+document.onkeypress = resetLogoutTimer;
+document.onclick = resetLogoutTimer;
+document.onscroll = resetLogoutTimer;
+document.ontouchstart = resetLogoutTimer;
+
+</script>
