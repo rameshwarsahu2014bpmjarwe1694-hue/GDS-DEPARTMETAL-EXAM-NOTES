@@ -481,14 +481,16 @@ document.addEventListener("dragstart", function(e) {
 document.addEventListener("keydown", function(e) {
 
     // Print Screen
-    if (e.key === "PrintScreen") {
+if (e.key === "PrintScreen") {
 
+    if (navigator.clipboard) {
         navigator.clipboard.writeText("");
-
-        alert("Screenshot Disabled");
-
-        e.preventDefault();
     }
+
+    alert("Screenshot Disabled");
+
+    e.preventDefault();
+}
 
     // Ctrl+Shift+S
     if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "s") {
