@@ -34,9 +34,10 @@ border-radius:14px;
 margin-bottom:16px;
 }
 
+/* Tools layout updated for 3 items */
 .tools{
 display:grid;
-grid-template-columns:1fr 1fr;
+grid-template-columns: 1.5fr 1fr 1fr;
 gap:12px;
 margin-bottom:16px;
 }
@@ -73,6 +74,14 @@ color:#111;
 font-size:14px;
 color:#666;
 margin-bottom:10px;
+display: flex;
+gap: 10px;
+}
+
+.tag{
+background: #eee;
+padding: 4px 8px;
+border-radius: 6px;
 }
 
 .desc{
@@ -133,11 +142,15 @@ font-size:21px;
 <div class="tools">
 <input type="text" id="searchInput" placeholder="Search notes...">
 
-<select id="catFilter">
-<option value="ALL">All Categories</option>
+<select id="postFilter">
+<option value="ALL">All Posts</option>
 <option value="MTS">MTS</option>
 <option value="POSTMAN">POSTMAN</option>
 <option value="PA/SA">PA/SA</option>
+</select>
+
+<select id="subFilter">
+<option value="ALL">All Subjects</option>
 <option value="GK">GK</option>
 <option value="Maths">Maths</option>
 <option value="Reasoning">Reasoning</option>
@@ -166,14 +179,13 @@ query,
 orderBy
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-// RENDER BACKEND CONNECTION के लिए ज़रूरी IMPORT
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 let allNotes = [];
 let currentUserEmail = "";
 const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
 
-// --- START: SECURE PAYMENT LOGIC (EXTRA ADDED AS PER REQUEST) ---
+// SECURE ACCESS LOGIC
 window.handleSecureAccess = async (category, title) => {
     if (!currentUserEmail) {
         alert("Please login first!");
@@ -183,7 +195,6 @@ window.handleSecureAccess = async (category, title) => {
     const secureUrl = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(currentUserEmail)}&year=Notes&post=${encodeURIComponent(category)}`;
 
     try {
-        // Step 1: Check Payment Status
         const res = await fetch(secureUrl, {
             headers: { 'x-source-auth': 'RSH-GDS-SECURE-ACCESS' }
         });
@@ -213,9 +224,7 @@ window.handleSecureAccess = async (category, title) => {
         alert("Connection error!");
     }
 };
-// --- END: SECURE PAYMENT LOGIC ---
 
-// AUTH LOGIC
 const auth = getAuth();
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -243,128 +252,75 @@ setTimeout(waitFirebase,300);
 }
 
 async function loadNotes(){
-
 const box = document.getElementById("notesList");
-
 try{
-
-const q = query(
-collection(window.db,"notes"),
-orderBy("createdAt","desc")
-);
-
+const q = query(collection(window.db,"notes"), orderBy("createdAt","desc"));
 const snap = await getDocs(q);
-
 allNotes = [];
-
 snap.forEach((doc)=>{
-allNotes.push({
-id:doc.id,
-...doc.data()
+allNotes.push({ id:doc.id, ...doc.data() });
 });
-});
-
 renderNotes(allNotes);
-
 }catch(error){
-
-box.innerHTML =
-`<div class="empty">Failed to load notes</div>`;
-
+box.innerHTML = `<div class="empty">Failed to load notes</div>`;
 }
-
 }
 
 function renderNotes(arr){
-
 const box = document.getElementById("notesList");
-
 if(arr.length===0){
-box.innerHTML =
-`<div class="empty">No notes found</div>`;
+box.innerHTML = `<div class="empty">No notes found</div>`;
 return;
 }
-
 let html = "";
-
 arr.forEach((x)=>{
-
 const title = safe(x.title);
-const cat = safe(x.category || x.subject || "-");
+const postTag = safe(x.category || "-");
+const subTag = safe(x.subject || "-");
 const desc = safe(x.description || x.content || "");
 const fileURL = x.fileURL || "";
 const fileType = x.fileType || "";
 
-// PAYMENT INTEGRATED BUTTON LOGIC
 html += `
 <div class="note">
-
-<h3>${title}</h3>
-
-<div class="meta">📘 ${cat}</div>
-
-${desc ? `<div class="desc">${desc}</div>` : ""}
-
-${fileURL && fileType.startsWith("image")
-? `<img src="${fileURL}" class="preview">`
-: ""}
-
-${fileURL
-? `<button onclick="handleSecureAccess('${cat}', '${title}')" class="btn">Open File</button>`
-: ""}
-
-</div>
-`;
-
+    <h3>${title}</h3>
+    <div class="meta">
+        <span class="tag">📮 ${postTag}</span>
+        <span class="tag">📖 ${subTag}</span>
+    </div>
+    ${desc ? `<div class="desc">${desc}</div>` : ""}
+    ${fileURL && fileType.startsWith("image") ? `<img src="${fileURL}" class="preview">` : ""}
+    ${fileURL ? `<button onclick="handleSecureAccess('${postTag}', '${title}')" class="btn">Open File</button>` : ""}
+</div>`;
 });
-
 box.innerHTML = html;
-
 }
 
 function applyFilter(){
-
-const q = document
-.getElementById("searchInput")
-.value
-.toLowerCase()
-.trim();
-
-const cat = document
-.getElementById("catFilter")
-.value;
+const q = document.getElementById("searchInput").value.toLowerCase().trim();
+const post = document.getElementById("postFilter").value;
+const sub = document.getElementById("subFilter").value;
 
 const filtered = allNotes.filter((x)=>{
-
 const title = (x.title || "").toLowerCase();
 const desc = (x.description || x.content || "").toLowerCase();
-const category = (x.category || x.subject || "");
+const notePost = (x.category || "");
+const noteSub = (x.subject || "");
 
-const matchText =
-title.includes(q) || desc.includes(q);
+const matchText = title.includes(q) || desc.includes(q);
+const matchPost = (post === "ALL") || (notePost === post);
+const matchSub = (sub === "ALL") || (noteSub === sub);
 
-const matchCat =
-(cat==="ALL") || (category===cat);
-
-return matchText && matchCat;
-
+return matchText && matchPost && matchSub;
 });
-
 renderNotes(filtered);
-
 }
 
-document
-.getElementById("searchInput")
-.addEventListener("input",applyFilter);
-
-document
-.getElementById("catFilter")
-.addEventListener("change",applyFilter);
+document.getElementById("searchInput").addEventListener("input",applyFilter);
+document.getElementById("postFilter").addEventListener("change",applyFilter);
+document.getElementById("subFilter").addEventListener("change",applyFilter);
 
 waitFirebase();
-
 </script>
-
 </body>
 </html>
