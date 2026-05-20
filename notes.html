@@ -173,6 +173,48 @@ let allNotes = [];
 let currentUserEmail = "";
 const BACKEND_URL = "https://payment-backend-2-g6go.onrender.com";
 
+// --- START: SECURE PAYMENT LOGIC (EXTRA ADDED AS PER REQUEST) ---
+window.handleSecureAccess = async (category, title) => {
+    if (!currentUserEmail) {
+        alert("Please login first!");
+        return;
+    }
+
+    const secureUrl = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(currentUserEmail)}&year=Notes&post=${encodeURIComponent(category)}`;
+
+    try {
+        // Step 1: Check Payment Status
+        const res = await fetch(secureUrl, {
+            headers: { 'x-source-auth': 'RSH-GDS-SECURE-ACCESS' }
+        });
+
+        if (res.status === 200) {
+            window.open(secureUrl, '_blank');
+        } else if (res.status === 403) {
+            if (confirm(`इस PDF (${title}) को अनलॉक करने के लिए ₹20 का पेमेंट करना होगा। क्या आप आगे बढ़ना चाहते हैं?`)) {
+                const payRes = await fetch(`${BACKEND_URL}/initiate-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentUserEmail,
+                        amount: 20,
+                        year: "Notes",
+                        post: category
+                    })
+                });
+                const data = await payRes.json();
+                if (data.url) window.location.href = data.url;
+                else alert("Payment link error!");
+            }
+        } else {
+            alert("File not found or Server error.");
+        }
+    } catch (err) {
+        alert("Connection error!");
+    }
+};
+// --- END: SECURE PAYMENT LOGIC ---
+
 // AUTH LOGIC
 const auth = getAuth();
 onAuthStateChanged(auth, (user) => {
@@ -253,9 +295,7 @@ const desc = safe(x.description || x.content || "");
 const fileURL = x.fileURL || "";
 const fileType = x.fileType || "";
 
-// RENDER BACKEND URL LOGIC
-const secureUrl = `${BACKEND_URL}/get-pdf?email=${encodeURIComponent(currentUserEmail)}&year=Notes&post=${encodeURIComponent(x.category || x.subject)}`;
-
+// PAYMENT INTEGRATED BUTTON LOGIC
 html += `
 <div class="note">
 
@@ -270,7 +310,7 @@ ${fileURL && fileType.startsWith("image")
 : ""}
 
 ${fileURL
-? `<button onclick="window.open('${secureUrl}', '_blank')" class="btn">Open File</button>`
+? `<button onclick="handleSecureAccess('${cat}', '${title}')" class="btn">Open File</button>`
 : ""}
 
 </div>
