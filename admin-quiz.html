@@ -157,14 +157,14 @@ margin-top:18px;
 </div>
 
 <div class="grid">
-<div class="card" onclick="choose('POSTAL MANUAL VOLUME 7')">📘 POSTAL MANUAL VOLUME 7</div>
+<div class="card" onclick="choose('Post Office Guide 1')">📮 PO GUIDE 1</div>
+<div class="card" onclick="choose('POSTAL MANUAL VOLUME 5')">🔤 PO MANUAL VOLUME 5</div>
 <div class="card" onclick="choose('GK')">📘 GK</div>
 <div class="card" onclick="choose('Maths')">➕ Maths</div>
 <div class="card" onclick="choose('Reasoning')">🧠 Reasoning</div>
-<div class="card" onclick="choose('POSTAL MANUAL VOLUME 5')">🔤  PO MANUAL VOLUME 5</div>
-<div class="card" onclick="choose('Post Office Guide 1')">📮 PO GUIDE 1</div>
+<div class="card" onclick="choose('POSTAL MANUAL VOLUME 7')">📘 POSTAL MANUAL VOLUME 7</div>
 <div class="card" onclick="choose('Post Office Guide 2')">📮 PO GUIDE 2</div>
-<div class="card" onclick="choose('POSTAL MANUAL VOLUME 6 PART 3')">📘POSTAL MANUAL VOLUME 6 PART 3 </div>
+<div class="card" onclick="choose('POSTAL MANUAL VOLUME 6 PART 3')">📘 POSTAL MANUAL VOLUME 6 PART 3 </div>
 </div>
 
 <div class="box hide" id="panel">
@@ -201,14 +201,12 @@ margin-top:18px;
 
 <h3>Bulk Paste Questions</h3>
 
-<textarea id="bulkBox" placeholder="Question text
-A) option
-B) option
-C) option
-D) option
-Answer: A
-
-(next question)"></textarea>
+<textarea id="bulkBox" placeholder="पंजीकृत पार्सल की अधिकतम वजन सीमा क्या है
+04 किलोग्राम
+20 किलोग्राम
+25 किलोग्राम
+35 किलोग्राम
+Answer: 20 किलोग्राम"></textarea>
 
 <button class="bulk" onclick="bulkImport()">Bulk Import</button>
 
@@ -220,6 +218,7 @@ Answer: A
 
 </div>
 
+<!-- Firebase Config File (Ensure window.db is exported inside firebase.js) -->
 <script type="module" src="firebase.js"></script>
 
 <script type="module">
@@ -231,321 +230,320 @@ query,
 where,
 doc,
 deleteDoc,
-updateDoc
+updateDoc,
+getFirestore
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let current = "";
 let editId = "";
 
-/* SUBJECT */
+// Ensure window.db is properly targeted if not already loaded via firebase.js
+if (!window.db) {
+    try {
+        window.db = getFirestore();
+    } catch(e) {
+        console.error("Firebase not initialized yet. Ensure firebase.js runs first.");
+    }
+}
+
+/* SUBJECT CHOOSE */
 window.choose = function(cat){
+    current = cat;
+    editId = "";
 
-current = cat;
-editId = "";
+    document.getElementById("subName").innerText = cat;
+    document.getElementById("panel").classList.remove("hide");
+    document.getElementById("title").innerText = cat + " - Add Questions";
 
-document.getElementById("subName").innerText = cat;
-document.getElementById("panel").classList.remove("hide");
-document.getElementById("title").innerText = cat + " - Add Questions";
+    resetMode();
+    showList();
 
-resetMode();
-showList();
-
-window.scrollTo({
-top:500,
-behavior:"smooth"
-});
-
+    window.scrollTo({
+        top: 450,
+        behavior: "smooth"
+    });
 };
 
 /* SAVE SINGLE */
 window.saveSingle = async function(){
+    if(current === ""){
+        alert("Select subject first");
+        return;
+    }
 
-if(current===""){
-alert("Select subject first");
-return;
-}
+    let q = val("question");
+    let a = val("opt1");
+    let b = val("opt2");
+    let c = val("opt3");
+    let d = val("opt4");
+    let ans = val("answer");
 
-let q = val("question");
-let a = val("opt1");
-let b = val("opt2");
-let c = val("opt3");
-let d = val("opt4");
-let ans = val("answer");
+    if(q === "" || a === "" || b === "" || c === "" || d === ""){
+        alert("Fill all fields");
+        return;
+    }
 
-if(q===""||a===""||b===""||c===""||d===""){
-alert("Fill all fields");
-return;
-}
+    try {
+        /* Duplicate Check */
+        const dup = query(
+            collection(window.db, "quizQuestions"),
+            where("subject", "==", current),
+            where("question", "==", q)
+        );
+        const dupSnap = await getDocs(dup);
 
-/* Duplicate Check */
-const dup = query(
-collection(window.db,"quizQuestions"),
-where("subject","==",current),
-where("question","==",q)
-);
+        if(!dupSnap.empty){
+            alert("Duplicate question already exists!");
+            return;
+        }
 
-const dupSnap = await getDocs(dup);
+        let correct = a;
+        if(ans === "B") correct = b;
+        if(ans === "C") correct = c;
+        if(ans === "D") correct = d;
 
-if(!dupSnap.empty){
-alert("Duplicate question already exists");
-return;
-}
+        await addDoc(collection(window.db, "quizQuestions"), {
+            subject: current,
+            question: q,
+            options: [a, b, c, d],
+            answer: correct,
+            createdAt: Date.now()
+        });
 
-let correct = a;
-if(ans==="B") correct=b;
-if(ans==="C") correct=c;
-if(ans==="D") correct=d;
-
-await addDoc(collection(window.db,"quizQuestions"),{
-subject:current,
-question:q,
-options:[a,b,c,d],
-answer:correct,
-createdAt:Date.now()
-});
-
-clearForm();
-showList();
-
-alert("Question Saved");
-
+        clearForm();
+        showList();
+        alert("Question Successfully Uploaded!");
+    } catch (error) {
+        console.error(error);
+        alert("Error saving question: " + error.message);
+    }
 };
 
-/* BULK */
+/* BULK IMPORT (Upgraded for both old and new formats) */
 window.bulkImport = async function(){
+    if(current === ""){
+        alert("Select subject first");
+        return;
+    }
 
-if(current===""){
-alert("Select subject first");
-return;
-}
+    let text = val("bulkBox");
+    if(text === ""){
+        alert("Paste questions first");
+        return;
+    }
 
-let text = val("bulkBox");
+    try {
+        // Splitting questions based on blank lines
+        let blocks = text.split(/\n\s*\n/);
+        let count = 0;
 
-if(text===""){
-alert("Paste questions first");
-return;
-}
+        for(let block of blocks){
+            let lines = block.split("\n").map(x => x.trim()).filter(Boolean);
+            
+            if(lines.length >= 6){
+                let q = lines[0];
+                let a = clean(lines[1]);
+                let b = clean(lines[2]);
+                let c = clean(lines[3]);
+                let d = clean(lines[4]);
+                let ansLine = lines[5];
 
-let blocks = text.split(/\n\s*\n/);
-let count = 0;
+                /* Duplicate skip check */
+                const dup = query(
+                    collection(window.db, "quizQuestions"),
+                    where("subject", "==", current),
+                    where("question", "==", q)
+                );
+                const dupSnap = await getDocs(dup);
+                if(!dupSnap.empty){
+                    continue; 
+                }
 
-for(let block of blocks){
+                // Extracts exact text after "Answer:" or "उत्तर:"
+                let correct = ansLine.replace(/^(Answer:|Answer\s*:\s*|उत्तर\s*:\s*)/i, "").trim();
 
-let lines = block.split("\n").map(x=>x.trim()).filter(Boolean);
+                // If Answer line just has A, B, C, D instead of text
+                if (correct.toUpperCase() === "A" || correct === a) correct = a;
+                else if (correct.toUpperCase() === "B" || correct === b) correct = b;
+                else if (correct.toUpperCase() === "C" || correct === c) correct = c;
+                else if (correct.toUpperCase() === "D" || correct === d) correct = d;
 
-if(lines.length>=6){
+                await addDoc(collection(window.db, "quizQuestions"), {
+                    subject: current,
+                    question: q,
+                    options: [a, b, c, d],
+                    answer: correct,
+                    createdAt: Date.now()
+                });
 
-let q = lines[0];
-let a = clean(lines[1]);
-let b = clean(lines[2]);
-let c = clean(lines[3]);
-let d = clean(lines[4]);
+                count++;
+            }
+        }
 
-/* duplicate skip */
-const dup = query(
-collection(window.db,"quizQuestions"),
-where("subject","==",current),
-where("question","==",q)
-);
-
-const dupSnap = await getDocs(dup);
-
-if(!dupSnap.empty){
-continue;
-}
-
-let ansLine = lines[5].toUpperCase();
-
-let correct = a;
-if(ansLine.includes("B")) correct=b;
-if(ansLine.includes("C")) correct=c;
-if(ansLine.includes("D")) correct=d;
-
-await addDoc(collection(window.db,"quizQuestions"),{
-subject:current,
-question:q,
-options:[a,b,c,d],
-answer:correct,
-createdAt:Date.now()
-});
-
-count++;
-
-}
-
-}
-
-document.getElementById("bulkBox").value="";
-showList();
-
-alert(count + " Questions Imported");
-
+        document.getElementById("bulkBox").value = "";
+        showList();
+        alert(count + " Questions Successfully Uploaded!");
+    } catch (error) {
+        console.error(error);
+        alert("Error in Bulk Import: " + error.message);
+    }
 };
 
 /* SHOW LIST */
 async function showList(){
+    if(current === "") return;
 
-if(current==="") return;
+    let box = document.getElementById("listBox");
+    
+    try {
+        const qy = query(
+            collection(window.db, "quizQuestions"),
+            where("subject", "==", current)
+        );
+        const snap = await getDocs(qy);
 
-let box = document.getElementById("listBox");
+        document.getElementById("countBox").innerText = snap.size;
 
-const qy = query(
-collection(window.db,"quizQuestions"),
-where("subject","==",current)
-);
+        if(snap.empty){
+            box.innerHTML = "<b>No Questions Added</b>";
+            return;
+        }
 
-const snap = await getDocs(qy);
+        let html = "";
+        let i = 1;
 
-document.getElementById("countBox").innerText = snap.size;
+        snap.forEach(x => {
+            let d = x.data();
+            html += `
+            <div class="item">
+                <b>${i}. ${d.question}</b><br>
+                1. ${d.options[0]}<br>
+                2. ${d.options[1]}<br>
+                3. ${d.options[2]}<br>
+                4. ${d.options[3]}<br>
+                <b>Answer:</b> ${d.answer}<br><br>
+                <button class="smallbtn update" onclick="editQuestion('${x.id}')">Edit</button>
+                <button class="smallbtn delete" onclick="deleteQuestion('${x.id}')">Delete</button>
+            </div>
+            `;
+            i++;
+        });
 
-if(snap.empty){
-box.innerHTML="<b>No Questions Added</b>";
-return;
-}
-
-let html = "";
-
-let i = 1;
-
-snap.forEach(x=>{
-
-let d = x.data();
-
-html += `
-<div class="item">
-
-<b>${i}. ${d.question}</b><br>
-A. ${d.options[0]}<br>
-B. ${d.options[1]}<br>
-C. ${d.options[2]}<br>
-D. ${d.options[3]}<br>
-<b>Answer:</b> ${d.answer}<br><br>
-
-<button class="smallbtn update" onclick="editQuestion('${x.id}')">Edit</button>
-<button class="smallbtn delete" onclick="deleteQuestion('${x.id}')">Delete</button>
-
-</div>
-`;
-
-i++;
-
-});
-
-box.innerHTML = html;
-
+        box.innerHTML = html;
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 /* EDIT */
 window.editQuestion = async function(id){
+    try {
+        const qy = query(
+            collection(window.db, "quizQuestions"),
+            where("subject", "==", current)
+        );
+        const snap = await getDocs(qy);
 
-const qy = query(
-collection(window.db,"quizQuestions"),
-where("subject","==",current)
-);
+        snap.forEach(x => {
+            if(x.id === id){
+                let d = x.data();
+                document.getElementById("question").value = d.question;
+                document.getElementById("opt1").value = d.options[0];
+                document.getElementById("opt2").value = d.options[1];
+                document.getElementById("opt3").value = d.options[2];
+                document.getElementById("opt4").value = d.options[3];
 
-const snap = await getDocs(qy);
+                let ans = "A";
+                if(d.answer === d.options[1]) ans = "B";
+                if(d.answer === d.options[2]) ans = "C";
+                if(d.answer === d.options[3]) ans = "D";
 
-snap.forEach(x=>{
+                document.getElementById("answer").value = ans;
+                editId = id;
 
-if(x.id===id){
+                document.getElementById("saveBtn").classList.add("hide");
+                document.getElementById("updateBtn").classList.remove("hide");
 
-let d = x.data();
-
-document.getElementById("question").value = d.question;
-document.getElementById("opt1").value = d.options[0];
-document.getElementById("opt2").value = d.options[1];
-document.getElementById("opt3").value = d.options[2];
-document.getElementById("opt4").value = d.options[3];
-
-let ans = "A";
-if(d.answer===d.options[1]) ans="B";
-if(d.answer===d.options[2]) ans="C";
-if(d.answer===d.options[3]) ans="D";
-
-document.getElementById("answer").value = ans;
-
-editId = id;
-
-document.getElementById("saveBtn").classList.add("hide");
-document.getElementById("updateBtn").classList.remove("hide");
-
-window.scrollTo({
-top:450,
-behavior:"smooth"
-});
-
-}
-
-});
-
+                window.scrollTo({
+                    top: 450,
+                    behavior: "smooth"
+                });
+            }
+        });
+    } catch (error) {
+        console.error(error);
+    }
 };
 
 /* UPDATE */
 window.updateQuestion = async function(){
+    if(editId === "") return;
 
-if(editId==="") return;
+    let q = val("question");
+    let a = val("opt1");
+    let b = val("opt2");
+    let c = val("opt3");
+    let d = val("opt4");
+    let ans = val("answer");
 
-let q = val("question");
-let a = val("opt1");
-let b = val("opt2");
-let c = val("opt3");
-let d = val("opt4");
-let ans = val("answer");
+    let correct = a;
+    if(ans === "B") correct = b;
+    if(ans === "C") correct = c;
+    if(ans === "D") correct = d;
 
-let correct = a;
-if(ans==="B") correct=b;
-if(ans==="C") correct=c;
-if(ans==="D") correct=d;
+    try {
+        await updateDoc(doc(window.db, "quizQuestions", editId), {
+            question: q,
+            options: [a, b, c, d],
+            answer: correct,
+            updatedAt: Date.now()
+        });
 
-await updateDoc(doc(window.db,"quizQuestions",editId),{
-question:q,
-options:[a,b,c,d],
-answer:correct,
-updatedAt:Date.now()
-});
-
-clearForm();
-resetMode();
-showList();
-
-alert("Question Updated");
-
+        clearForm();
+        resetMode();
+        showList();
+        alert("Question Updated Successfully!");
+    } catch (error) {
+        console.error(error);
+        alert("Update failed: " + error.message);
+    }
 };
 
 /* DELETE */
 window.deleteQuestion = async function(id){
-
-if(!confirm("Delete this question?")) return;
-
-await deleteDoc(doc(window.db,"quizQuestions",id));
-
-showList();
-
+    if(!confirm("Delete this question?")) return;
+    try {
+        await deleteDoc(doc(window.db, "quizQuestions", id));
+        showList();
+        alert("Deleted Successfully!");
+    } catch (error) {
+        console.error(error);
+    }
 };
 
 /* HELPERS */
 function val(id){
-return document.getElementById(id).value.trim();
+    return document.getElementById(id).value.trim();
 }
 
 function clean(t){
-return t.replace(/^A\)|^B\)|^C\)|^D\)/i,"").trim();
+    // Removes old prefixes like A), B) or a), b) if present, else returns text as is
+    return t.replace(/^[A-D]\)\s*|^[a-d]\)\s*/i, "").trim();
 }
 
 function clearForm(){
-["question","opt1","opt2","opt3","opt4","bulkBox"].forEach(id=>{
-document.getElementById(id).value="";
-});
-document.getElementById("answer").value="A";
+    ["question", "opt1", "opt2", "opt3", "opt4", "bulkBox"].forEach(id => {
+        document.getElementById(id).value = "";
+    });
+    document.getElementById("answer").value = "A";
 }
 
 function resetMode(){
-editId="";
-document.getElementById("saveBtn").classList.remove("hide");
-document.getElementById("updateBtn").classList.add("hide");
-clearForm();
+    editId = "";
+    document.getElementById("saveBtn").classList.remove("hide");
+    document.getElementById("updateBtn").classList.add("hide");
+    clearForm();
 }
-
 </script>
 
 </body>
