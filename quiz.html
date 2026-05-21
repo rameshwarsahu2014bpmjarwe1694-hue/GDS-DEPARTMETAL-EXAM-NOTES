@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>Mock Test - Official Study</title>
+    <title>Mock Test - RAMESHWAR SAHU GDS DEPARTMENTAL EXAM STUDY</title>
 
     <style>
         :root {
@@ -213,6 +213,31 @@
         .hide {
             display: none;
         }
+
+        /* नए जोड़े गए स्टाइल्स (Subject के अंदर Sections के लिए) */
+        .sections-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .section-sub-card {
+            background: #f8f9fa;
+            border: 1px dashed #ccc;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .section-sub-card:hover {
+            background: #e9ecef;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
     </style>
 </head>
 
@@ -229,47 +254,63 @@
 
     <div id="statusBox" class="status-bar hide"></div>
 
+    <!-- MAIN SUBJECT BOX -->
     <div id="subjectBox">
-
         <p style="text-align:center; font-weight:bold; color:#666;">
             विषय चुनें और टेस्ट शुरू करें:
         </p>
 
         <div class="grid">
-
-            <div class="subject-card" onclick="startQuiz('POSTAL MANUAL VOLUME 7')">
+            <div class="subject-card" onclick="showSections('POSTAL MANUAL VOLUME 7')">
                 📘 POSTAL MANUAL VOL 7
             </div>
-
-            <div class="subject-card" onclick="startQuiz('GK')">
+            <div class="subject-card" onclick="showSections('GK')">
                 🌍 General Knowledge
             </div>
-
-            <div class="subject-card" onclick="startQuiz('Maths')">
+            <div class="subject-card" onclick="showSections('Maths')">
                 ➕ Mathematics
             </div>
-
-            <div class="subject-card" onclick="startQuiz('Reasoning')">
+            <div class="subject-card" onclick="showSections('Reasoning')">
                 🧠 Reasoning
             </div>
-
-            <div class="subject-card" onclick="startQuiz('POSTAL MANUAL VOLUME 5')">
+            <div class="subject-card" onclick="showSections('POSTAL MANUAL VOLUME 5')">
                 📘 POSTAL MANUAL VOL 5
             </div>
-
-            <div class="subject-card" onclick="startQuiz('Post Office Guide 1')">
+            <div class="subject-card" onclick="showSections('Post Office Guide 1')">
                 📮 PO GUIDE 1
             </div>
-
-            <div class="subject-card" onclick="startQuiz('Post Office Guide 2')">
+            <div class="subject-card" onclick="showSections('Post Office Guide 2')">
                 📮 PO GUIDE 2
             </div>
-
-            <div class="subject-card" onclick="startQuiz('POSTAL MANUAL VOLUME 6 PART 3')">
+            <div class="subject-card" onclick="showSections('POSTAL MANUAL VOLUME 6 PART 3')">
                 📘 VOL 6 PART 3
             </div>
-
         </div>
+    </div>
+
+    <!-- NEW SECTION SELECTOR BOX (Subject पर क्लिक करने के बाद यह दिखेगा) -->
+    <div id="sectionBox" class="hide card">
+        <h3 id="selectedSubjectTitle" style="text-align:center; color:var(--primary); margin-bottom:5px; font-size:16px;">Subject</h3>
+        <p style="text-align:center; font-size:12px; color:#666; margin-bottom:15px;">पढ़ाई के लिए संबंधित सेक्शन चुनें:</p>
+        
+        <div class="sections-container">
+            <div class="section-sub-card" onclick="selectSection('Section I')">Section I</div>
+            <div class="section-sub-card" onclick="selectSection('Section II')">Section II</div>
+            <div class="section-sub-card" onclick="selectSection('Section III')">Section III</div>
+            <div class="section-sub-card" onclick="selectSection('Section IV')">Section IV</div>
+            <div class="section-sub-card" onclick="selectSection('Section V')">Section V</div>
+            <div class="section-sub-card" onclick="selectSection('Section VI')">Section VI</div>
+            <div class="section-sub-card" onclick="selectSection('Section VII')">Section VII</div>
+            <div class="section-sub-card" onclick="selectSection('Section VIII')">Section VIII</div>
+            <div class="section-sub-card" onclick="selectSection('Section IX')">Section IX</div>
+            <div class="section-sub-card" onclick="selectSection('Section X')">Section X</div>
+            <div class="section-sub-card" onclick="selectSection('Section XI')">Section XI</div>
+            <div class="section-sub-card" onclick="selectSection('Section XII')">Section XII</div>
+        </div>
+        
+        <button class="btn" style="background:#6c757d; width:100%; margin-top:15px; padding:10px;" onclick="backToSubjects()">
+            ← Back to Subjects
+        </button>
     </div>
 
     <div id="quizBox" class="hide">
@@ -365,6 +406,7 @@ const auth = getAuth(app);
 
 let user = null;
 let subject = "";
+let selectedSection = ""; // नया वेरिएबल सेक्शन ट्रैक करने के लिए
 let questions = [];
 let current = 0;
 let answers = {};
@@ -391,11 +433,34 @@ onAuthStateChanged(auth, (u) => {
 });
 
 
+// सब्जेक्ट पर क्लिक होने पर सेक्शन्स की लिस्ट दिखाने के लिए नया फ़ंक्शन
+window.showSections = function(sub) {
+    subject = sub;
+    document.getElementById("selectedSubjectTitle").innerText = "📚 " + sub;
+    document.getElementById("subjectBox").classList.add("hide");
+    document.getElementById("sectionBox").classList.remove("hide");
+};
+
+// सेक्शन्स स्क्रीन से वापस सब्जेक्ट ग्रिड पर जाने के लिए नया फ़ंक्शन
+window.backToSubjects = function() {
+    document.getElementById("sectionBox").classList.add("hide");
+    document.getElementById("subjectBox").classList.remove("hide");
+};
+
+// सेक्शन सिलेक्ट होने पर क्विज़ लोड करने के लिए नया फ़ंक्शन
+window.selectSection = function(secName) {
+    selectedSection = secName;
+    document.getElementById("sectionBox").classList.add("hide");
+    // पुराने ओरिजिनल फ़ंक्शन startQuiz को कॉल करता है
+    startQuiz(subject);
+};
+
+
 window.startQuiz = async function(sub) {
 
     subject = sub;
 
-    msg("लोड हो रहा है: " + sub + "...", "loader");
+    msg("लोड हो रहा है: " + sub + " (" + selectedSection + ")...", "loader");
 
     try {
 
@@ -726,6 +791,7 @@ window.submitQuiz = async function() {
                         uid: user.uid,
                         email: user.email,
                         subject: subject,
+                        section: selectedSection, // सेव डेटा में सेक्शन भी स्टोर होगा
                         score: finalScore,
                         total: questions.length,
                         createdAt: serverTimestamp()
@@ -746,11 +812,17 @@ window.submitQuiz = async function() {
 };
 
 window.goBack = function() {
-
-    if (confirm("Exit test?")) {
-
-        window.location.href =
-            "candidate-dashboard.html";
+    // अगर यूज़र टेस्ट स्क्रीन पर है, तो कन्फर्मेशन लेकर उसे सेक्शन्स या डैशबोर्ड पर बैक करें
+    if (!document.getElementById("quizBox").classList.contains("hide")) {
+        if (confirm("Exit test?")) {
+            window.history.back();
+        }
+    } else if (!document.getElementById("sectionBox").classList.contains("hide")) {
+        // अगर सेक्शन बॉक्स खुला है तो बैक बटन दबाने पर वापस सब्जेक्ट्स दिखेगा
+        backToSubjects();
+    } else {
+        // होम स्क्रीन पर सीधे पिछले पेज पर बैक करेगा
+        window.history.back();
     }
 };
 
